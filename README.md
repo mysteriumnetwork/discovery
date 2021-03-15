@@ -1,1 +1,5 @@
 # discovery
+
+```
+mage build
+```
