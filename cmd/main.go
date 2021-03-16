@@ -8,8 +8,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/gin"
+	"github.com/mysteriumnetwork/discovery/proposal/repository"
 	v1 "github.com/mysteriumnetwork/discovery/proposal/v1"
 	"github.com/nats-io/nats.go"
 	"github.com/rs/zerolog"
@@ -18,10 +18,14 @@ import (
 
 var Version = "<dev>"
 
+var Repository *repository.Repository
+
 func main() {
 	configureLogger()
 	printBanner()
 	r := gin.Default()
+
+	Repository = repository.New()
 
 	broker, subscription, err := listenToBroker()
 	if err != nil {
@@ -39,6 +43,16 @@ func main() {
 		})
 	})
 
+	r.GET("/proposals", func(c *gin.Context) {
+		list, err2 := Repository.List("wireguard", "LT")
+		if err2 != nil {
+			log.Err(err2).Msg("Failed to list proposals")
+			c.JSON(500, "")
+			return
+		}
+		c.JSON(200, list)
+	})
+
 	if err := r.Run(); err != nil {
 		log.Err(err).Send()
 		return
@@ -54,14 +68,18 @@ func listenToBroker() (*nats.Conn, *nats.Subscription, error) {
 	log.Info().Msgf("Connected to broker: %v", nc.IsConnected())
 
 	sub, err := nc.Subscribe("*.proposal-ping", func(msg *nats.Msg) {
-		log.Info().Msgf("Received a message [%s] %s", msg.Subject, string(msg.Data))
+		//log.Info().Msgf("Received a message [%s] %s", msg.Subject, string(msg.Data))
 		p := v1.ProposalPingMessage{}
 		if err := json.Unmarshal(msg.Data, &p); err != nil {
 			log.Err(err).Msg("Failed to parse proposal")
 		} else if (reflect.DeepEqual(p, v1.ProposalPingMessage{})) {
 			log.Err(errors.New("unknown message format")).Msg("Failed to parse proposal")
 		} else {
-			spew.Dump(p.Proposal)
+			proposal := p.Proposal.ConvertToV2()
+			err := Repository.Store(proposal.ProviderID, proposal.ServiceType, proposal.Location.Country, *proposal)
+			if err != nil {
+				log.Err(err).Msg("Failed to store proposal")
+			}
 		}
 	})
 	return nc, sub, err

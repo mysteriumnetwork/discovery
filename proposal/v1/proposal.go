@@ -1,8 +1,11 @@
 package v1
 
 import (
+	"encoding/json"
 	"math/big"
 	"time"
+
+	v2 "github.com/mysteriumnetwork/discovery/proposal/v2"
 )
 
 type ProposalPingMessage struct {
@@ -36,7 +39,38 @@ type ServiceProposal struct {
 	//ProviderContacts ContactList `json:"provider_contacts"`
 
 	// AccessPolicies represents the access controls for proposal
-	AccessPolicies *[]AccessPolicy `json:"access_policies,omitempty"`
+	AccessPolicies *[]v2.AccessPolicy `json:"access_policies,omitempty"`
+}
+
+func (s *ServiceProposal) ConvertToV2() *v2.Proposal {
+	p := v2.NewProposal(s.ProviderID, s.ServiceType)
+	loc := s.ServiceDefinition.Location
+	p.Location = v2.Location{
+		Continent: loc.Continent,
+		Country:   loc.Country,
+		City:      loc.City,
+		ASN:       loc.ASN,
+		ISP:       loc.ISP,
+		IPType:    loc.NodeType,
+	}
+
+	p.Price = v2.Price{
+		Currency: v2.Currency(s.PaymentMethod.Price.Currency),
+		PerHour:  s.PaymentMethod.pricePerHour(),
+		PerGiB:   s.PaymentMethod.pricePerGiB(),
+	}
+
+	p.AccessPolicies = s.AccessPolicies
+
+	return p
+}
+
+func (s *ServiceProposal) MarshalBinary() (data []byte, err error) {
+	return json.Marshal(s)
+}
+
+func (s *ServiceProposal) UnmarshalBinary(data []byte) error {
+	return json.Unmarshal(data, &s)
 }
 
 // ServiceDefinition interface is interface for all service definition types
@@ -55,14 +89,6 @@ type Location struct {
 	NodeType string `json:"node_type,omitempty"`
 }
 
-// PaymentMethod is a interface for all types of payment methods
-type PaymentMethod struct {
-	Price    Money  `json:"price"`
-	Duration int    `json:"duration"`
-	Bytes    int    `json:"bytes"`
-	Type     string `json:"type"`
-}
-
 // Money holds the currency type and amount
 type Money struct {
 	Amount   *big.Int `json:"amount,omitempty"`
@@ -76,10 +102,4 @@ type Currency string
 type PaymentRate struct {
 	PerTime time.Duration
 	PerByte uint64
-}
-
-// AccessPolicy represents the access controls for proposal
-type AccessPolicy struct {
-	ID     string `json:"id"`
-	Source string `json:"source"`
 }

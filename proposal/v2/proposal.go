@@ -1,0 +1,55 @@
+package v2
+
+import (
+	"encoding/json"
+	"math/big"
+)
+
+const Format = "service-proposal/v2"
+
+type Proposal struct {
+	Format         string          `json:"format"`
+	ProviderID     string          `json:"provider_id"`
+	ServiceType    string          `json:"service_type"`
+	Location       Location        `json:"location"`
+	Price          Price           `json:"price"`
+	AccessPolicies *[]AccessPolicy `json:"access_policies,omitempty"`
+}
+
+func NewProposal(providerID, serviceType string) *Proposal {
+	return &Proposal{
+		Format:      Format,
+		ProviderID:  providerID,
+		ServiceType: serviceType,
+	}
+}
+
+func (p Proposal) MarshalBinary() (data []byte, err error) {
+	marshal, err := json.Marshal(p)
+	return marshal, err
+}
+
+func (p Proposal) UnmarshalBinary(data []byte) error {
+	return json.Unmarshal(data, &p)
+}
+
+type Location struct {
+	Continent string `json:"continent,omitempty"`
+	Country   string `json:"country,omitempty"`
+	City      string `json:"city,omitempty"`
+	ASN       int    `json:"asn,omitempty"`
+	ISP       string `json:"isp,omitempty"`
+	IPType    string `json:"ip_type,omitempty"`
+}
+
+type Price struct {
+	Currency Currency `json:"currency"`
+	PerHour  *big.Int `json:"per_hour"`
+	PerGiB   *big.Int `json:"per_gib"`
+}
+
+// AccessPolicy represents the access controls for proposal
+type AccessPolicy struct {
+	ID     string `json:"id"`
+	Source string `json:"source"`
+}
