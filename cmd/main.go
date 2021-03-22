@@ -44,7 +44,7 @@ func main() {
 	})
 
 	r.GET("/proposals", func(c *gin.Context) {
-		list, err2 := Repository.List("wireguard", "LT")
+		list, err2 := Repository.List("wireguard", "US")
 		if err2 != nil {
 			log.Err(err2).Msg("Failed to list proposals")
 			c.JSON(500, "")

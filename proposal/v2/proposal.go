@@ -8,12 +8,13 @@ import (
 const Format = "service-proposal/v2"
 
 type Proposal struct {
-	Format         string          `json:"format"`
-	ProviderID     string          `json:"provider_id"`
-	ServiceType    string          `json:"service_type"`
-	Location       Location        `json:"location"`
-	Price          Price           `json:"price"`
-	AccessPolicies *[]AccessPolicy `json:"access_policies,omitempty"`
+	Format         string         `json:"format"`
+	ProviderID     string         `json:"provider_id"`
+	ServiceType    string         `json:"service_type"`
+	Location       Location       `json:"location"`
+	Price          Price          `json:"price"`
+	Contacts       []Contact      `json:"contacts"`
+	AccessPolicies []AccessPolicy `json:"access_policies,omitempty"`
 }
 
 func NewProposal(providerID, serviceType string) *Proposal {
@@ -46,6 +47,11 @@ type Price struct {
 	Currency Currency `json:"currency"`
 	PerHour  *big.Int `json:"per_hour"`
 	PerGiB   *big.Int `json:"per_gib"`
+}
+
+type Contact struct {
+	Type       string           `json:"type"`
+	Definition *json.RawMessage `json:"definition"`
 }
 
 // AccessPolicy represents the access controls for proposal

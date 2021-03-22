@@ -36,10 +36,10 @@ type ServiceProposal struct {
 	ProviderID string `json:"provider_id"`
 
 	// Communication methods possible
-	//ProviderContacts ContactList `json:"provider_contacts"`
+	ProviderContacts []v2.Contact `json:"provider_contacts"`
 
 	// AccessPolicies represents the access controls for proposal
-	AccessPolicies *[]v2.AccessPolicy `json:"access_policies,omitempty"`
+	AccessPolicies []v2.AccessPolicy `json:"access_policies,omitempty"`
 }
 
 func (s *ServiceProposal) ConvertToV2() *v2.Proposal {
@@ -60,6 +60,7 @@ func (s *ServiceProposal) ConvertToV2() *v2.Proposal {
 		PerGiB:   s.PaymentMethod.pricePerGiB(),
 	}
 
+	p.Contacts = s.ProviderContacts
 	p.AccessPolicies = s.AccessPolicies
 
 	return p
