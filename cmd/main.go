@@ -3,17 +3,19 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"github.com/gin-gonic/gin"
+	"github.com/mysteriumnetwork/discovery/proposal/repository"
+	v1 "github.com/mysteriumnetwork/discovery/proposal/v1"
+	v2 "github.com/mysteriumnetwork/discovery/proposal/v2"
+	"github.com/mysteriumnetwork/discovery/quality"
+	"github.com/nats-io/nats.go"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	stdlog "log"
 	"os"
 	"reflect"
 	"strings"
-
-	"github.com/gin-gonic/gin"
-	"github.com/mysteriumnetwork/discovery/proposal/repository"
-	v1 "github.com/mysteriumnetwork/discovery/proposal/v1"
-	"github.com/nats-io/nats.go"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
+	"time"
 )
 
 var Version = "<dev>"
@@ -50,14 +52,37 @@ func main() {
 			c.JSON(500, "")
 			return
 		}
+
+		qualities, err := Repository.ListQualities(v2.ProposalProviderIDS(list), "wireguard", "DE")
+		if err != nil {
+			log.Err(err).Msg("failed listing proposal qualities")
+			qualities = map[string]v2.Quality{}
+		}
+
+		for idx, p := range list {
+			q, ok := qualities[p.ProviderID]
+			if ok {
+				list[idx].Quality = q
+			}
+		}
+
 		c.JSON(200, list)
 	})
+
+	qa := quality.NewKeeper(
+		"https://testnet2-quality.mysterium.network",
+		Repository,
+		quality.KeeperConfig{
+			UpdateCycle:          30 * time.Second,
+			QualityFetchDebounce: time.Second,
+		},
+	)
+	go qa.StartAsync()
 
 	if err := r.Run(); err != nil {
 		log.Err(err).Send()
 		return
 	}
-
 }
 
 func listenToBroker() (*nats.Conn, *nats.Subscription, error) {
