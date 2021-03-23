@@ -18,14 +18,19 @@ type QualityRepository interface {
 	StoreQuality(id, serviceType, forCountry string, quality float32) error
 }
 
+type KeeperConfig struct {
+	UpdateCycle          time.Duration
+	QualityFetchDebounce time.Duration
+}
+
 func NewKeeper(
 	qualityOracleURL string,
 	countryProvider QualityRepository,
+	KeeperConfig KeeperConfig,
 ) *Keeper {
 	return &Keeper{
-		//updateCycle:      5 * time.Minute,
-		updateCycle:          30 * time.Second,
-		qualityFetchDebounce: time.Second,
+		updateCycle:          KeeperConfig.UpdateCycle,
+		qualityFetchDebounce: KeeperConfig.QualityFetchDebounce,
 		qualityOracleURL:     qualityOracleURL,
 		oracleAPI:            NewOracleAPI(qualityOracleURL),
 		countryProvider:      countryProvider,

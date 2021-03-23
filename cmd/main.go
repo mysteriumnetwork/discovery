@@ -15,6 +15,7 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"time"
 )
 
 var Version = "<dev>"
@@ -58,9 +59,11 @@ func main() {
 			qualities = map[string]v2.Quality{}
 		}
 
-		//for pid, q := range qualities {
-		for _, _ = range qualities {
-			// map qualities to proposals here
+		for idx, p := range list {
+			q, ok := qualities[p.ProviderID]
+			if ok {
+				list[idx].Quality = q
+			}
 		}
 
 		c.JSON(200, list)
@@ -69,6 +72,10 @@ func main() {
 	qa := quality.NewKeeper(
 		"https://testnet2-quality.mysterium.network",
 		Repository,
+		quality.KeeperConfig{
+			UpdateCycle:          30 * time.Second,
+			QualityFetchDebounce: time.Second,
+		},
 	)
 	go qa.StartAsync()
 
