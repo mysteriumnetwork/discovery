@@ -25,6 +25,14 @@ func NewProposal(providerID, serviceType string) *Proposal {
 	}
 }
 
+func ProposalProviderIDS(proposals []Proposal) []string {
+	ids := make([]string, len(proposals))
+	for idx, p := range proposals {
+		ids[idx] = p.ProviderID
+	}
+	return ids
+}
+
 func (p Proposal) MarshalBinary() (data []byte, err error) {
 	marshal, err := json.Marshal(p)
 	return marshal, err
@@ -58,4 +66,22 @@ type Contact struct {
 type AccessPolicy struct {
 	ID     string `json:"id"`
 	Source string `json:"source"`
+}
+
+type Quality struct {
+	ProviderID string  `json:"provider_id"`
+	Quality    float32 `json:"quality"`
+}
+
+func (p Quality) MarshalBinary() (data []byte, err error) {
+	marshal, err := json.Marshal(p)
+	return marshal, err
+}
+
+func (p Quality) UnmarshalBinary(data []byte) error {
+	return json.Unmarshal(data, &p)
+}
+
+func NewQuality(providerID string, quality float32) *Quality {
+	return &Quality{ProviderID: providerID, Quality: quality}
 }
