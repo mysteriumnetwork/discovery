@@ -4,58 +4,48 @@ import (
 	"time"
 
 	"github.com/mysteriumnetwork/discovery/location"
+	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
 	"github.com/rs/zerolog/log"
 )
 
-type Keeper struct {
-	updateCycle          time.Duration
-	qualityFetchDebounce time.Duration
-	qualityOracleURL     string
-	qualityRepository    QualityRepository
-	oracleAPI            *OracleAPI
+type Updater struct {
+	UpdaterOpts
+	repository *Repository
+	api        *oracleapi.API
 }
 
-type QualityRepository interface {
-	StoreQuality(id, serviceType, forCountry string, quality float32) error
+type UpdaterOpts struct {
+	UpdateCycleDelay  time.Duration
+	QualityFetchDelay time.Duration
 }
 
-type KeeperConfig struct {
-	UpdateCycle          time.Duration
-	QualityFetchDebounce time.Duration
-}
-
-func NewKeeper(
+func NewUpdater(
 	qualityOracleURL string,
-	qualityRepository QualityRepository,
-	KeeperConfig KeeperConfig,
-) *Keeper {
-	return &Keeper{
-		updateCycle:          KeeperConfig.UpdateCycle,
-		qualityFetchDebounce: KeeperConfig.QualityFetchDebounce,
-		qualityOracleURL:     qualityOracleURL,
-		oracleAPI:            NewOracleAPI(qualityOracleURL),
-		qualityRepository:    qualityRepository,
+	qualityRepository *Repository,
+	opts UpdaterOpts,
+) *Updater {
+	return &Updater{
+		UpdaterOpts: opts,
+		api:         oracleapi.New(qualityOracleURL),
+		repository:  qualityRepository,
 	}
 }
 
-func (k *Keeper) StartAsync() {
-	go k.start()
-}
-
-func (k *Keeper) start() {
+func (u *Updater) Start() {
 	for {
-		log.Info().Msg("proposal quality updated - started")
+		log.Info().Msg("Quality updater: started")
 
 		for _, country := range location.Countries {
-			k.sleepQualityFetchDebounce()
-			qualities, err := k.oracleAPI.ProposalQualities(country)
+			time.Sleep(u.QualityFetchDelay)
+
+			qualities, err := u.api.Quality(country)
 			if err != nil {
-				log.Err(err).Msgf("skipping proposal quality update for country: %s", country)
+				log.Err(err).Msgf("Failed to fetch quality (country=%s)", country)
 				continue
 			}
 
 			for _, q := range qualities.Entries {
-				err := k.qualityRepository.StoreQuality(
+				err := u.repository.StoreQuality(
 					q.ProposalID.ProviderID,
 					q.ProposalID.ServiceType,
 					country,
@@ -63,21 +53,13 @@ func (k *Keeper) start() {
 				)
 
 				if err != nil {
-					log.Err(err).Msgf("failed to store quality: %+w", q)
+					log.Err(err).Msgf("Failed to store quality: %+v", q)
 				}
 			}
 		}
 
-		log.Info().Msg("proposal quality updated - completed")
+		log.Info().Msg("Quality updater: cycle complete")
 
-		k.sleepUpdateCycle()
+		time.Sleep(u.UpdateCycleDelay)
 	}
-}
-
-func (k *Keeper) sleepUpdateCycle() {
-	time.Sleep(k.updateCycle)
-}
-
-func (k *Keeper) sleepQualityFetchDebounce() {
-	time.Sleep(k.qualityFetchDebounce)
 }

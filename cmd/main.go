@@ -10,7 +10,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mysteriumnetwork/discovery/proposal/repository"
+	"github.com/mysteriumnetwork/discovery/db"
+	"github.com/mysteriumnetwork/discovery/proposal"
 	v1 "github.com/mysteriumnetwork/discovery/proposal/v1"
 	v2 "github.com/mysteriumnetwork/discovery/proposal/v2"
 	"github.com/mysteriumnetwork/discovery/quality"
@@ -21,16 +22,16 @@ import (
 
 var Version = "<dev>"
 
-var Repository *repository.Repository
-
 func main() {
 	configureLogger()
 	printBanner()
 	r := gin.Default()
 
-	Repository = repository.New()
+	rdb := db.New()
+	proposalRepo := proposal.NewRepository(rdb)
+	qualityRepo := quality.NewRepository(rdb)
 
-	broker, subscription, err := listenToBroker()
+	broker, subscription, err := listenToBroker(proposalRepo)
 	if err != nil {
 		log.Err(err).Msg("Could not listen to the broker")
 		return
@@ -47,14 +48,14 @@ func main() {
 	})
 
 	r.GET("/proposals", func(c *gin.Context) {
-		list, err2 := Repository.List("wireguard", "US")
+		list, err2 := proposalRepo.List("wireguard", "US")
 		if err2 != nil {
 			log.Err(err2).Msg("Failed to list proposals")
 			c.JSON(500, "")
 			return
 		}
 
-		qualities, err := Repository.ListQualities(v2.ProposalProviderIDS(list), "wireguard", "DE")
+		qualities, err := qualityRepo.ListQualities(v2.ProposalProviderIDS(list), "wireguard", "DE")
 		if err != nil {
 			log.Err(err).Msg("failed listing proposal qualities")
 			qualities = map[string]v2.Quality{}
@@ -70,15 +71,15 @@ func main() {
 		c.JSON(200, list)
 	})
 
-	qa := quality.NewKeeper(
+	qa := quality.NewUpdater(
 		"https://testnet2-quality.mysterium.network",
-		Repository,
-		quality.KeeperConfig{
-			UpdateCycle:          30 * time.Second,
-			QualityFetchDebounce: time.Second,
+		qualityRepo,
+		quality.UpdaterOpts{
+			UpdateCycleDelay:  30 * time.Second,
+			QualityFetchDelay: time.Second,
 		},
 	)
-	go qa.StartAsync()
+	go qa.Start()
 
 	if err := r.Run(); err != nil {
 		log.Err(err).Send()
@@ -86,7 +87,7 @@ func main() {
 	}
 }
 
-func listenToBroker() (*nats.Conn, *nats.Subscription, error) {
+func listenToBroker(repository *proposal.Repository) (*nats.Conn, *nats.Subscription, error) {
 	nc, err := nats.Connect("testnet2-broker.mysterium.network")
 	if err != nil {
 		return nil, nil, err
@@ -95,14 +96,14 @@ func listenToBroker() (*nats.Conn, *nats.Subscription, error) {
 
 	sub, err := nc.Subscribe("*.proposal-ping", func(msg *nats.Msg) {
 		//log.Info().Msgf("Received a message [%s] %s", msg.Subject, string(msg.Data))
-		p := v1.ProposalPingMessage{}
-		if err := json.Unmarshal(msg.Data, &p); err != nil {
+		pingMsg := v1.ProposalPingMessage{}
+		if err := json.Unmarshal(msg.Data, &pingMsg); err != nil {
 			log.Err(err).Msg("Failed to parse proposal")
-		} else if (reflect.DeepEqual(p, v1.ProposalPingMessage{})) {
+		} else if (reflect.DeepEqual(pingMsg, v1.ProposalPingMessage{})) {
 			log.Err(errors.New("unknown message format")).Msg("Failed to parse proposal")
 		} else {
-			proposal := p.Proposal.ConvertToV2()
-			err := Repository.Store(proposal.ProviderID, proposal.ServiceType, proposal.Location.Country, *proposal)
+			p := pingMsg.Proposal.ConvertToV2()
+			err := repository.Store(p.ProviderID, p.ServiceType, p.Location.Country, *p)
 			if err != nil {
 				log.Err(err).Msg("Failed to store proposal")
 			}

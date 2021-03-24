@@ -1,20 +1,19 @@
-package quality
+package oracleapi
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"net/http"
 	"time"
 )
 
-type OracleAPI struct {
+type API struct {
 	client *http.Client
 	url    string
 }
 
-func NewOracleAPI(url string) *OracleAPI {
-	return &OracleAPI{
+func New(url string) *API {
+	return &API{
 		url: url,
 		client: &http.Client{
 			Timeout: 5 * time.Second,
@@ -22,24 +21,20 @@ func NewOracleAPI(url string) *OracleAPI {
 	}
 }
 
-func (o *OracleAPI) ProposalQualities(country string) (*ProposalQualityResponse, error) {
-	resp, err := o.client.Get(fmt.Sprintf("%s/api/v2/providers/quality?country=%s", o.url, country))
+func (a *API) Quality(country string) (*ProposalQualityResponse, error) {
+	resp, err := a.client.Get(fmt.Sprintf("%s/api/v2/providers/quality?country=%s", a.url, country))
 	if err != nil {
-		log.Err(err).Msgf("failed fetching proposal qualities; country: %s", country)
-		return nil, err
+		return nil, fmt.Errorf("request failed: %w", err)
 	}
-
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		log.Warn().Msgf("failed fetching proposal qualities; country: %s, response code: %d", resp.StatusCode, country)
-		return nil, err
+		return nil, fmt.Errorf("received response code: %v", resp.StatusCode)
 	}
 
 	var entries []ProposalQuality
 	if err := json.NewDecoder(resp.Body).Decode(&entries); err != nil {
-		log.Err(err).Msgf("failed fetching proposal qualities; country: %s", country)
-		return nil, err
+		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 	return &ProposalQualityResponse{Entries: entries}, nil
 }
