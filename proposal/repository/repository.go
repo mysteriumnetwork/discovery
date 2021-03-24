@@ -119,18 +119,6 @@ func (r *Repository) ListQualities(providerIDS []string, serviceType, forCountry
 	return qualities, nil
 }
 
-func (r *Repository) Countries() ([]string, error) {
-	keys, err := r.rdb.Keys(ctx, keyCountry("??")).Result()
-	if err != nil {
-		return nil, err
-	}
-	countries := make([]string, len(keys))
-	for i, key := range keys {
-		countries[i] = key[len(keyCountry("")):]
-	}
-	return countries, nil
-}
-
 func (r *Repository) StoreQuality(providerID, serviceType, forCountry string, quality float32) error {
 	qualityKey := keyQuality(providerID, serviceType, forCountry)
 	return r.rdb.Set(ctx, qualityKey, v2.NewQuality(providerID, quality), 0).Err()
