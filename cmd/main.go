@@ -73,7 +73,6 @@ func main() {
 	qa := quality.NewKeeper(
 		"https://testnet2-quality.mysterium.network",
 		Repository,
-		quality.NewCSVCountryProvider(),
 		quality.KeeperConfig{
 			UpdateCycle:          30 * time.Second,
 			QualityFetchDebounce: time.Second,

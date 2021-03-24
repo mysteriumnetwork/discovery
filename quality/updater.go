@@ -1,8 +1,10 @@
 package quality
 
 import (
-	"github.com/rs/zerolog/log"
 	"time"
+
+	"github.com/mysteriumnetwork/discovery/location"
+	"github.com/rs/zerolog/log"
 )
 
 type Keeper struct {
@@ -10,7 +12,6 @@ type Keeper struct {
 	qualityFetchDebounce time.Duration
 	qualityOracleURL     string
 	qualityRepository    QualityRepository
-	countryProvider      CountryProvider
 	oracleAPI            *OracleAPI
 }
 
@@ -26,7 +27,6 @@ type KeeperConfig struct {
 func NewKeeper(
 	qualityOracleURL string,
 	qualityRepository QualityRepository,
-	countryProvider CountryProvider,
 	KeeperConfig KeeperConfig,
 ) *Keeper {
 	return &Keeper{
@@ -35,7 +35,6 @@ func NewKeeper(
 		qualityOracleURL:     qualityOracleURL,
 		oracleAPI:            NewOracleAPI(qualityOracleURL),
 		qualityRepository:    qualityRepository,
-		countryProvider:      countryProvider,
 	}
 }
 
@@ -47,9 +46,7 @@ func (k *Keeper) start() {
 	for {
 		log.Info().Msg("proposal quality updated - started")
 
-		countries := k.countryProvider.Countries()
-
-		for _, country := range countries {
+		for _, country := range location.Countries {
 			k.sleepQualityFetchDebounce()
 			qualities, err := k.oracleAPI.ProposalQualities(country)
 			if err != nil {
