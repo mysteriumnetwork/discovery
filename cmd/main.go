@@ -3,6 +3,12 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	stdlog "log"
+	"os"
+	"reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/mysteriumnetwork/discovery/proposal/repository"
 	v1 "github.com/mysteriumnetwork/discovery/proposal/v1"
@@ -11,11 +17,6 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	stdlog "log"
-	"os"
-	"reflect"
-	"strings"
-	"time"
 )
 
 var Version = "<dev>"
@@ -72,7 +73,7 @@ func main() {
 	qa := quality.NewKeeper(
 		"https://testnet2-quality.mysterium.network",
 		Repository,
-		quality.NewCsvCountryProvider(),
+		quality.NewCSVCountryProvider(),
 		quality.KeeperConfig{
 			UpdateCycle:          30 * time.Second,
 			QualityFetchDebounce: time.Second,

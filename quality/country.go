@@ -17,7 +17,7 @@ type csvCountryProvider struct {
 	countries []string
 }
 
-func NewCsvCountryProvider() *csvCountryProvider {
+func NewCSVCountryProvider() *csvCountryProvider {
 	lines := strings.Split(countryCSV, "\n")
 	countries := make([]string, len(lines))
 	for idx, line := range lines {
