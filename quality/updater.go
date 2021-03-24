@@ -9,12 +9,12 @@ type Keeper struct {
 	updateCycle          time.Duration
 	qualityFetchDebounce time.Duration
 	qualityOracleURL     string
-	countryProvider      QualityRepository
+	qualityRepository    QualityRepository
+	countryProvider      CountryProvider
 	oracleAPI            *OracleAPI
 }
 
 type QualityRepository interface {
-	Countries() ([]string, error)
 	StoreQuality(id, serviceType, forCountry string, quality float32) error
 }
 
@@ -25,7 +25,8 @@ type KeeperConfig struct {
 
 func NewKeeper(
 	qualityOracleURL string,
-	countryProvider QualityRepository,
+	qualityRepository QualityRepository,
+	countryProvider CountryProvider,
 	KeeperConfig KeeperConfig,
 ) *Keeper {
 	return &Keeper{
@@ -33,6 +34,7 @@ func NewKeeper(
 		qualityFetchDebounce: KeeperConfig.QualityFetchDebounce,
 		qualityOracleURL:     qualityOracleURL,
 		oracleAPI:            NewOracleAPI(qualityOracleURL),
+		qualityRepository:    qualityRepository,
 		countryProvider:      countryProvider,
 	}
 }
@@ -45,10 +47,7 @@ func (k *Keeper) start() {
 	for {
 		log.Info().Msg("proposal quality updated - started")
 
-		countries, err := k.countryProvider.Countries()
-		if err != nil {
-			log.Err(err).Msg("failed updating proposal quality")
-		}
+		countries := k.countryProvider.Countries()
 
 		for _, country := range countries {
 			k.sleepQualityFetchDebounce()
@@ -59,7 +58,7 @@ func (k *Keeper) start() {
 			}
 
 			for _, q := range qualities.Entries {
-				err := k.countryProvider.StoreQuality(
+				err := k.qualityRepository.StoreQuality(
 					q.ProposalID.ProviderID,
 					q.ProposalID.ServiceType,
 					country,
