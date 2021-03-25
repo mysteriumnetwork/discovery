@@ -68,6 +68,9 @@ func (r *Repository) List(serviceType, country string) ([]v2.Proposal, error) {
 	if err != nil {
 		return nil, err
 	}
+	if len(keys) == 0 {
+		return nil, nil
+	}
 
 	jsonProposals, err := r.rdb.MGet(ctx, keys...).Result()
 	if err != nil {

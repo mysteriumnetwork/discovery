@@ -52,3 +52,11 @@ type ProposalQuality struct {
 type ProposalQualityResponse struct {
 	Entries []ProposalQuality
 }
+
+func (p ProposalQualityResponse) MarshalBinary() (data []byte, err error) {
+	return json.Marshal(p)
+}
+
+func (p ProposalQualityResponse) UnmarshalBinary(data []byte) error {
+	return json.Unmarshal(data, &p)
+}
