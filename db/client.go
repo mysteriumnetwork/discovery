@@ -2,9 +2,9 @@ package db
 
 import "github.com/go-redis/redis/v8"
 
-func New() *redis.Client {
+func New(dbHost, dbPassword string) *redis.Client {
 	return redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
+		Addr:     dbHost,
+		Password: dbPassword,
 	})
 }

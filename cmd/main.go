@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mysteriumnetwork/discovery/config"
 	"github.com/mysteriumnetwork/discovery/db"
 	"github.com/mysteriumnetwork/discovery/listener"
 	"github.com/mysteriumnetwork/discovery/proposal"
@@ -20,17 +21,22 @@ var Version = "<dev>"
 func main() {
 	configureLogger()
 	printBanner()
+	cfg, err := config.Read()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to read config")
+	}
+
 	r := gin.Default()
 
-	rdb := db.New()
+	rdb := db.New(cfg.DBHost, cfg.DBPassword)
 	proposalRepo := proposal.NewRepository(rdb)
-	qualityOracleAPI := oracleapi.New("https://testnet2-quality.mysterium.network")
+	qualityOracleAPI := oracleapi.New(cfg.QualityOracleURL.String())
 	qualityService := quality.NewService(qualityOracleAPI, rdb)
 	proposalService := proposal.NewService(proposalRepo, qualityService)
 
 	proposal.NewAPI(proposalService).RegisterRoutes(r)
 
-	brokerListener := listener.New("testnet2-broker.mysterium.network", proposalRepo)
+	brokerListener := listener.New(cfg.BrokerURL.String(), proposalRepo)
 
 	if err := brokerListener.Listen(); err != nil {
 		log.Fatal().Err(err).Msg("Could not listen to the broker")
