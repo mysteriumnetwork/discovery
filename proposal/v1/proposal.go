@@ -3,6 +3,7 @@ package v1
 import (
 	"encoding/json"
 	"math/big"
+	"reflect"
 	"time"
 
 	v2 "github.com/mysteriumnetwork/discovery/proposal/v2"
@@ -10,6 +11,10 @@ import (
 
 type ProposalPingMessage struct {
 	Proposal ServiceProposal `json:"proposal"`
+}
+
+func (p ProposalPingMessage) IsEmpty() bool {
+	return reflect.DeepEqual(p, ProposalPingMessage{})
 }
 
 type ServiceProposal struct {
