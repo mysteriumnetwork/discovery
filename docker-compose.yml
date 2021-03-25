@@ -1,6 +1,6 @@
 version: '3.1'
 services:
-  redis:
+  db:
     image: redis
     container_name: 'discovery_cache'
     ports:
