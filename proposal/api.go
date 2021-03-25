@@ -36,6 +36,6 @@ func (a *API) Proposals(c *gin.Context) {
 }
 
 func (a *API) RegisterRoutes(r *gin.Engine) {
-	r.GET("/ping", a.Ping)
-	r.GET("/proposals", a.Proposals)
+	r.GET("/api/v3/ping", a.Ping)
+	r.GET("/api/v3/proposals", a.Proposals)
 }
