@@ -9,7 +9,7 @@ mage build
 Or using docker:
 
 ```
-docker build -t ndiscovery:local .
+docker build -t discovery:local .
 ```
 
 ## Run
