@@ -9,6 +9,7 @@ const Format = "service-proposal/v2"
 
 type Proposal struct {
 	Format         string         `json:"format"`
+	Compatibility  int            `json:"compatibility"`
 	ProviderID     string         `json:"provider_id"`
 	ServiceType    string         `json:"service_type"`
 	Location       Location       `json:"location"`
