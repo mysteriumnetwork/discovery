@@ -6,7 +6,7 @@ import (
 	"github.com/magefile/mage/sh"
 )
 
-func Local() {
+func Up() {
 	err := sh.RunV("docker-compose", "up", "-d", "db")
 	if err != nil {
 		return

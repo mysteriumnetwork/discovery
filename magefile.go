@@ -9,17 +9,17 @@ import (
 	"github.com/mysteriumnetwork/discovery/ci/local"
 )
 
-// Build builds the project.
+// Build builds the app binary.
 func Build() error {
-	return sh.Run("go", "build", "-o", path.Join("build", "discovery"), path.Join("cmd", "main.go"))
+	return sh.Run("go", "build", "-o", path.Join("build", "ndiscovery"), path.Join("cmd", "main.go"))
 }
 
-// Run runs the project.
+// Run runs the app (without the DB).
 func Run() error {
 	return sh.RunV("go", "run", "./cmd/main.go")
 }
 
-// Local runs local discovery stack.
-func Local() {
-	local.Local()
+// Up runs the discovery stack (app and DB) locally.
+func Up() {
+	local.Up()
 }

@@ -6,8 +6,22 @@
 mage build
 ```
 
+Or using docker:
+
+```
+docker build -t ndiscovery:local .
+```
+
 ## Run
 
 ```
-mage local
+mage up
 ```
+
+Or using docker:
+
+```
+docker-compose up
+```
+
+API: http://localhost:3000/api/v3
