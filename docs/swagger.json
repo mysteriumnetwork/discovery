@@ -1,0 +1,179 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Discovery API for Mysterium Network",
+        "title": "Discovery API",
+        "contact": {},
+        "version": "3.0"
+    },
+    "basePath": "/api/v3",
+    "paths": {
+        "/ping": {
+            "get": {
+                "description": "Ping",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Ping",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/proposal.PingResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/proposals": {
+            "get": {
+                "description": "List proposals",
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "List proposals",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Consumer country",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Service type",
+                        "name": "service_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider country",
+                        "name": "country",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v2.Proposal"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "proposal.PingResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "v2.AccessPolicy": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                }
+            }
+        },
+        "v2.Contact": {
+            "type": "object",
+            "properties": {
+                "definition": {
+                    "type": "object"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "v2.Location": {
+            "type": "object",
+            "properties": {
+                "asn": {
+                    "type": "integer"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "continent": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "ip_type": {
+                    "type": "string"
+                },
+                "isp": {
+                    "type": "string"
+                }
+            }
+        },
+        "v2.Price": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "type": "string"
+                },
+                "per_gib": {
+                    "type": "integer"
+                },
+                "per_hour": {
+                    "type": "integer"
+                }
+            }
+        },
+        "v2.Proposal": {
+            "type": "object",
+            "properties": {
+                "access_policies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v2.AccessPolicy"
+                    }
+                },
+                "compatibility": {
+                    "type": "integer"
+                },
+                "contacts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v2.Contact"
+                    }
+                },
+                "format": {
+                    "type": "string"
+                },
+                "location": {
+                    "$ref": "#/definitions/v2.Location"
+                },
+                "price": {
+                    "$ref": "#/definitions/v2.Price"
+                },
+                "provider_id": {
+                    "type": "string"
+                },
+                "quality": {
+                    "type": "number"
+                },
+                "service_type": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

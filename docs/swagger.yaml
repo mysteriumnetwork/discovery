@@ -1,0 +1,116 @@
+basePath: /api/v3
+definitions:
+  proposal.PingResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  v2.AccessPolicy:
+    properties:
+      id:
+        type: string
+      source:
+        type: string
+    type: object
+  v2.Contact:
+    properties:
+      definition:
+        type: object
+      type:
+        type: string
+    type: object
+  v2.Location:
+    properties:
+      asn:
+        type: integer
+      city:
+        type: string
+      continent:
+        type: string
+      country:
+        type: string
+      ip_type:
+        type: string
+      isp:
+        type: string
+    type: object
+  v2.Price:
+    properties:
+      currency:
+        type: string
+      per_gib:
+        type: integer
+      per_hour:
+        type: integer
+    type: object
+  v2.Proposal:
+    properties:
+      access_policies:
+        items:
+          $ref: '#/definitions/v2.AccessPolicy'
+        type: array
+      compatibility:
+        type: integer
+      contacts:
+        items:
+          $ref: '#/definitions/v2.Contact'
+        type: array
+      format:
+        type: string
+      location:
+        $ref: '#/definitions/v2.Location'
+      price:
+        $ref: '#/definitions/v2.Price'
+      provider_id:
+        type: string
+      quality:
+        type: number
+      service_type:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Discovery API for Mysterium Network
+  title: Discovery API
+  version: "3.0"
+paths:
+  /ping:
+    get:
+      consumes:
+      - application/json
+      description: Ping
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/proposal.PingResponse'
+      summary: Ping
+  /proposals:
+    get:
+      consumes:
+      - application/json
+      description: List proposals
+      parameters:
+      - description: Consumer country
+        in: query
+        name: from
+        type: string
+      - description: Service type
+        in: query
+        name: service_type
+        type: string
+      - description: Provider country
+        in: query
+        name: country
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/v2.Proposal'
+            type: array
+      summary: List proposals
+swagger: "2.0"

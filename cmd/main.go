@@ -12,16 +12,23 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mysteriumnetwork/discovery/config"
 	"github.com/mysteriumnetwork/discovery/db"
+	_ "github.com/mysteriumnetwork/discovery/docs"
 	"github.com/mysteriumnetwork/discovery/listener"
 	"github.com/mysteriumnetwork/discovery/proposal"
 	"github.com/mysteriumnetwork/discovery/quality"
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 var Version = "<dev>"
 
+// @title Discovery API
+// @version 3.0
+// @BasePath /api/v3
+// @description Discovery API for Mysterium Network
 func main() {
 	configureLogger()
 	printBanner()
@@ -31,6 +38,7 @@ func main() {
 	}
 
 	r := gin.Default()
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	rdb := db.New(cfg.DBHost, cfg.DBPassword)
 	proposalRepo := proposal.NewRepository(rdb)
@@ -38,7 +46,9 @@ func main() {
 	qualityService := quality.NewService(qualityOracleAPI, rdb)
 	proposalService := proposal.NewService(proposalRepo, qualityService)
 
-	proposal.NewAPI(proposalService).RegisterRoutes(r)
+	v3 := r.Group("/api/v3")
+
+	proposal.NewAPI(proposalService).RegisterRoutes(v3)
 
 	brokerListener := listener.New(cfg.BrokerURL.String(), proposalRepo)
 

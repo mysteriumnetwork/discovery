@@ -51,13 +51,13 @@ type Location struct {
 
 type Price struct {
 	Currency Currency `json:"currency"`
-	PerHour  *big.Int `json:"per_hour"`
-	PerGiB   *big.Int `json:"per_gib"`
+	PerHour  *big.Int `json:"per_hour" swaggertype:"integer"`
+	PerGiB   *big.Int `json:"per_gib" swaggertype:"integer"`
 }
 
 type Contact struct {
 	Type       string           `json:"type"`
-	Definition *json.RawMessage `json:"definition"`
+	Definition *json.RawMessage `json:"definition" swaggertype:"object"`
 }
 
 // AccessPolicy represents the access controls for proposal

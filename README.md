@@ -24,4 +24,5 @@ Or using docker:
 docker-compose up
 ```
 
-API: http://localhost:3000/api/v3
+Docs: http://localhost:8080/swagger/index.html
+API: http://localhost:8080/api/v3

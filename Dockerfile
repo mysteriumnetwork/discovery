@@ -16,6 +16,6 @@ RUN apk add --no-cache ca-certificates git
 # Install application
 COPY --from=builder /go/src/github.com/mysteriumnetwork/discovery/build/discovery /usr/bin/discovery
 
-EXPOSE 3000
+EXPOSE 8080
 
 CMD ["/usr/bin/discovery"]

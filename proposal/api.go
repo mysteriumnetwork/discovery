@@ -17,12 +17,31 @@ func NewAPI(service *Service) *API {
 	return &API{service: service}
 }
 
+// Ping godoc.
+// @Summary Ping
+// @Description Ping
+// @Accept json
+// @Produce json
+// @Success 200 {object} PingResponse
+// @Router /ping [get]
 func (a *API) Ping(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"message": "pong",
-	})
+	c.JSON(200, PingResponse{"pong"})
 }
 
+type PingResponse struct {
+	Message string `json:"message"`
+}
+
+// Proposals list proposals.
+// @Summary List proposals
+// @Description List proposals
+// @Param from query string false "Consumer country"
+// @Param service_type query string false "Service type"
+// @Param country query string false "Provider country"
+// @Accept json
+// @Product json
+// @Success 200 {array} v2.Proposal
+// @Router /proposals [get]
 func (a *API) Proposals(c *gin.Context) {
 	proposals, err := a.service.List(ListOpts{
 		from:        c.Query("from"),
@@ -39,7 +58,7 @@ func (a *API) Proposals(c *gin.Context) {
 	c.JSON(200, proposals)
 }
 
-func (a *API) RegisterRoutes(r *gin.Engine) {
-	r.GET("/api/v3/ping", a.Ping)
-	r.GET("/api/v3/proposals", a.Proposals)
+func (a *API) RegisterRoutes(r gin.IRoutes) {
+	r.GET("/ping", a.Ping)
+	r.GET("/proposals", a.Proposals)
 }
