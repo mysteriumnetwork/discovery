@@ -1,3 +1,7 @@
+// Copyright (c) 2021 BlockDev AG
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the root directory of this source tree.
+
 // +build mage
 
 package main
@@ -7,7 +11,22 @@ import (
 
 	"github.com/magefile/mage/sh"
 	"github.com/mysteriumnetwork/discovery/ci/local"
+	"github.com/mysteriumnetwork/go-ci/commands"
 )
+
+// Test runs the tests.
+func Test() error {
+	return commands.Test("./...")
+}
+
+// Check checks that the source is compliant with all of the checks.
+func Check() error {
+	return commands.CheckD(".")
+}
+
+func Copyright() error {
+	return commands.CopyrightD(".")
+}
 
 // Build builds the app binary.
 //goland:noinspection GoUnusedExportedFunction
