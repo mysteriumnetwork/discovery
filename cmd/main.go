@@ -56,7 +56,7 @@ func main() {
 		log.Fatal().Err(err).Msg("Could not listen to the broker")
 	}
 	defer brokerListener.Shutdown()
-
+	go proposalRepo.StartExpirationJob()
 	if err := r.Run(); err != nil {
 		log.Err(err).Send()
 		return
