@@ -43,7 +43,7 @@ func keyCountry(country string) string {
 
 const keyExpiration = "expiration"
 
-func (r *Repository) Start() {
+func (r *Repository) StartExpirationJob() {
 	for {
 		select {
 		case <-time.After(20 * time.Second):
