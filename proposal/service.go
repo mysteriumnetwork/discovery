@@ -55,7 +55,7 @@ func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
 }
 
 func values(proposalsMap map[string]*v2.Proposal) []v2.Proposal {
-	var res []v2.Proposal
+	var res []v2.Proposal = make([]v2.Proposal, 0)
 	for k := range proposalsMap {
 		res = append(res, *proposalsMap[k])
 	}
