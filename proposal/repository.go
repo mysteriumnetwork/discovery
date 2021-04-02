@@ -83,6 +83,9 @@ func (r *Repository) List(serviceType, country string) ([]v2.Proposal, error) {
 
 	var proposals []v2.Proposal
 	for _, j := range jsonProposals {
+		if j == nil { // TODO remove this hack once expiration is fixed (proposals are expired but the country/service_service type keys are not
+			continue
+		}
 		s := j.(string)
 		p := v2.Proposal{}
 		if err := json.Unmarshal([]byte(s), &p); err != nil {
