@@ -19,13 +19,17 @@ import (
 var ctx = context.Background()
 
 type Repository struct {
-	rdb      *redis.Client
-	shutdown chan struct{}
+	rdb                *redis.Client
+	shutdown           chan struct{}
+	expirationJobDelay time.Duration
+	expirationDuration time.Duration
 }
 
 func NewRepository(rdb *redis.Client) *Repository {
 	return &Repository{
-		rdb: rdb,
+		rdb:                rdb,
+		expirationDuration: 2 * time.Minute,
+		expirationJobDelay: 20 * time.Second,
 	}
 }
 
@@ -46,7 +50,7 @@ const keyExpiration = "expiration"
 func (r *Repository) StartExpirationJob() {
 	for {
 		select {
-		case <-time.After(20 * time.Second):
+		case <-time.After(r.expirationJobDelay):
 			result, err := r.rdb.ZRangeByScore(ctx, keyExpiration, &redis.ZRangeBy{
 				Min: "-inf",
 				Max: strconv.FormatInt(time.Now().Unix(), 10),
@@ -55,12 +59,10 @@ func (r *Repository) StartExpirationJob() {
 				log.Warn().Err(err).Msg("Failed to get expired proposals")
 				continue
 			}
-			for _, k := range result {
-				r.rdb.Get(ctx, k).Val()
+			if err := r.Delete(result...); err != nil {
+				log.Err(err).Msgf("Failed to delete proposals %v", result)
 			}
-			if err := r.rdb.Del(ctx, result...).Err(); err != nil {
-				log.Warn().Err(err).Msg("Failed to delete expired proposals")
-			}
+
 		case <-r.shutdown:
 			return
 		}
@@ -83,9 +85,6 @@ func (r *Repository) List(serviceType, country string) ([]v2.Proposal, error) {
 
 	var proposals []v2.Proposal
 	for _, j := range jsonProposals {
-		if j == nil { // TODO remove this hack once expiration is fixed (proposals are expired but the country/service_service type keys are not
-			continue
-		}
 		s := j.(string)
 		p := v2.Proposal{}
 		if err := json.Unmarshal([]byte(s), &p); err != nil {
@@ -110,10 +109,37 @@ func (r *Repository) Store(id string, serviceType string, country string, propos
 		return err
 	}
 	if err := r.rdb.ZAdd(ctx, keyExpiration, &redis.Z{
-		Score:  float64(time.Now().Add(2 * time.Minute).Unix()),
+		Score:  float64(time.Now().Add(r.expirationDuration).Unix()),
 		Member: key,
 	}).Err(); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (r *Repository) Delete(keys ...string) error {
+	if len(keys) == 0 {
+		return nil
+	}
+	for _, k := range keys {
+		j := r.rdb.Get(ctx, k).Val()
+		var p v2.Proposal
+		if err := json.Unmarshal([]byte(j), &p); err != nil {
+			log.Warn().Err(err).Msgf("Failed to unmarshal %s %v", k, j)
+			continue
+		}
+		if err := r.rdb.SRem(ctx, keyCountry(p.Location.Country), k).Err(); err != nil {
+			log.Warn().Err(err).Msgf("Failed to delete %s from country index", k)
+		}
+		if err := r.rdb.SRem(ctx, keyServiceType(p.ServiceType), k).Err(); err != nil {
+			log.Warn().Err(err).Msgf("Failed to delete %s from serviceType index", k)
+		}
+	}
+	if err := r.rdb.ZRem(ctx, keyExpiration, keys).Err(); err != nil {
+		return err
+	}
+	if err := r.rdb.Del(ctx, keys...).Err(); err != nil {
+		log.Warn().Err(err).Msgf("Failed to delete proposal keys %v", keys)
 	}
 	return nil
 }
