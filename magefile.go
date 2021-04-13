@@ -45,8 +45,13 @@ func Build() error {
 // Run runs the app (without the DB).
 //goland:noinspection GoUnusedExportedFunction
 func Run() error {
-	mg.Deps(Swag)
-	return sh.RunV("go", "run", "./cmd/main.go")
+	envs := map[string]string{
+		"DB_HOST":            "localhost:6379",
+		"DB_PASSWORD":        "",
+		"QUALITY_ORACLE_URL": "https://testnet2-quality.mysterium.network",
+		"BROKER_URL":         "nats://testnet2-broker.mysterium.network",
+	}
+	return sh.RunWithV(envs, "go", "run", "./cmd/main.go")
 }
 
 // Up runs the discovery stack (app and DB) locally.
