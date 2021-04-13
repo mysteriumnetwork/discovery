@@ -105,6 +105,10 @@ paths:
         in: query
         name: country
         type: string
+      - description: Residential IPs only?
+        in: query
+        name: residential
+        type: boolean
       responses:
         "200":
           description: OK

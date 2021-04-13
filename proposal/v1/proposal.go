@@ -60,7 +60,7 @@ func (s *ServiceProposal) ConvertToV2() *v2.Proposal {
 		City:      loc.City,
 		ASN:       loc.ASN,
 		ISP:       loc.ISP,
-		IPType:    loc.NodeType,
+		IPType:    v2.IPType(loc.NodeType),
 	}
 
 	p.Price = v2.Price{

@@ -40,13 +40,24 @@ func (p Proposal) UnmarshalBinary(data []byte) error {
 	return json.Unmarshal(data, &p)
 }
 
+type IPType string
+
+func (ipt IPType) IsResidential() bool {
+	switch ipt {
+	case "residential", "cellular":
+		return true
+	default:
+		return false
+	}
+}
+
 type Location struct {
 	Continent string `json:"continent,omitempty"`
 	Country   string `json:"country,omitempty"`
 	City      string `json:"city,omitempty"`
 	ASN       int    `json:"asn,omitempty"`
 	ISP       string `json:"isp,omitempty"`
-	IPType    string `json:"ip_type,omitempty"`
+	IPType    IPType `json:"ip_type,omitempty"`
 }
 
 type Price struct {

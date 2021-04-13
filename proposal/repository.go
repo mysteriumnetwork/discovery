@@ -45,7 +45,11 @@ func keyCountry(country string) string {
 	return "country:" + country
 }
 
-const keyExpiration = "expiration"
+const (
+	keyAll         = "all"
+	keyExpiration  = "expiration"
+	keyResidential = "ip:residential"
+)
 
 func (r *Repository) StartExpirationJob() {
 	for {
@@ -62,15 +66,35 @@ func (r *Repository) StartExpirationJob() {
 			if err := r.Delete(result...); err != nil {
 				log.Err(err).Msgf("Failed to delete proposals %v", result)
 			}
-
 		case <-r.shutdown:
 			return
 		}
 	}
 }
 
-func (r *Repository) List(serviceType, country string) ([]v2.Proposal, error) {
-	keys, err := r.rdb.SInter(ctx, keyServiceType(serviceType), keyCountry(country)).Result()
+type repoListOpts struct {
+	serviceType, country string
+	residential          bool
+}
+
+func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
+	var filterIndexes []string
+	if opts.country != "" {
+		filterIndexes = append(filterIndexes, keyCountry(opts.country))
+	} else {
+		filterIndexes = append(filterIndexes, keyAll)
+	}
+	if opts.serviceType != "" {
+		filterIndexes = append(filterIndexes, keyServiceType(opts.serviceType))
+	} else {
+		filterIndexes = append(filterIndexes, keyAll)
+	}
+	if opts.residential {
+		filterIndexes = append(filterIndexes, keyResidential)
+	} else {
+		filterIndexes = append(filterIndexes, keyAll)
+	}
+	keys, err := r.rdb.SInter(ctx, filterIndexes...).Result()
 	if err != nil {
 		return nil, err
 	}
@@ -85,6 +109,9 @@ func (r *Repository) List(serviceType, country string) ([]v2.Proposal, error) {
 
 	var proposals []v2.Proposal
 	for _, j := range jsonProposals {
+		if j == nil {
+			continue // Expiration might be in progress
+		}
 		s := j.(string)
 		p := v2.Proposal{}
 		if err := json.Unmarshal([]byte(s), &p); err != nil {
@@ -96,16 +123,24 @@ func (r *Repository) List(serviceType, country string) ([]v2.Proposal, error) {
 	return proposals, nil
 }
 
-func (r *Repository) Store(id string, serviceType string, country string, proposal v2.Proposal) error {
-	key := keyProposals(serviceType, id)
+func (r *Repository) Store(proposal v2.Proposal) error {
+	key := keyProposals(proposal.ServiceType, proposal.ProviderID)
 	err := r.rdb.Set(ctx, key, proposal, 0).Err()
 	if err != nil {
 		return err
 	}
-	if err := r.rdb.SAdd(ctx, keyCountry(country), key).Err(); err != nil {
+	if err := r.rdb.SAdd(ctx, keyCountry(proposal.Location.Country), key).Err(); err != nil {
 		return err
 	}
-	if err := r.rdb.SAdd(ctx, keyServiceType(serviceType), key).Err(); err != nil {
+	if err := r.rdb.SAdd(ctx, keyServiceType(proposal.ServiceType), key).Err(); err != nil {
+		return err
+	}
+	if proposal.Location.IPType.IsResidential() {
+		if err := r.rdb.SAdd(ctx, keyResidential, key).Err(); err != nil {
+			return err
+		}
+	}
+	if err := r.rdb.SAdd(ctx, keyAll, key).Err(); err != nil {
 		return err
 	}
 	if err := r.rdb.ZAdd(ctx, keyExpiration, &redis.Z{
@@ -129,10 +164,16 @@ func (r *Repository) Delete(keys ...string) error {
 			continue
 		}
 		if err := r.rdb.SRem(ctx, keyCountry(p.Location.Country), k).Err(); err != nil {
-			log.Warn().Err(err).Msgf("Failed to delete %s from country index", k)
+			log.Warn().Err(err).Msgf("Failed to delete %s from index [%s]", k, "country")
 		}
 		if err := r.rdb.SRem(ctx, keyServiceType(p.ServiceType), k).Err(); err != nil {
-			log.Warn().Err(err).Msgf("Failed to delete %s from serviceType index", k)
+			log.Warn().Err(err).Msgf("Failed to delete %s from index [%s]", k, "service-type")
+		}
+		if err := r.rdb.SRem(ctx, keyResidential, k).Err(); err != nil {
+			log.Warn().Err(err).Msgf("Failed to delete %s from index [%s]", k, "ip-type")
+		}
+		if err := r.rdb.SRem(ctx, keyAll, k).Err(); err != nil {
+			log.Warn().Err(err).Msgf("Failed to delete %s from index [%s]", k, "all")
 		}
 	}
 	if err := r.rdb.ZRem(ctx, keyExpiration, keys).Err(); err != nil {

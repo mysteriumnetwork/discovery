@@ -69,6 +69,12 @@ var doc = `{
                         "description": "Provider country",
                         "name": "country",
                         "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Residential IPs only?",
+                        "name": "residential",
+                        "in": "query"
                     }
                 ],
                 "responses": {

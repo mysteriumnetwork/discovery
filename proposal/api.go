@@ -5,6 +5,8 @@
 package proposal
 
 import (
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 )
@@ -38,16 +40,20 @@ type PingResponse struct {
 // @Param from query string false "Consumer country"
 // @Param service_type query string false "Service type"
 // @Param country query string false "Provider country"
+// @Param residential query bool false "Residential IPs only?"
 // @Accept json
 // @Product json
 // @Success 200 {array} v2.Proposal
 // @Router /proposals [get]
 func (a *API) Proposals(c *gin.Context) {
-	proposals, err := a.service.List(ListOpts{
+	opts := ListOpts{
 		from:        c.Query("from"),
 		serviceType: c.Query("service_type"),
 		country:     c.Query("country"),
-	})
+	}
+	residential, _ := strconv.ParseBool(c.Query("residential"))
+	opts.residential = residential
+	proposals, err := a.service.List(opts)
 
 	if err != nil {
 		log.Err(err).Msg("Failed to list proposals")

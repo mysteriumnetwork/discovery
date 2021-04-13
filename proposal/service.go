@@ -25,10 +25,15 @@ func NewService(repository *Repository, qualityService *quality.Service) *Servic
 type ListOpts struct {
 	from                 string
 	serviceType, country string
+	residential          bool
 }
 
 func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
-	proposals, err := s.Repository.List(opts.serviceType, opts.country)
+	proposals, err := s.Repository.List(repoListOpts{
+		serviceType: opts.serviceType,
+		country:     opts.country,
+		residential: opts.residential,
+	})
 	if err != nil {
 		return nil, err
 	}

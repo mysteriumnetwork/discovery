@@ -46,7 +46,7 @@ func (l *Listener) Listen() error {
 				Msg("Failed to parse proposal")
 		} else {
 			p := pingMsg.Proposal.ConvertToV2()
-			err := l.repository.Store(p.ProviderID, p.ServiceType, p.Location.Country, *p)
+			err := l.repository.Store(*p)
 			if err != nil {
 				log.Err(err).Msg("Failed to store proposal")
 			}
