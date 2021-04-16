@@ -4,11 +4,12 @@
 
 package db
 
-import "github.com/go-redis/redis/v8"
+import (
+	"context"
 
-func New(dbHost, dbPassword string) *redis.Client {
-	return redis.NewClient(&redis.Options{
-		Addr:     dbHost,
-		Password: dbPassword,
-	})
+	"github.com/jackc/pgx/v4/pgxpool"
+)
+
+func New(dbConnString string) (*pgxpool.Pool, error) {
+	return pgxpool.Connect(context.Background(), dbConnString)
 }

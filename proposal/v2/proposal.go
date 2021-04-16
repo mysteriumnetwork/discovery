@@ -31,6 +31,10 @@ func NewProposal(providerID, serviceType string) *Proposal {
 	}
 }
 
+func (p Proposal) Key() string {
+	return p.ServiceType + ":" + p.ProviderID
+}
+
 func (p Proposal) MarshalBinary() (data []byte, err error) {
 	marshal, err := json.Marshal(p)
 	return marshal, err

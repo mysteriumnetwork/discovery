@@ -5,27 +5,33 @@
 package quality
 
 import (
-	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/allegro/bigcache"
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
+	"github.com/rs/zerolog/log"
 )
 
 const cacheDuration = 20 * time.Second
 
-var ctx = context.Background()
+var cache *bigcache.BigCache
+
+func init() {
+	cfg := bigcache.DefaultConfig(cacheDuration)
+	cfg.CleanWindow = 10 * time.Second
+	cfg.Verbose = true
+	cache, _ = bigcache.NewBigCache(cfg)
+}
 
 type Service struct {
 	qualityAPI *oracleapi.API
-	rdb        *redis.Client
 }
 
-func NewService(qualityAPI *oracleapi.API, rdb *redis.Client) *Service {
+func NewService(qualityAPI *oracleapi.API) *Service {
 	return &Service{
 		qualityAPI: qualityAPI,
-		rdb:        rdb,
 	}
 }
 
@@ -34,18 +40,23 @@ func keyQuality(fromCountry string) string {
 }
 
 func (s *Service) Quality(fromCountry string) (*oracleapi.ProposalQualityResponse, error) {
-	res := s.rdb.Get(ctx, keyQuality(fromCountry))
-	if res.Err() != nil {
+	res, err := cache.Get(keyQuality(fromCountry))
+	if err != nil {
 		quality, err := s.qualityAPI.Quality(fromCountry)
 		if err != nil {
 			return nil, err
 		}
-		s.rdb.SetNX(ctx, keyQuality(fromCountry), quality, cacheDuration)
+		response, err := json.Marshal(quality)
+		if err != nil {
+			log.Err(err).Msg("Failed to marshal quality response for caching")
+		} else if err := cache.Set(keyQuality(fromCountry), response); err != nil {
+			log.Err(err).Msg("Failed to cache quality response")
+		}
 		return quality, nil
 	}
 	result := oracleapi.ProposalQualityResponse{}
-	if err := res.Scan(&result); err != nil {
-		return nil, err
+	if err := json.Unmarshal(res, &result); err != nil {
+		return nil, fmt.Errorf("failed to decode from cache: %w", err)
 	}
 	return &result, nil
 }

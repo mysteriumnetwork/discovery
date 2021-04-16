@@ -12,18 +12,13 @@ import (
 )
 
 type Options struct {
-	DBHost           string
-	DBPassword       string
+	DBConnString     string
 	QualityOracleURL url.URL
 	BrokerURL        url.URL
 }
 
 func Read() (*Options, error) {
-	dbHost, err := requiredEnv("DB_HOST")
-	if err != nil {
-		return nil, err
-	}
-	dbPassword, err := requiredEnv("DB_PASSWORD")
+	dbConnString, err := requiredEnv("DB_CONN_STRING")
 	if err != nil {
 		return nil, err
 	}
@@ -36,8 +31,7 @@ func Read() (*Options, error) {
 		return nil, err
 	}
 	return &Options{
-		DBHost:           dbHost,
-		DBPassword:       dbPassword,
+		DBConnString:     dbConnString,
 		QualityOracleURL: *qualityOracleURL,
 		BrokerURL:        *brokerURL,
 	}, nil

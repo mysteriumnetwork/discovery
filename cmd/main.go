@@ -37,14 +37,23 @@ func main() {
 		log.Fatal().Err(err).Msg("Failed to read config")
 	}
 
-	r := gin.Default()
+	r := gin.New()
+	r.Use(gin.Recovery())
+
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	rdb := db.New(cfg.DBHost, cfg.DBPassword)
-	proposalRepo := proposal.NewRepository(rdb)
+	pgdb, err := db.New(cfg.DBConnString)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to connect to DB")
+	}
+	defer pgdb.Close()
+
+	proposalRepo := proposal.NewRepository(pgdb)
 	qualityOracleAPI := oracleapi.New(cfg.QualityOracleURL.String())
-	qualityService := quality.NewService(qualityOracleAPI, rdb)
+	qualityService := quality.NewService(qualityOracleAPI)
 	proposalService := proposal.NewService(proposalRepo, qualityService)
+	go proposalService.StartExpirationJob()
+	defer proposalService.Shutdown()
 
 	v3 := r.Group("/api/v3")
 
@@ -56,7 +65,7 @@ func main() {
 		log.Fatal().Err(err).Msg("Could not listen to the broker")
 	}
 	defer brokerListener.Shutdown()
-	go proposalRepo.StartExpirationJob()
+
 	if err := r.Run(); err != nil {
 		log.Err(err).Send()
 		return

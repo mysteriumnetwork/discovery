@@ -5,6 +5,8 @@
 package proposal
 
 import (
+	"time"
+
 	v2 "github.com/mysteriumnetwork/discovery/proposal/v2"
 	"github.com/mysteriumnetwork/discovery/quality"
 	"github.com/rs/zerolog/log"
@@ -13,6 +15,7 @@ import (
 type Service struct {
 	*Repository
 	qualityService *quality.Service
+	shutdown       chan struct{}
 }
 
 func NewService(repository *Repository, qualityService *quality.Service) *Service {
@@ -59,10 +62,31 @@ func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
 	return values(resultMap), nil
 }
 
+func (s *Service) StartExpirationJob() {
+	for {
+		select {
+		case <-time.After(s.expirationJobDelay):
+			log.Debug().Msgf("Running expiration job")
+			count, err := s.Repository.Expire()
+			if err != nil {
+				log.Err(err).Msg("Failed to expire proposals")
+			} else {
+				log.Debug().Msgf("Expired proposals: %v", count)
+			}
+		case <-s.shutdown:
+			return
+		}
+	}
+}
+
 func values(proposalsMap map[string]*v2.Proposal) []v2.Proposal {
-	var res []v2.Proposal = make([]v2.Proposal, 0)
+	var res = make([]v2.Proposal, 0)
 	for k := range proposalsMap {
 		res = append(res, *proposalsMap[k])
 	}
 	return res
+}
+
+func (s *Service) Shutdown() {
+	s.shutdown <- struct{}{}
 }

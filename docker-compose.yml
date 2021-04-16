@@ -7,12 +7,15 @@ services:
       - 8080:8080
     environment:
       - PORT=8080
-      - DB_HOST=db:6379
-      - DB_PASSWORD=
+      - DB_CONN_STRING=postgresql://discovery:discovery@db:5432/discovery
       - QUALITY_ORACLE_URL=https://testnet2-quality.mysterium.network
       - BROKER_URL=nats://testnet2-broker.mysterium.network
   db:
-    image: redis
-    container_name: 'discovery_db'
+    image: postgres:13-alpine
+    container_name: discovery_db
     ports:
-      - 6379:6379
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=discovery
+      - POSTGRES_DB=discovery
+      - POSTGRES_PASSWORD=discovery
