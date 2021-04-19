@@ -7,6 +7,8 @@ package proposal
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/mysteriumnetwork/discovery/db"
@@ -32,6 +34,7 @@ func NewRepository(db *db.DB) *Repository {
 type repoListOpts struct {
 	serviceType, country string
 	residential          bool
+	accessPolicy         string
 }
 
 func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
@@ -41,14 +44,29 @@ func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
 	}
 	defer conn.Release()
 
+	var args []interface{}
 	//start := time.Now()
-	rows, _ := conn.Query(context.Background(), `
-		SELECT proposal FROM proposals
-		WHERE
-			($1 = '' OR proposal->>'service_type' = $1)
-			AND ($2 = '' OR proposal->'location'->>'country' = $2)
-			AND ($3 IS NOT TRUE OR proposal->'location'->>'ip_type' = 'residential')
-	`, opts.serviceType, opts.country, opts.residential)
+	q := strings.Builder{}
+	q.WriteString("SELECT proposal FROM proposals WHERE 1=1")
+	if opts.serviceType != "" {
+		args = append(args, opts.serviceType)
+		q.WriteString(fmt.Sprintf(" AND proposal->>'service_type' = $%v", len(args)))
+	}
+	if opts.country != "" {
+		args = append(args, opts.country)
+		q.WriteString(fmt.Sprintf(" AND proposal->'location'->>'country' = $%v", len(args)))
+	}
+	if opts.residential {
+		q.WriteString(" AND proposal->'location'->>'ip_type' = 'residential'")
+	}
+	if opts.accessPolicy == "" {
+		q.WriteString(" AND proposal ? 'access_policies' = FALSE")
+	} else if opts.accessPolicy == "*" {
+		// all access policies
+	} else {
+		q.WriteString(fmt.Sprintf(` AND proposal->'access_policies' @> '[{"id": "%s"}]'`, opts.accessPolicy))
+	}
+	rows, _ := conn.Query(context.Background(), q.String(), args...)
 	defer rows.Close()
 	//log.Info().Msgf("select: %s", time.Since(start))
 

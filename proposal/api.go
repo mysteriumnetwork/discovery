@@ -42,15 +42,17 @@ type PingResponse struct {
 // @Param service_type query string false "Service type"
 // @Param country query string false "Provider country"
 // @Param residential query bool false "Residential IPs only?"
+// @Param access_policy query string false "Access policy. When empty, returns only public proposals (default). Use * to return all."
 // @Accept json
 // @Product json
 // @Success 200 {array} v2.Proposal
 // @Router /proposals [get]
 func (a *API) Proposals(c *gin.Context) {
 	opts := ListOpts{
-		from:        c.Query("from"),
-		serviceType: c.Query("service_type"),
-		country:     c.Query("country"),
+		from:         c.Query("from"),
+		serviceType:  c.Query("service_type"),
+		country:      c.Query("country"),
+		accessPolicy: c.Query("access_policy"),
 	}
 	residential, _ := strconv.ParseBool(c.Query("residential"))
 	opts.residential = residential

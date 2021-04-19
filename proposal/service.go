@@ -29,13 +29,15 @@ type ListOpts struct {
 	from                 string
 	serviceType, country string
 	residential          bool
+	accessPolicy         string
 }
 
 func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
 	proposals, err := s.Repository.List(repoListOpts{
-		serviceType: opts.serviceType,
-		country:     opts.country,
-		residential: opts.residential,
+		serviceType:  opts.serviceType,
+		country:      opts.country,
+		residential:  opts.residential,
+		accessPolicy: opts.accessPolicy,
 	})
 	if err != nil {
 		return nil, err

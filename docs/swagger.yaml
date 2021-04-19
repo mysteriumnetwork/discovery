@@ -109,6 +109,11 @@ paths:
         in: query
         name: residential
         type: boolean
+      - description: Access policy. When empty, returns only public proposals (default).
+          Use * to return all.
+        in: query
+        name: access_policy
+        type: string
       responses:
         "200":
           description: OK

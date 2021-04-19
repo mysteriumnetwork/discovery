@@ -75,6 +75,12 @@ var doc = `{
                         "description": "Residential IPs only?",
                         "name": "residential",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Access policy. When empty, returns only public proposals (default). Use * to return all.",
+                        "name": "access_policy",
+                        "in": "query"
                     }
                 ],
                 "responses": {
