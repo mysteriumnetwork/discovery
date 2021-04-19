@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mysteriumnetwork/discovery/gorest"
 	"github.com/rs/zerolog/log"
 )
 
@@ -57,7 +58,7 @@ func (a *API) Proposals(c *gin.Context) {
 
 	if err != nil {
 		log.Err(err).Msg("Failed to list proposals")
-		c.JSON(500, "")
+		c.JSON(500, gorest.Err500)
 		return
 	}
 
