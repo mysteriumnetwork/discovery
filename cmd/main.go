@@ -42,13 +42,13 @@ func main() {
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	pgdb, err := db.New(cfg.DBConnString)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to connect to DB")
+	database := db.New(cfg.DBConnString)
+	if err := database.Init(); err != nil {
+		log.Fatal().Err(err).Msg("Failed to initialize DB")
 	}
-	defer pgdb.Close()
+	defer database.Close()
 
-	proposalRepo := proposal.NewRepository(pgdb)
+	proposalRepo := proposal.NewRepository(database)
 	qualityOracleAPI := oracleapi.New(cfg.QualityOracleURL.String())
 	qualityService := quality.NewService(qualityOracleAPI)
 	proposalService := proposal.NewService(proposalRepo, qualityService)

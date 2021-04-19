@@ -6,10 +6,45 @@ package db
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-func New(dbConnString string) (*pgxpool.Pool, error) {
-	return pgxpool.Connect(context.Background(), dbConnString)
+type DB struct {
+	connString string
+	pool       *pgxpool.Pool
+}
+
+func New(connString string) *DB {
+	return &DB{
+		connString: connString,
+	}
+}
+
+func (d *DB) Init() error {
+	pool, err := pgxpool.Connect(context.Background(), d.connString)
+	if err != nil {
+		return fmt.Errorf("could not initialize pool: %w", err)
+	}
+	d.pool = pool
+	return migrateUp(d.connString)
+}
+
+func (d *DB) Connection() (*pgxpool.Conn, error) {
+	if d.pool == nil {
+		return nil, errors.New("pool not initialized")
+	}
+	conn, err := d.pool.Acquire(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("could not acquire connection: %w", err)
+	}
+	return conn, nil
+}
+
+func (d *DB) Close() {
+	if d.pool != nil {
+		d.pool.Close()
+	}
 }

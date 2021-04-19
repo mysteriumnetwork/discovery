@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/mysteriumnetwork/discovery/db"
 	v2 "github.com/mysteriumnetwork/discovery/proposal/v2"
 )
 
@@ -18,14 +18,14 @@ var ctx = context.Background()
 type Repository struct {
 	expirationJobDelay time.Duration
 	expirationDuration time.Duration
-	pool               *pgxpool.Pool
+	db                 *db.DB
 }
 
-func NewRepository(dbPool *pgxpool.Pool) *Repository {
+func NewRepository(db *db.DB) *Repository {
 	return &Repository{
 		expirationDuration: 2 * time.Minute,
 		expirationJobDelay: 20 * time.Second,
-		pool:               dbPool,
+		db:                 db,
 	}
 }
 
@@ -35,7 +35,7 @@ type repoListOpts struct {
 }
 
 func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
-	conn, err := r.pool.Acquire(context.Background())
+	conn, err := r.db.Connection()
 	if err != nil {
 		return nil, err
 	}
@@ -75,12 +75,12 @@ func (r *Repository) Store(proposal v2.Proposal) error {
 		return err
 	}
 
-	conn, err := r.pool.Acquire(context.Background())
+	conn, err := r.db.Connection()
 	if err != nil {
 		return err
 	}
-
 	defer conn.Release()
+
 	_, err = conn.Exec(context.Background(), `
 		INSERT INTO proposals (proposal, key, expires_at)
 		VALUES ($1, $2, $3)
@@ -88,7 +88,7 @@ func (r *Repository) Store(proposal v2.Proposal) error {
 			SET proposal = $1,
 				expires_at = $3;
 		`,
-		proposalJSON, proposal.Key(), expiresAt,
+		proposalJSON, proposal.Key(), expiresAt.UTC(),
 	)
 	if err != nil {
 		return err
@@ -98,7 +98,7 @@ func (r *Repository) Store(proposal v2.Proposal) error {
 }
 
 func (r *Repository) Expire() (int64, error) {
-	conn, err := r.pool.Acquire(ctx)
+	conn, err := r.db.Connection()
 	if err != nil {
 		return 0, err
 	}
