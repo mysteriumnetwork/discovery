@@ -6,6 +6,7 @@ package main
 
 import (
 	stdlog "log"
+	"net/http"
 	"os"
 	"strings"
 
@@ -40,6 +41,9 @@ func main() {
 	r := gin.New()
 	r.Use(gin.Recovery())
 
+	r.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
+	})
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	database := db.New(cfg.DBConnString)
