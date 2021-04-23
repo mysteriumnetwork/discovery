@@ -18,7 +18,7 @@ func Up() {
 	time.Sleep(3 * time.Second)
 	defer sh.RunV("docker-compose", "down", "-v")
 	envs := map[string]string{
-		"DB_CONN_STRING":     "postgresql://discovery:discovery@localhost:5432/discovery",
+		"DB_DSN":             "postgresql://discovery:discovery@localhost:5432/discovery",
 		"QUALITY_ORACLE_URL": "https://testnet2-quality.mysterium.network",
 		"BROKER_URL":         "nats://testnet2-broker.mysterium.network",
 	}

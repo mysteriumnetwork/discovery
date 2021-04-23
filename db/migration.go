@@ -18,9 +18,9 @@ import (
 //go:embed migrations/*.sql
 var migrationsFS embed.FS
 
-func migrateUp(connString string) error {
+func migrateUp(dsn string) error {
 	log.Info().Msg("Running DB migrations")
-	cfg, err := pgx.ParseConfig(connString)
+	cfg, err := pgx.ParseConfig(dsn)
 	if err != nil {
 		return err
 	}

@@ -7,7 +7,7 @@ services:
       - 8080:8080
     environment:
       - PORT=8080
-      - DB_CONN_STRING=postgresql://discovery:discovery@db:5432/discovery
+      - DB_DSN=postgresql://discovery:discovery@db:5432/discovery
       - QUALITY_ORACLE_URL=https://testnet2-quality.mysterium.network
       - BROKER_URL=nats://testnet2-broker.mysterium.network
   db:

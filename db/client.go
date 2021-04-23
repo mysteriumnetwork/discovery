@@ -13,23 +13,23 @@ import (
 )
 
 type DB struct {
-	connString string
-	pool       *pgxpool.Pool
+	dsn  string
+	pool *pgxpool.Pool
 }
 
-func New(connString string) *DB {
+func New(dsn string) *DB {
 	return &DB{
-		connString: connString,
+		dsn: dsn,
 	}
 }
 
 func (d *DB) Init() error {
-	pool, err := pgxpool.Connect(context.Background(), d.connString)
+	pool, err := pgxpool.Connect(context.Background(), d.dsn)
 	if err != nil {
 		return fmt.Errorf("could not initialize pool: %w", err)
 	}
 	d.pool = pool
-	return migrateUp(d.connString)
+	return migrateUp(d.dsn)
 }
 
 func (d *DB) Connection() (*pgxpool.Conn, error) {

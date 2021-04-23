@@ -12,14 +12,14 @@ import (
 )
 
 type Options struct {
-	DBConnString     string
+	DbDSN            string
 	QualityOracleURL url.URL
 	BrokerURL        url.URL
 	BindAddr         string
 }
 
 func Read() (*Options, error) {
-	dbConnString, err := requiredEnv("DB_CONN_STRING")
+	dsn, err := requiredEnv("DB_DSN")
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +32,7 @@ func Read() (*Options, error) {
 		return nil, err
 	}
 	return &Options{
-		DBConnString:     dbConnString,
+		DbDSN:            dsn,
 		QualityOracleURL: *qualityOracleURL,
 		BrokerURL:        *brokerURL,
 		BindAddr:         optionalEnv("BIND_ADDR", ":8080"),

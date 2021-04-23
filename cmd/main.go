@@ -46,7 +46,7 @@ func main() {
 	})
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	database := db.New(cfg.DBConnString)
+	database := db.New(cfg.DbDSN)
 	if err := database.Init(); err != nil {
 		log.Fatal().Err(err).Msg("Failed to initialize DB")
 	}
