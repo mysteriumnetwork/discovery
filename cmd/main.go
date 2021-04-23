@@ -70,7 +70,7 @@ func main() {
 	}
 	defer brokerListener.Shutdown()
 
-	if err := r.Run(); err != nil {
+	if err := r.Run(cfg.BindAddr); err != nil {
 		log.Err(err).Send()
 		return
 	}
