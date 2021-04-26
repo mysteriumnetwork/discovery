@@ -15,7 +15,6 @@ type Options struct {
 	DbDSN            string
 	QualityOracleURL url.URL
 	BrokerURL        url.URL
-	BindAddr         string
 }
 
 func Read() (*Options, error) {
@@ -35,7 +34,6 @@ func Read() (*Options, error) {
 		DbDSN:            dsn,
 		QualityOracleURL: *qualityOracleURL,
 		BrokerURL:        *brokerURL,
-		BindAddr:         optionalEnv("BIND_ADDR", ":8080"),
 	}, nil
 }
 
