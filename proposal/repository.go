@@ -25,7 +25,7 @@ type Repository struct {
 
 func NewRepository(db *db.DB) *Repository {
 	return &Repository{
-		expirationDuration: 2 * time.Minute,
+		expirationDuration: 3*time.Minute + 10*time.Second,
 		expirationJobDelay: 20 * time.Second,
 		db:                 db,
 	}
