@@ -32,11 +32,12 @@ func NewRepository(db *db.DB) *Repository {
 }
 
 type repoListOpts struct {
-	serviceType, country string
-	residential          bool
-	accessPolicy         string
-	compatibilityFrom    uint
-	compatibilityTo      uint
+	serviceType, country      string
+	residential               bool
+	accessPolicy              string
+	compatibilityFrom         int
+	compatibilityTo           int
+	priceGiBMax, priceHourMax int64
 }
 
 func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
@@ -53,8 +54,8 @@ func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
 	if opts.compatibilityFrom == opts.compatibilityTo {
 		q.WriteString(fmt.Sprintf(" AND proposal->>'compatibility' = '%d'", opts.compatibilityTo))
 	} else {
-		q.WriteString(fmt.Sprintf(" AND (proposal->>'compatibility')::int >= '%d'", opts.compatibilityFrom))
-		q.WriteString(fmt.Sprintf(" AND (proposal->>'compatibility')::int <= '%d'", opts.compatibilityTo))
+		q.WriteString(fmt.Sprintf(" AND (proposal->>'compatibility')::int >= %d", opts.compatibilityFrom))
+		q.WriteString(fmt.Sprintf(" AND (proposal->>'compatibility')::int <= %d", opts.compatibilityTo))
 	}
 	if opts.serviceType != "" {
 		args = append(args, opts.serviceType)
@@ -73,6 +74,14 @@ func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
 		// all access policies
 	} else {
 		q.WriteString(fmt.Sprintf(` AND proposal->'access_policies' @> '[{"id": "%s"}]'`, opts.accessPolicy))
+	}
+	if opts.priceGiBMax > 0 {
+		args = append(args, opts.priceGiBMax)
+		q.WriteString(fmt.Sprintf(" AND (proposal->'price'->>'per_gib')::bigint <= $%v", len(args)))
+	}
+	if opts.priceHourMax > 0 {
+		args = append(args, opts.priceHourMax)
+		q.WriteString(fmt.Sprintf(" AND (proposal->'price'->>'per_hour')::bigint <= $%v", len(args)))
 	}
 	rows, _ := conn.Query(context.Background(), q.String(), args...)
 	defer rows.Close()

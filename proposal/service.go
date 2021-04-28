@@ -26,14 +26,14 @@ func NewService(repository *Repository, qualityService *quality.Service) *Servic
 }
 
 type ListOpts struct {
-	from                 string
-	serviceType, country string
-	residential          bool
-	accessPolicy         string
-	compatibilityFrom    uint
-	compatibilityTo      uint
-	qualityMin           float32
-	priceGB, priceHour   uint64
+	from                      string
+	serviceType, country      string
+	residential               bool
+	accessPolicy              string
+	compatibilityFrom         int
+	compatibilityTo           int
+	qualityMin                float32
+	priceGiBMax, priceHourMax int64
 }
 
 func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
@@ -44,6 +44,8 @@ func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
 		accessPolicy:      opts.accessPolicy,
 		compatibilityFrom: opts.compatibilityFrom,
 		compatibilityTo:   opts.compatibilityTo,
+		priceGiBMax:       opts.priceGiBMax,
+		priceHourMax:      opts.priceHourMax,
 	})
 	if err != nil {
 		return nil, err

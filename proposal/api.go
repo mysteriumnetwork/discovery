@@ -55,10 +55,17 @@ func (a *API) Proposals(c *gin.Context) {
 		accessPolicy: c.Query("access_policy"),
 	}
 
+	priceGiBMax, _ := strconv.ParseInt(c.Query("price_gib_max"), 10, 64)
+	opts.priceGiBMax = priceGiBMax
+
+	priceHourMax, _ := strconv.ParseInt(c.Query("price_hour_max"), 10, 64)
+	opts.priceHourMax = priceHourMax
+
 	compatibilityFrom, _ := strconv.ParseInt(c.Query("compatibility_from"), 10, 16)
-	opts.compatibilityFrom = uint(compatibilityFrom)
+	opts.compatibilityFrom = int(compatibilityFrom)
+
 	compatibilityTo, _ := strconv.ParseInt(c.Query("compatibility_to"), 10, 16)
-	opts.compatibilityTo = uint(compatibilityTo)
+	opts.compatibilityTo = int(compatibilityTo)
 
 	qlb, _ := strconv.ParseFloat(c.Query("quality_lower_bound"), 32)
 	opts.qualityMin = float32(qlb)
