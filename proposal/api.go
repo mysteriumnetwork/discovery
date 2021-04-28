@@ -54,8 +54,18 @@ func (a *API) Proposals(c *gin.Context) {
 		country:      c.Query("country"),
 		accessPolicy: c.Query("access_policy"),
 	}
+
+	compatibilityFrom, _ := strconv.ParseInt(c.Query("compatibility_from"), 10, 16)
+	opts.compatibilityFrom = uint(compatibilityFrom)
+	compatibilityTo, _ := strconv.ParseInt(c.Query("compatibility_to"), 10, 16)
+	opts.compatibilityTo = uint(compatibilityTo)
+
+	qlb, _ := strconv.ParseFloat(c.Query("quality_lower_bound"), 32)
+	opts.qualityMin = float32(qlb)
+
 	residential, _ := strconv.ParseBool(c.Query("residential"))
 	opts.residential = residential
+
 	proposals, err := a.service.List(opts)
 
 	if err != nil {

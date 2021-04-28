@@ -35,6 +35,8 @@ type repoListOpts struct {
 	serviceType, country string
 	residential          bool
 	accessPolicy         string
+	compatibilityFrom    uint
+	compatibilityTo      uint
 }
 
 func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
@@ -48,6 +50,12 @@ func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
 	//start := time.Now()
 	q := strings.Builder{}
 	q.WriteString("SELECT proposal FROM proposals WHERE 1=1")
+	if opts.compatibilityFrom == opts.compatibilityTo {
+		q.WriteString(fmt.Sprintf(" AND proposal->>'compatibility' = '%d'", opts.compatibilityTo))
+	} else {
+		q.WriteString(fmt.Sprintf(" AND (proposal->>'compatibility')::int >= '%d'", opts.compatibilityFrom))
+		q.WriteString(fmt.Sprintf(" AND (proposal->>'compatibility')::int <= '%d'", opts.compatibilityTo))
+	}
 	if opts.serviceType != "" {
 		args = append(args, opts.serviceType)
 		q.WriteString(fmt.Sprintf(" AND proposal->>'service_type' = $%v", len(args)))
