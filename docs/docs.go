@@ -81,6 +81,36 @@ var doc = `{
                         "description": "Access policy. When empty, returns only public proposals (default). Use * to return all.",
                         "name": "access_policy",
                         "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Maximum price per GiB. When empty, will not filter by it. Price is set in ethereum wei.",
+                        "name": "price_gib_max",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Maximum price per hour. When empty, will not filter by it. Price is set in ethereum wei.",
+                        "name": "price_hour_max",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Minimum compatibility. When empty will be defaulted to 0.",
+                        "name": "compatibility_from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Maximum compatibility. When empty will be defaulted to 0.",
+                        "name": "compatibility_to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Minimal quality threshold. When empty will be defaulted to 0. Quality ranges from [0.0; 3.0]",
+                        "name": "quality_min",
+                        "in": "query"
                     }
                 ],
                 "responses": {

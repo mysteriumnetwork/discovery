@@ -26,18 +26,26 @@ func NewService(repository *Repository, qualityService *quality.Service) *Servic
 }
 
 type ListOpts struct {
-	from                 string
-	serviceType, country string
-	residential          bool
-	accessPolicy         string
+	from                      string
+	serviceType, country      string
+	residential               bool
+	accessPolicy              string
+	compatibilityFrom         int
+	compatibilityTo           int
+	qualityMin                float32
+	priceGiBMax, priceHourMax int64
 }
 
 func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
 	proposals, err := s.Repository.List(repoListOpts{
-		serviceType:  opts.serviceType,
-		country:      opts.country,
-		residential:  opts.residential,
-		accessPolicy: opts.accessPolicy,
+		serviceType:       opts.serviceType,
+		country:           opts.country,
+		residential:       opts.residential,
+		accessPolicy:      opts.accessPolicy,
+		compatibilityFrom: opts.compatibilityFrom,
+		compatibilityTo:   opts.compatibilityTo,
+		priceGiBMax:       opts.priceGiBMax,
+		priceHourMax:      opts.priceHourMax,
 	})
 	if err != nil {
 		return nil, err
@@ -47,6 +55,7 @@ func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
 		resultMap[p.ServiceType+p.ProviderID] = &proposals[i]
 	}
 
+	// filter by quality
 	qualityResponse, err := s.qualityService.Quality(opts.from)
 	if err != nil {
 		log.Warn().Err(err).Msgf("Could not fetch quality for consumer (country=%s)", opts.from)
@@ -54,11 +63,30 @@ func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
 	}
 
 	for _, q := range qualityResponse.Entries {
-		p, ok := resultMap[q.ProposalID.ServiceType+q.ProposalID.ProviderID]
+		key := q.ProposalID.ServiceType + q.ProposalID.ProviderID
+		p, ok := resultMap[key]
 		if !ok {
 			continue
 		}
-		p.Quality = q.Quality
+
+		if opts.qualityMin <= q.Quality {
+			p.Quality = q.Quality
+		} else {
+			delete(resultMap, key)
+		}
+	}
+
+	// exclude monitoringFailed nodes
+	sessionsResponse, err := s.qualityService.Sessions()
+	if err != nil {
+		log.Warn().Err(err).Msgf("Could not fetch quality for consumer (country=%s)", opts.from)
+		return values(resultMap), nil
+	}
+
+	for k, proposal := range resultMap {
+		if sessionsResponse.MonitoringFailed(proposal.ProviderID, proposal.ServiceType) {
+			delete(resultMap, k)
+		}
 	}
 
 	return values(resultMap), nil
