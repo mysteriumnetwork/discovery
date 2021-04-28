@@ -43,6 +43,11 @@ type PingResponse struct {
 // @Param country query string false "Provider country"
 // @Param residential query bool false "Residential IPs only?"
 // @Param access_policy query string false "Access policy. When empty, returns only public proposals (default). Use * to return all."
+// @Param price_gib_max query number false "Maximum price per GiB. When empty, will not filter by it. Price is set in ethereum wei."
+// @Param price_hour_max query number false "Maximum price per hour. When empty, will not filter by it. Price is set in ethereum wei."
+// @Param compatibility_from query number false "Minimum compatibility. When empty, will not filter by it."
+// @Param compatibility_to query number false "Maximum compatibility. When empty, will not filter by it."
+// @Param quality_min query number false "Minimal quality threshold. When empty will be defaulted to 0. Quality ranges from [0.0; 3.0]"
 // @Accept json
 // @Product json
 // @Success 200 {array} v2.Proposal
@@ -67,7 +72,7 @@ func (a *API) Proposals(c *gin.Context) {
 	compatibilityTo, _ := strconv.ParseInt(c.Query("compatibility_to"), 10, 16)
 	opts.compatibilityTo = int(compatibilityTo)
 
-	qlb, _ := strconv.ParseFloat(c.Query("quality_lower_bound"), 32)
+	qlb, _ := strconv.ParseFloat(c.Query("quality_min"), 32)
 	opts.qualityMin = float32(qlb)
 
 	residential, _ := strconv.ParseBool(c.Query("residential"))

@@ -114,6 +114,29 @@ paths:
         in: query
         name: access_policy
         type: string
+      - description: Maximum price per GiB. When empty, will not filter by it. Price
+          is set in ethereum wei.
+        in: query
+        name: price_gib_max
+        type: number
+      - description: Maximum price per hour. When empty, will not filter by it. Price
+          is set in ethereum wei.
+        in: query
+        name: price_hour_max
+        type: number
+      - description: Minimum compatibility. When empty will be defaulted to 0.
+        in: query
+        name: compatibility_from
+        type: number
+      - description: Maximum compatibility. When empty will be defaulted to 0.
+        in: query
+        name: compatibility_to
+        type: number
+      - description: Minimal quality threshold. When empty will be defaulted to 0.
+          Quality ranges from [0.0; 3.0]
+        in: query
+        name: quality_min
+        type: number
       responses:
         "200":
           description: OK

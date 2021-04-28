@@ -53,6 +53,8 @@ func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
 	q.WriteString("SELECT proposal FROM proposals WHERE 1=1")
 	if opts.compatibilityFrom == opts.compatibilityTo {
 		q.WriteString(fmt.Sprintf(" AND proposal->>'compatibility' = '%d'", opts.compatibilityTo))
+	} else if opts.compatibilityFrom == 0 && opts.compatibilityTo == 0 {
+		// defaults, ignore and return all
 	} else {
 		q.WriteString(fmt.Sprintf(" AND (proposal->>'compatibility')::int >= %d", opts.compatibilityFrom))
 		q.WriteString(fmt.Sprintf(" AND (proposal->>'compatibility')::int <= %d", opts.compatibilityTo))
