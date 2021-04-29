@@ -51,13 +51,17 @@ func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
 	//start := time.Now()
 	q := strings.Builder{}
 	q.WriteString("SELECT proposal FROM proposals WHERE 1=1")
-	if opts.compatibilityFrom == opts.compatibilityTo {
-		q.WriteString(fmt.Sprintf(" AND proposal->>'compatibility' = '%d'", opts.compatibilityTo))
-	} else if opts.compatibilityFrom == 0 && opts.compatibilityTo == 0 {
+	if opts.compatibilityFrom == 0 && opts.compatibilityTo == 0 {
 		// defaults, ignore and return all
+	} else if opts.compatibilityFrom == opts.compatibilityTo {
+		args = append(args, fmt.Sprint(opts.compatibilityTo))
+		q.WriteString(fmt.Sprintf(" AND proposal->>'compatibility' = $%v", len(args)))
 	} else {
-		q.WriteString(fmt.Sprintf(" AND (proposal->>'compatibility')::int >= %d", opts.compatibilityFrom))
-		q.WriteString(fmt.Sprintf(" AND (proposal->>'compatibility')::int <= %d", opts.compatibilityTo))
+		args = append(args, opts.compatibilityFrom)
+		q.WriteString(fmt.Sprintf(" AND (proposal->>'compatibility')::int >= $%v", len(args)))
+
+		args = append(args, opts.compatibilityTo)
+		q.WriteString(fmt.Sprintf(" AND (proposal->>'compatibility')::int <= $%v", len(args)))
 	}
 	if opts.serviceType != "" {
 		args = append(args, opts.serviceType)

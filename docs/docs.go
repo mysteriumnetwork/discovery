@@ -96,13 +96,13 @@ var doc = `{
                     },
                     {
                         "type": "number",
-                        "description": "Minimum compatibility. When empty will be defaulted to 0.",
+                        "description": "Minimum compatibility. When empty, will not filter by it.",
                         "name": "compatibility_from",
                         "in": "query"
                     },
                     {
                         "type": "number",
-                        "description": "Maximum compatibility. When empty will be defaulted to 0.",
+                        "description": "Maximum compatibility. When empty, will not filter by it.",
                         "name": "compatibility_to",
                         "in": "query"
                     },
