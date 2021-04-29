@@ -124,11 +124,11 @@ paths:
         in: query
         name: price_hour_max
         type: number
-      - description: Minimum compatibility. When empty will be defaulted to 0.
+      - description: Minimum compatibility. When empty, will not filter by it.
         in: query
         name: compatibility_from
         type: number
-      - description: Maximum compatibility. When empty will be defaulted to 0.
+      - description: Maximum compatibility. When empty, will not filter by it.
         in: query
         name: compatibility_to
         type: number
