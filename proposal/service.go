@@ -5,6 +5,7 @@
 package proposal
 
 import (
+	"github.com/mysteriumnetwork/discovery/proposal/metrics"
 	"time"
 
 	v2 "github.com/mysteriumnetwork/discovery/proposal/v2"
@@ -16,12 +17,14 @@ type Service struct {
 	*Repository
 	qualityService *quality.Service
 	shutdown       chan struct{}
+	enhancer       *metrics.Enhancer
 }
 
 func NewService(repository *Repository, qualityService *quality.Service) *Service {
 	return &Service{
 		Repository:     repository,
 		qualityService: qualityService,
+		enhancer:       metrics.NewEnhancer(qualityService),
 	}
 }
 
@@ -79,13 +82,20 @@ func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
 	// exclude monitoringFailed nodes
 	sessionsResponse, err := s.qualityService.Sessions()
 	if err != nil {
-		log.Warn().Err(err).Msgf("Could not fetch quality for consumer (country=%s)", opts.from)
+		log.Warn().Err(err).Msgf("Could not fetch session stats for consumer", opts.from)
 		return values(resultMap), nil
 	}
 
 	for k, proposal := range resultMap {
 		if sessionsResponse.MonitoringFailed(proposal.ProviderID, proposal.ServiceType) {
 			delete(resultMap, k)
+		}
+	}
+
+	s.enhancer.EnhanceWithMetrics(resultMap, opts.from)
+	for key, proposal := range resultMap {
+		if proposal.Quality < opts.qualityMin {
+			delete(resultMap, key)
 		}
 	}
 

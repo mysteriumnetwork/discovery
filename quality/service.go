@@ -18,6 +18,8 @@ const cacheDuration = 20 * time.Second
 
 var qualityCache *bigcache.BigCache
 var sessionCache *bigcache.BigCache
+var latencyCache *bigcache.BigCache
+var bandwidthCache *bigcache.BigCache
 
 const sessionsKey = "sessions-monitoring"
 
@@ -27,6 +29,8 @@ func init() {
 	cfg.Verbose = true
 	qualityCache, _ = bigcache.NewBigCache(cfg)
 	sessionCache, _ = bigcache.NewBigCache(cfg)
+	latencyCache, _ = bigcache.NewBigCache(cfg)
+	bandwidthCache, _ = bigcache.NewBigCache(cfg)
 }
 
 type Service struct {
@@ -41,6 +45,14 @@ func NewService(qualityAPI *oracleapi.API) *Service {
 
 func keyQuality(fromCountry string) string {
 	return fmt.Sprintf("quality:%s", fromCountry)
+}
+
+func keyLatency(fromCountry string) string {
+	return fmt.Sprintf("latency:%s", fromCountry)
+}
+
+func keyBandwidth(fromCountry string) string {
+	return fmt.Sprintf("bandwidth:%s", fromCountry)
 }
 
 func (s *Service) Quality(fromCountry string) (*oracleapi.ProposalQualityResponse, error) {
@@ -85,4 +97,48 @@ func (s *Service) Sessions() (*oracleapi.SessionsResponse, error) {
 		return nil, fmt.Errorf("failed to decode from cache: %w", err)
 	}
 	return &result, nil
+}
+
+func (s *Service) Latency(fromCountry string) (*oracleapi.LatencyResponse, error) {
+	res, err := latencyCache.Get(keyLatency(fromCountry))
+	if err != nil {
+		response, err := s.qualityAPI.Latency(fromCountry)
+		if err != nil {
+			return nil, err
+		}
+		marshaled, err := json.Marshal(response)
+		if err != nil {
+			log.Err(err).Msg("Failed to marshal latency response for caching")
+		} else if err := latencyCache.Set(keyLatency(fromCountry), marshaled); err != nil {
+			log.Err(err).Msg("Failed to cache latency response")
+		}
+		return response, nil
+	}
+	cached := oracleapi.LatencyResponse{}
+	if err := json.Unmarshal(res, &cached); err != nil {
+		return nil, fmt.Errorf("failed to decode from cache: %w", err)
+	}
+	return &cached, nil
+}
+
+func (s *Service) Bandwidth(fromCountry string) (*oracleapi.BandwidthResponse, error) {
+	res, err := bandwidthCache.Get(keyBandwidth(fromCountry))
+	if err != nil {
+		response, err := s.qualityAPI.Bandwidth(fromCountry)
+		if err != nil {
+			return nil, err
+		}
+		marshaled, err := json.Marshal(response)
+		if err != nil {
+			log.Err(err).Msg("Failed to marshal bandwidth response for caching")
+		} else if err := bandwidthCache.Set(keyBandwidth(fromCountry), marshaled); err != nil {
+			log.Err(err).Msg("Failed to cache bandwidth response")
+		}
+		return response, nil
+	}
+	cached := oracleapi.BandwidthResponse{}
+	if err := json.Unmarshal(res, &cached); err != nil {
+		return nil, fmt.Errorf("failed to decode from cache: %w", err)
+	}
+	return &cached, nil
 }
