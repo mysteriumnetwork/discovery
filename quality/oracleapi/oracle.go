@@ -61,9 +61,85 @@ func (a *API) Sessions() (*SessionsResponse, error) {
 	return &sp, nil
 }
 
+func (a *API) Latency(country string) (*LatencyResponse, error) {
+	resp, err := a.client.Get(fmt.Sprintf("%s/api/v2/providers/latency?country=%s", a.url, country))
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return nil, fmt.Errorf("received response code: %v", resp.StatusCode)
+	}
+
+	var lr LatencyResponse
+	if err := json.NewDecoder(resp.Body).Decode(&lr.Entries); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+	return &lr, nil
+}
+
+func (a *API) Bandwidth(country string) (*BandwidthResponse, error) {
+	resp, err := a.client.Get(fmt.Sprintf("%s/api/v2/providers/bandwidth?country=%s", a.url, country))
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return nil, fmt.Errorf("received response code: %v", resp.StatusCode)
+	}
+
+	var br BandwidthResponse
+	if err := json.NewDecoder(resp.Body).Decode(&br.Entries); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+	return &br, nil
+}
+
+type BandwidthResponse struct {
+	Entries []Bandwidth
+}
+
+func (p BandwidthResponse) MarshalBinary() (data []byte, err error) {
+	return json.Marshal(p)
+}
+
+func (p BandwidthResponse) UnmarshalBinary(data []byte) error {
+	return json.Unmarshal(data, &p)
+}
+
+type Bandwidth struct {
+	ProposalID    ProposalID `json:"proposalId"`
+	BandwidthMBPS float64    `json:"bandwidth"`
+}
+
+type LatencyResponse struct {
+	Entries []Latency
+}
+
+func (p LatencyResponse) MarshalBinary() (data []byte, err error) {
+	return json.Marshal(p)
+}
+
+func (p LatencyResponse) UnmarshalBinary(data []byte) error {
+	return json.Unmarshal(data, &p)
+}
+
+type Latency struct {
+	ProposalID ProposalID `json:"proposalId"`
+	Latency    float64    `json:"latency"`
+}
+
 type SessionsResponse struct {
 	Connects    []Connect `json:"connects"`
 	ConnectsMap map[string]*Connect
+}
+
+func (p SessionsResponse) MarshalBinary() (data []byte, err error) {
+	return json.Marshal(p)
+}
+
+func (p SessionsResponse) UnmarshalBinary(data []byte) error {
+	return json.Unmarshal(data, &p)
 }
 
 func (s *SessionsResponse) index() {
