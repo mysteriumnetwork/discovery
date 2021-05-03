@@ -83,11 +83,11 @@ func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
 	}
 	if opts.priceGiBMax > 0 {
 		args = append(args, opts.priceGiBMax)
-		q.WriteString(fmt.Sprintf(" AND (proposal->'price'->>'per_gib')::bigint <= $%v", len(args)))
+		q.WriteString(fmt.Sprintf(" AND (proposal->'price'->>'per_gib')::decimal <= $%v", len(args)))
 	}
 	if opts.priceHourMax > 0 {
 		args = append(args, opts.priceHourMax)
-		q.WriteString(fmt.Sprintf(" AND (proposal->'price'->>'per_hour')::bigint <= $%v", len(args)))
+		q.WriteString(fmt.Sprintf(" AND (proposal->'price'->>'per_hour')::decimal <= $%v", len(args)))
 	}
 	rows, _ := conn.Query(context.Background(), q.String(), args...)
 	defer rows.Close()
