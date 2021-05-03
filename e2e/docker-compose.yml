@@ -1,0 +1,39 @@
+version: '3.1'
+services:
+  discovery:
+    build:
+      context: ..
+    ports:
+      - 8080:8080
+    environment:
+      - PORT=8080
+      - DB_DSN=postgresql://discovery:discovery@db:5432/discovery
+      - QUALITY_ORACLE_URL=https://testnet2-quality.mysterium.network
+      - BROKER_URL=nats://broker
+    depends_on:
+      - db
+      - broker
+
+  db:
+    image: postgres:13-alpine
+    container_name: discovery_db
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=discovery
+      - POSTGRES_DB=discovery
+      - POSTGRES_PASSWORD=discovery
+
+  broker:
+    image: nats:1.0.4
+    ports:
+      - 4222:4222
+      - 8222:8222
+
+  dev:
+    image: tianon/true
+    restart: 'no'
+    depends_on:
+      - db
+      - broker
+

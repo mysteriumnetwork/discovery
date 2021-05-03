@@ -7,6 +7,7 @@
 package main
 
 import (
+	"github.com/mysteriumnetwork/discovery/ci/e2e"
 	"path"
 
 	"github.com/magefile/mage/mg"
@@ -58,4 +59,16 @@ func Run() error {
 func Up() {
 	mg.Deps(Swag)
 	local.Up()
+}
+
+// E2EDev spins up local NATS and seeded DB for e2e test development.
+//goland:noinspection GoUnusedExportedFunction
+func E2EDev() {
+	e2e.UpDevDependencies()
+}
+
+// E2E runs e2e tests on locally running instance
+//goland:noinspection GoUnusedExportedFunction
+func E2E() {
+	e2e.Run()
 }
