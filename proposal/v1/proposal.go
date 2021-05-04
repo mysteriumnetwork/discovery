@@ -21,6 +21,18 @@ func (p ProposalPingMessage) IsEmpty() bool {
 	return reflect.DeepEqual(p, ProposalPingMessage{})
 }
 
+type ProposalUnregisterMessage struct {
+	Proposal ServiceProposal `json:"proposal"`
+}
+
+func (p ProposalUnregisterMessage) IsEmpty() bool {
+	return reflect.DeepEqual(p, ProposalPingMessage{})
+}
+
+func (p ProposalUnregisterMessage) Key() string {
+	return p.Proposal.ServiceType + ":" + p.Proposal.ProviderID
+}
+
 type ServiceProposal struct {
 	// Per provider unique serial number of service description provided
 	// TODO Not supported yet
