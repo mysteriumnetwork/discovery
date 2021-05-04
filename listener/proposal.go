@@ -55,6 +55,24 @@ func (l *Listener) Listen() error {
 		return err
 	}
 
+	if _, err := conn.Subscribe("*.proposal-unregister", func(msg *nats.Msg) {
+		unregisterMsg := v1.ProposalUnregisterMessage{}
+		if err := json.Unmarshal(msg.Data, &unregisterMsg); err != nil {
+			log.Err(err).Msg("Failed to unregister proposal")
+		} else if unregisterMsg.IsEmpty() {
+			log.Err(errors.New("unknown format")).
+				Bytes("message", msg.Data).
+				Msg("Failed to unregister proposal")
+		} else {
+			_, err := l.repository.Remove(unregisterMsg.Key())
+			if err != nil {
+				log.Err(err).Msg("Failed to delete proposal")
+			}
+		}
+	}); err != nil {
+		return err
+	}
+
 	return nil
 }
 

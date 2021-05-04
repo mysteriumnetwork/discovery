@@ -154,3 +154,20 @@ func (r *Repository) Expire() (int64, error) {
 	}
 	return cmd.RowsAffected(), nil
 }
+
+func (r *Repository) Remove(key string) (int64, error) {
+	conn, err := r.db.Connection()
+	if err != nil {
+		return 0, err
+	}
+	defer conn.Release()
+
+	cmd, err := conn.Exec(ctx, `
+			DELETE FROM proposals
+			WHERE key = $1
+		`, key)
+	if err != nil {
+		return 0, err
+	}
+	return cmd.RowsAffected(), nil
+}
