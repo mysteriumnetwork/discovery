@@ -32,9 +32,12 @@ func NewRepository(db *db.DB) *Repository {
 }
 
 type repoListOpts struct {
-	serviceType, country      string
-	residential               bool
+	providerID                string
+	serviceType               string
+	country                   string
+	ipType                    string
 	accessPolicy              string
+	accessPolicySource        string
 	compatibilityFrom         int
 	compatibilityTo           int
 	priceGiBMax, priceHourMax int64
@@ -51,6 +54,18 @@ func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
 	//start := time.Now()
 	q := strings.Builder{}
 	q.WriteString("SELECT proposal FROM proposals WHERE 1=1")
+	if opts.providerID != "" {
+		args = append(args, opts.providerID)
+		q.WriteString(fmt.Sprintf(" AND proposal->>'provider_id' = $%v", len(args)))
+	}
+	if opts.serviceType != "" {
+		args = append(args, opts.serviceType)
+		q.WriteString(fmt.Sprintf(" AND proposal->>'service_type' = $%v", len(args)))
+	}
+	if opts.country != "" {
+		args = append(args, opts.country)
+		q.WriteString(fmt.Sprintf(" AND proposal->'location'->>'country' = $%v", len(args)))
+	}
 	if opts.compatibilityFrom == 0 && opts.compatibilityTo == 0 {
 		// defaults, ignore and return all
 	} else if opts.compatibilityFrom == opts.compatibilityTo {
@@ -63,16 +78,9 @@ func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
 		args = append(args, opts.compatibilityTo)
 		q.WriteString(fmt.Sprintf(" AND (proposal->>'compatibility')::int <= $%v", len(args)))
 	}
-	if opts.serviceType != "" {
-		args = append(args, opts.serviceType)
-		q.WriteString(fmt.Sprintf(" AND proposal->>'service_type' = $%v", len(args)))
-	}
-	if opts.country != "" {
-		args = append(args, opts.country)
-		q.WriteString(fmt.Sprintf(" AND proposal->'location'->>'country' = $%v", len(args)))
-	}
-	if opts.residential {
-		q.WriteString(" AND proposal->'location'->>'ip_type' = 'residential'")
+	if opts.ipType != "" {
+		args = append(args, opts.ipType)
+		q.WriteString(fmt.Sprintf(" AND proposal->'location'->>'ip_type' = $%v", len(args)))
 	}
 	if opts.accessPolicy == "" {
 		q.WriteString(" AND proposal ? 'access_policies' = FALSE")
@@ -80,6 +88,9 @@ func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
 		// all access policies
 	} else {
 		q.WriteString(fmt.Sprintf(` AND proposal->'access_policies' @> '[{"id": "%s"}]'`, opts.accessPolicy))
+	}
+	if opts.accessPolicySource != "" {
+		q.WriteString(fmt.Sprintf(` AND proposal->'access_policies' @> '[{"source": "%s"}]'`, opts.accessPolicySource))
 	}
 	if opts.priceGiBMax > 0 {
 		args = append(args, opts.priceGiBMax)

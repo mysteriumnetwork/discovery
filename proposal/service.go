@@ -5,8 +5,9 @@
 package proposal
 
 import (
-	"github.com/mysteriumnetwork/discovery/proposal/metrics"
 	"time"
+
+	"github.com/mysteriumnetwork/discovery/proposal/metrics"
 
 	v2 "github.com/mysteriumnetwork/discovery/proposal/v2"
 	"github.com/mysteriumnetwork/discovery/quality"
@@ -30,9 +31,12 @@ func NewService(repository *Repository, qualityService *quality.Service) *Servic
 
 type ListOpts struct {
 	from                      string
-	serviceType, country      string
-	residential               bool
+	providerID                string
+	serviceType               string
+	country                   string
+	ipType                    string
 	accessPolicy              string
+	accessPolicySource        string
 	compatibilityFrom         int
 	compatibilityTo           int
 	qualityMin                float32
@@ -41,14 +45,16 @@ type ListOpts struct {
 
 func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
 	proposals, err := s.Repository.List(repoListOpts{
-		serviceType:       opts.serviceType,
-		country:           opts.country,
-		residential:       opts.residential,
-		accessPolicy:      opts.accessPolicy,
-		compatibilityFrom: opts.compatibilityFrom,
-		compatibilityTo:   opts.compatibilityTo,
-		priceGiBMax:       opts.priceGiBMax,
-		priceHourMax:      opts.priceHourMax,
+		providerID:         opts.providerID,
+		serviceType:        opts.serviceType,
+		country:            opts.country,
+		ipType:             opts.ipType,
+		accessPolicy:       opts.accessPolicy,
+		accessPolicySource: opts.accessPolicySource,
+		compatibilityFrom:  opts.compatibilityFrom,
+		compatibilityTo:    opts.compatibilityTo,
+		priceGiBMax:        opts.priceGiBMax,
+		priceHourMax:       opts.priceHourMax,
 	})
 	if err != nil {
 		return nil, err

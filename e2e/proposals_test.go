@@ -6,15 +6,30 @@ package e2e
 
 import (
 	_ "embed"
+	"math/big"
+	"testing"
+
 	"github.com/dghubble/sling"
 	v2 "github.com/mysteriumnetwork/discovery/proposal/v2"
 	"github.com/stretchr/testify/assert"
-	"math/big"
-	"testing"
 )
 
 func Test_ProposalFiltering(t *testing.T) {
 	api := newAPI("http://localhost:8080/")
+
+	t.Run("provider_id", func(t *testing.T) {
+		query := query{
+			ProviderID:  "0xd0cd77e69b572a638ca2d6d881e09bb7d5558c69",
+			ServiceType: "wireguard",
+		}
+		proposals, err := api.ListFilters(query)
+		assert.NoError(t, err)
+		assert.Len(t, proposals, 1)
+		for _, p := range proposals {
+			assert.Equal(t, query.ProviderID, p.ProviderID)
+			assert.Equal(t, query.ServiceType, p.ServiceType)
+		}
+	})
 
 	t.Run("country", func(t *testing.T) {
 		for _, query := range []query{
@@ -45,7 +60,7 @@ func Test_ProposalFiltering(t *testing.T) {
 		}
 	})
 
-	t.Run("service type", func(t *testing.T) {
+	t.Run("service_type", func(t *testing.T) {
 		for _, query := range []query{
 			{ServiceType: "wireguard"},
 			{ServiceType: "openvpn"},
@@ -59,8 +74,8 @@ func Test_ProposalFiltering(t *testing.T) {
 		}
 	})
 
-	t.Run("residential", func(t *testing.T) {
-		proposals, err := api.ListFilters(query{Residential: true})
+	t.Run("ip_type", func(t *testing.T) {
+		proposals, err := api.ListFilters(query{IPType: "residential"})
 		assert.NoError(t, err)
 		assert.True(t, len(proposals) > 0)
 		for _, p := range proposals {
@@ -68,7 +83,7 @@ func Test_ProposalFiltering(t *testing.T) {
 		}
 	})
 
-	t.Run("hour price", func(t *testing.T) {
+	t.Run("price_hour_max", func(t *testing.T) {
 		for _, query := range []query{
 			{PriceHourMax: 300000000000000},
 			{PriceHourMax: 850000000000000},
@@ -89,7 +104,7 @@ func Test_ProposalFiltering(t *testing.T) {
 		assert.Len(t, proposals, 0)
 	})
 
-	t.Run("GiB price", func(t *testing.T) {
+	t.Run("price_gib_max", func(t *testing.T) {
 		for _, query := range []query{
 			{PriceGibMax: 220000029504303120},
 			{PriceGibMax: 310000029504303120},
@@ -142,14 +157,16 @@ func (a *api) ListFilters(query query) (proposals []v2.Proposal, err error) {
 }
 
 type query struct {
-	From              string  `url:"from"`
-	ServiceType       string  `url:"service_type"`
-	Country           string  `url:"country"`
-	Residential       bool    `url:"residential"`
-	AccessPolicy      string  `url:"access_policy"`
-	PriceGibMax       int64   `url:"price_gib_max"`
-	PriceHourMax      int64   `url:"price_hour_max"`
-	CompatibilityFrom int     `url:"compatibility_from"`
-	CompatibilityTo   int     `url:"compatibility_to"`
-	QualityMin        float32 `url:"quality_min"`
+	From               string  `url:"from"`
+	ProviderID         string  `url:"provider_id"`
+	ServiceType        string  `url:"service_type"`
+	Country            string  `url:"country"`
+	IPType             string  `url:"ip_type"`
+	AccessPolicy       string  `url:"access_policy"`
+	AccessPolicySource string  `url:"access_policy_source"`
+	PriceGibMax        int64   `url:"price_gib_max"`
+	PriceHourMax       int64   `url:"price_hour_max"`
+	CompatibilityFrom  int     `url:"compatibility_from"`
+	CompatibilityTo    int     `url:"compatibility_to"`
+	QualityMin         float32 `url:"quality_min"`
 }

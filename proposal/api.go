@@ -39,10 +39,12 @@ type PingResponse struct {
 // @Summary List proposals
 // @Description List proposals
 // @Param from query string false "Consumer country"
+// @Param provider_id query string false "Provider ID"
 // @Param service_type query string false "Service type"
 // @Param country query string false "Provider country"
-// @Param residential query bool false "Residential IPs only?"
+// @Param ip_type query string false "IP type (residential, datacenter, etc.)"
 // @Param access_policy query string false "Access policy. When empty, returns only public proposals (default). Use * to return all."
+// @Param access_policy_source query string false "Access policy source"
 // @Param price_gib_max query number false "Maximum price per GiB. When empty, will not filter by it. Price is set in ethereum wei."
 // @Param price_hour_max query number false "Maximum price per hour. When empty, will not filter by it. Price is set in ethereum wei."
 // @Param compatibility_from query number false "Minimum compatibility. When empty, will not filter by it."
@@ -54,10 +56,13 @@ type PingResponse struct {
 // @Router /proposals [get]
 func (a *API) Proposals(c *gin.Context) {
 	opts := ListOpts{
-		from:         c.Query("from"),
-		serviceType:  c.Query("service_type"),
-		country:      c.Query("country"),
-		accessPolicy: c.Query("access_policy"),
+		providerID:         c.Query("provider_id"),
+		from:               c.Query("from"),
+		serviceType:        c.Query("service_type"),
+		country:            c.Query("country"),
+		accessPolicy:       c.Query("access_policy"),
+		accessPolicySource: c.Query("access_policy_source"),
+		ipType:             c.Query("ip_type"),
 	}
 
 	priceGiBMax, _ := strconv.ParseInt(c.Query("price_gib_max"), 10, 64)
@@ -74,9 +79,6 @@ func (a *API) Proposals(c *gin.Context) {
 
 	qlb, _ := strconv.ParseFloat(c.Query("quality_min"), 32)
 	opts.qualityMin = float32(qlb)
-
-	residential, _ := strconv.ParseBool(c.Query("residential"))
-	opts.residential = residential
 
 	proposals, err := a.service.List(opts)
 
