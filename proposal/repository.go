@@ -84,7 +84,7 @@ func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
 	}
 	if opts.accessPolicy == "" {
 		q.WriteString(" AND proposal ? 'access_policies' = FALSE")
-	} else if opts.accessPolicy == "*" {
+	} else if opts.accessPolicy == "all" {
 		// all access policies
 	} else {
 		q.WriteString(fmt.Sprintf(` AND proposal->'access_policies' @> '[{"id": "%s"}]'`, opts.accessPolicy))

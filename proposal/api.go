@@ -43,7 +43,7 @@ type PingResponse struct {
 // @Param service_type query string false "Service type"
 // @Param location_country query string false "Provider country"
 // @Param ip_type query string false "IP type (residential, datacenter, etc.)"
-// @Param access_policy query string false "Access policy. When empty, returns only public proposals (default). Use * to return all."
+// @Param access_policy query string false "Access policy. When empty, returns only public proposals (default). Use 'all' to return all."
 // @Param access_policy_source query string false "Access policy source"
 // @Param price_gib_max query number false "Maximum price per GiB. When empty, will not filter by it. Price is set in ethereum wei."
 // @Param price_hour_max query number false "Maximum price per hour. When empty, will not filter by it. Price is set in ethereum wei."
