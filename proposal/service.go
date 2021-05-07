@@ -37,8 +37,8 @@ type ListOpts struct {
 	ipType                    string
 	accessPolicy              string
 	accessPolicySource        string
-	compatibilityFrom         int
-	compatibilityTo           int
+	compatibilityMin          int
+	compatibilityMax          int
 	qualityMin                float32
 	priceGiBMax, priceHourMax int64
 }
@@ -51,8 +51,8 @@ func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
 		ipType:             opts.ipType,
 		accessPolicy:       opts.accessPolicy,
 		accessPolicySource: opts.accessPolicySource,
-		compatibilityFrom:  opts.compatibilityFrom,
-		compatibilityTo:    opts.compatibilityTo,
+		compatibilityMin:   opts.compatibilityMin,
+		compatibilityMax:   opts.compatibilityMax,
 		priceGiBMax:        opts.priceGiBMax,
 		priceHourMax:       opts.priceHourMax,
 	})

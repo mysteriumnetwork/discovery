@@ -38,8 +38,8 @@ type repoListOpts struct {
 	ipType                    string
 	accessPolicy              string
 	accessPolicySource        string
-	compatibilityFrom         int
-	compatibilityTo           int
+	compatibilityMin          int
+	compatibilityMax          int
 	priceGiBMax, priceHourMax int64
 }
 
@@ -66,16 +66,16 @@ func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
 		args = append(args, opts.country)
 		q.WriteString(fmt.Sprintf(" AND proposal->'location'->>'country' = $%v", len(args)))
 	}
-	if opts.compatibilityFrom == 0 && opts.compatibilityTo == 0 {
+	if opts.compatibilityMin == 0 && opts.compatibilityMax == 0 {
 		// defaults, ignore and return all
-	} else if opts.compatibilityFrom == opts.compatibilityTo {
-		args = append(args, fmt.Sprint(opts.compatibilityTo))
+	} else if opts.compatibilityMin == opts.compatibilityMax {
+		args = append(args, fmt.Sprint(opts.compatibilityMax))
 		q.WriteString(fmt.Sprintf(" AND proposal->>'compatibility' = $%v", len(args)))
 	} else {
-		args = append(args, opts.compatibilityFrom)
+		args = append(args, opts.compatibilityMin)
 		q.WriteString(fmt.Sprintf(" AND (proposal->>'compatibility')::int >= $%v", len(args)))
 
-		args = append(args, opts.compatibilityTo)
+		args = append(args, opts.compatibilityMax)
 		q.WriteString(fmt.Sprintf(" AND (proposal->>'compatibility')::int <= $%v", len(args)))
 	}
 	if opts.ipType != "" {

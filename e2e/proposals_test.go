@@ -48,14 +48,14 @@ func Test_ProposalFiltering(t *testing.T) {
 
 	t.Run("compatibility", func(t *testing.T) {
 		for _, query := range []query{
-			{CompatibilityFrom: 1, CompatibilityTo: 1},
-			{CompatibilityFrom: 0, CompatibilityTo: 2},
+			{CompatibilityMin: 1, CompatibilityMax: 1},
+			{CompatibilityMin: 0, CompatibilityMax: 2},
 		} {
 			proposals, err := api.ListFilters(query)
 			assert.NoError(t, err)
 			assert.True(t, len(proposals) > 0)
 			for _, p := range proposals {
-				assert.True(t, p.Compatibility >= query.CompatibilityFrom && p.Compatibility <= query.CompatibilityTo, p.Compatibility)
+				assert.True(t, p.Compatibility >= query.CompatibilityMin && p.Compatibility <= query.CompatibilityMax, p.Compatibility)
 			}
 		}
 	})
@@ -166,7 +166,7 @@ type query struct {
 	AccessPolicySource string  `url:"access_policy_source"`
 	PriceGibMax        int64   `url:"price_gib_max"`
 	PriceHourMax       int64   `url:"price_hour_max"`
-	CompatibilityFrom  int     `url:"compatibility_from"`
-	CompatibilityTo    int     `url:"compatibility_to"`
+	CompatibilityMin   int     `url:"compatibility_min"`
+	CompatibilityMax   int     `url:"compatibility_max"`
 	QualityMin         float32 `url:"quality_min"`
 }

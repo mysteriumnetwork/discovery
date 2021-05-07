@@ -97,13 +97,13 @@ var doc = `{
                     {
                         "type": "number",
                         "description": "Minimum compatibility. When empty, will not filter by it.",
-                        "name": "compatibility_from",
+                        "name": "compatibility_min",
                         "in": "query"
                     },
                     {
                         "type": "number",
                         "description": "Maximum compatibility. When empty, will not filter by it.",
-                        "name": "compatibility_to",
+                        "name": "compatibility_max",
                         "in": "query"
                     },
                     {
