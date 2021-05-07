@@ -33,7 +33,7 @@ type ListOpts struct {
 	from                      string
 	providerID                string
 	serviceType               string
-	country                   string
+	locationCountry           string
 	ipType                    string
 	accessPolicy              string
 	accessPolicySource        string
@@ -47,7 +47,7 @@ func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
 	proposals, err := s.Repository.List(repoListOpts{
 		providerID:         opts.providerID,
 		serviceType:        opts.serviceType,
-		country:            opts.country,
+		country:            opts.locationCountry,
 		ipType:             opts.ipType,
 		accessPolicy:       opts.accessPolicy,
 		accessPolicySource: opts.accessPolicySource,
@@ -67,7 +67,7 @@ func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
 	// filter by quality
 	qualityResponse, err := s.qualityService.Quality(opts.from)
 	if err != nil {
-		log.Warn().Err(err).Msgf("Could not fetch quality for consumer (country=%s)", opts.from)
+		log.Warn().Err(err).Msgf("Could not fetch quality for consumer (from country=%s)", opts.from)
 		return values(resultMap), nil
 	}
 
