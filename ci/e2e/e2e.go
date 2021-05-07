@@ -2,11 +2,12 @@ package e2e
 
 import (
 	"context"
+	"time"
+
 	"github.com/magefile/mage/sh"
 	"github.com/mysteriumnetwork/discovery/db"
 	"github.com/mysteriumnetwork/discovery/e2e"
 	"github.com/rs/zerolog/log"
-	"time"
 )
 
 const (
@@ -97,5 +98,5 @@ func upDependencies() error {
 }
 
 func upApp() error {
-	return sh.RunV("docker-compose", "-f", dockerFile, "up", "-d", "discovery")
+	return sh.RunV("docker-compose", "-f", dockerFile, "up", "--build", "-d", "discovery")
 }
