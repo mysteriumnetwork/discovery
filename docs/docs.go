@@ -60,6 +60,12 @@ var doc = `{
                     },
                     {
                         "type": "string",
+                        "description": "Provider ID",
+                        "name": "provider_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "description": "Service type",
                         "name": "service_type",
                         "in": "query"
@@ -67,19 +73,25 @@ var doc = `{
                     {
                         "type": "string",
                         "description": "Provider country",
-                        "name": "country",
-                        "in": "query"
-                    },
-                    {
-                        "type": "boolean",
-                        "description": "Residential IPs only?",
-                        "name": "residential",
+                        "name": "location_country",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Access policy. When empty, returns only public proposals (default). Use * to return all.",
+                        "description": "IP type (residential, datacenter, etc.)",
+                        "name": "ip_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Access policy. When empty, returns only public proposals (default). Use 'all' to return all.",
                         "name": "access_policy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Access policy source",
+                        "name": "access_policy_source",
                         "in": "query"
                     },
                     {
@@ -226,10 +238,27 @@ var doc = `{
                     "type": "string"
                 },
                 "quality": {
-                    "type": "number"
+                    "$ref": "#/definitions/v2.Quality"
                 },
                 "service_type": {
                     "type": "string"
+                }
+            }
+        },
+        "v2.Quality": {
+            "type": "object",
+            "properties": {
+                "bandwidth": {
+                    "description": "Bandwidth in Mbps.",
+                    "type": "number"
+                },
+                "latency": {
+                    "description": "Latency in ms.",
+                    "type": "number"
+                },
+                "quality": {
+                    "description": "Quality valuation from the oracle.",
+                    "type": "number"
                 }
             }
         }

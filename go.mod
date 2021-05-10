@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/allegro/bigcache v1.2.1
+	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/dghubble/sling v1.3.0
 	github.com/fatih/color v1.10.0
 	github.com/gin-gonic/gin v1.6.3
@@ -22,11 +23,12 @@ require (
 	github.com/nats-io/nats-server/v2 v2.2.0 // indirect
 	github.com/nats-io/nats.go v1.10.1-0.20210228004050-ed743748acac
 	github.com/rs/zerolog v1.20.0
+	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14
 	github.com/swaggo/gin-swagger v1.3.0
 	github.com/swaggo/swag v1.7.0
 	github.com/ugorji/go v1.2.4 // indirect
-	golang.org/x/net v0.0.0-20210502030024-e5908800b52b // indirect
-	golang.org/x/sys v0.0.0-20210502180810-71e4cd670f79 // indirect
+	golang.org/x/net v0.0.0-20210510120150-4163338589ed // indirect
+	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
 )

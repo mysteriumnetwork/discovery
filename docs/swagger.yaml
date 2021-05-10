@@ -64,9 +64,21 @@ definitions:
       provider_id:
         type: string
       quality:
-        type: number
+        $ref: '#/definitions/v2.Quality'
       service_type:
         type: string
+    type: object
+  v2.Quality:
+    properties:
+      bandwidth:
+        description: Bandwidth in Mbps.
+        type: number
+      latency:
+        description: Latency in ms.
+        type: number
+      quality:
+        description: Quality valuation from the oracle.
+        type: number
     type: object
 info:
   contact: {}
@@ -97,22 +109,30 @@ paths:
         in: query
         name: from
         type: string
+      - description: Provider ID
+        in: query
+        name: provider_id
+        type: string
       - description: Service type
         in: query
         name: service_type
         type: string
       - description: Provider country
         in: query
-        name: country
+        name: location_country
         type: string
-      - description: Residential IPs only?
+      - description: IP type (residential, datacenter, etc.)
         in: query
-        name: residential
-        type: boolean
+        name: ip_type
+        type: string
       - description: Access policy. When empty, returns only public proposals (default).
-          Use * to return all.
+          Use 'all' to return all.
         in: query
         name: access_policy
+        type: string
+      - description: Access policy source
+        in: query
+        name: access_policy_source
         type: string
       - description: Maximum price per GiB. When empty, will not filter by it. Price
           is set in ethereum wei.

@@ -7,8 +7,9 @@
 package main
 
 import (
-	"github.com/mysteriumnetwork/discovery/ci/e2e"
 	"path"
+
+	"github.com/mysteriumnetwork/discovery/ci/e2e"
 
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"

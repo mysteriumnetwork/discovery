@@ -26,7 +26,7 @@ func (s *Enhancer) EnhanceWithMetrics(resultMap map[string]*v2.Proposal, fromCou
 				continue
 			}
 
-			p.Quality = q.Quality
+			p.Quality.Quality = q.Quality
 		}
 	}
 
@@ -45,7 +45,7 @@ func (s *Enhancer) EnhanceWithMetrics(resultMap map[string]*v2.Proposal, fromCou
 			} {
 				p, ok := resultMap[key]
 				if ok {
-					p.Latency = latency.Latency
+					p.Quality.Latency = latency.Latency
 				}
 			}
 		}
@@ -59,7 +59,7 @@ func (s *Enhancer) EnhanceWithMetrics(resultMap map[string]*v2.Proposal, fromCou
 			key := bandwidth.ProposalID.Key()
 			p, ok := resultMap[key]
 			if ok {
-				p.BandwidthMBPS = bandwidth.BandwidthMBPS
+				p.Quality.Bandwidth = bandwidth.BandwidthMBPS
 			}
 		}
 	}

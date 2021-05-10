@@ -39,7 +39,7 @@ type ListOpts struct {
 	accessPolicySource        string
 	compatibilityMin          int
 	compatibilityMax          int
-	qualityMin                float32
+	qualityMin                float64
 	priceGiBMax, priceHourMax int64
 }
 
@@ -78,11 +78,12 @@ func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
 			continue
 		}
 
-		if opts.qualityMin <= q.Quality {
-			p.Quality = q.Quality
-		} else {
+		if opts.qualityMin > q.Quality {
 			delete(resultMap, key)
+			continue
 		}
+
+		p.Quality.Quality = q.Quality
 	}
 
 	// exclude monitoringFailed nodes
@@ -100,7 +101,7 @@ func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
 
 	s.enhancer.EnhanceWithMetrics(resultMap, opts.from)
 	for key, proposal := range resultMap {
-		if proposal.Quality < opts.qualityMin {
+		if proposal.Quality.Quality < opts.qualityMin {
 			delete(resultMap, key)
 		}
 	}
@@ -112,7 +113,7 @@ func (s *Service) StartExpirationJob() {
 	for {
 		select {
 		case <-time.After(s.expirationJobDelay):
-			log.Debug().Msgf("Running expiration job")
+			log.Debug().Msg("Running expiration job")
 			count, err := s.Repository.Expire()
 			if err != nil {
 				log.Err(err).Msg("Failed to expire proposals")

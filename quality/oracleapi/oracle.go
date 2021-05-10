@@ -182,7 +182,7 @@ func (pid *ProposalID) Key() string {
 
 type ProposalQuality struct {
 	ProposalID ProposalID `json:"proposalId"`
-	Quality    float32    `json:"quality"`
+	Quality    float64    `json:"quality"`
 }
 
 type ProposalQualityResponse struct {

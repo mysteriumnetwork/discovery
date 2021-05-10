@@ -77,8 +77,8 @@ func (a *API) Proposals(c *gin.Context) {
 	compatibilityMax, _ := strconv.ParseInt(c.Query("compatibility_max"), 10, 16)
 	opts.compatibilityMax = int(compatibilityMax)
 
-	qlb, _ := strconv.ParseFloat(c.Query("quality_min"), 32)
-	opts.qualityMin = float32(qlb)
+	qualityMin, _ := strconv.ParseFloat(c.Query("quality_min"), 64)
+	opts.qualityMin = qualityMin
 
 	proposals, err := a.service.List(opts)
 

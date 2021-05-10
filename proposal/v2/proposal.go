@@ -20,9 +20,7 @@ type Proposal struct {
 	Price          Price          `json:"price"`
 	Contacts       []Contact      `json:"contacts"`
 	AccessPolicies []AccessPolicy `json:"access_policies,omitempty"`
-	Quality        float32        `json:"quality"`
-	Latency        float64        `json:"latency"`
-	BandwidthMBPS  float64        `json:"bandwidth"`
+	Quality        Quality        `json:"quality"`
 }
 
 func NewProposal(providerID, serviceType string) *Proposal {
@@ -81,4 +79,13 @@ type Contact struct {
 type AccessPolicy struct {
 	ID     string `json:"id"`
 	Source string `json:"source"`
+}
+
+type Quality struct {
+	// Quality valuation from the oracle.
+	Quality float64 `json:"quality"`
+	// Latency in ms.
+	Latency float64 `json:"latency"`
+	// Bandwidth in Mbps.
+	Bandwidth float64 `json:"bandwidth"`
 }

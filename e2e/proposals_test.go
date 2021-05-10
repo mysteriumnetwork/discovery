@@ -135,7 +135,7 @@ func Test_ProposalFiltering(t *testing.T) {
 			assert.NoError(t, err)
 			assert.True(t, len(proposals) > 0)
 			for _, proposal := range proposals {
-				assert.GreaterOrEqual(t, proposal.Quality, query.QualityMin)
+				assert.GreaterOrEqual(t, proposal.Quality.Quality, query.QualityMin)
 			}
 		}
 	})
@@ -160,7 +160,7 @@ type query struct {
 	From               string  `url:"from"`
 	ProviderID         string  `url:"provider_id"`
 	ServiceType        string  `url:"service_type"`
-	Country            string  `url:"country"`
+	Country            string  `url:"location_country"`
 	IPType             string  `url:"ip_type"`
 	AccessPolicy       string  `url:"access_policy"`
 	AccessPolicySource string  `url:"access_policy_source"`
@@ -168,5 +168,5 @@ type query struct {
 	PriceHourMax       int64   `url:"price_hour_max"`
 	CompatibilityMin   int     `url:"compatibility_min"`
 	CompatibilityMax   int     `url:"compatibility_max"`
-	QualityMin         float32 `url:"quality_min"`
+	QualityMin         float64 `url:"quality_min"`
 }
