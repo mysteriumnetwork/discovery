@@ -64,26 +64,19 @@ func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
 		resultMap[p.ServiceType+p.ProviderID] = &proposals[i]
 	}
 
-	// filter by quality
-	qualityResponse, err := s.qualityService.Quality(opts.from)
-	if err != nil {
-		log.Warn().Err(err).Msgf("Could not fetch quality for consumer (from country=%s)", opts.from)
-		return values(resultMap), nil
+	s.enhancer.EnhanceWithMetrics(resultMap, opts.from)
+	for key, proposal := range resultMap {
+		if proposal.Quality.Quality < opts.qualityMin {
+			delete(resultMap, key)
+		}
 	}
 
-	for _, q := range qualityResponse.Entries {
-		key := q.ProposalID.ServiceType + q.ProposalID.ProviderID
-		p, ok := resultMap[key]
-		if !ok {
-			continue
-		}
-
-		if opts.qualityMin > q.Quality {
+	// filter by quality
+	for key, _ := range resultMap {
+		p := resultMap[key]
+		if opts.qualityMin > p.Quality.Quality {
 			delete(resultMap, key)
-			continue
 		}
-
-		p.Quality.Quality = q.Quality
 	}
 
 	// exclude monitoringFailed nodes
@@ -96,13 +89,6 @@ func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
 	for k, proposal := range resultMap {
 		if sessionsResponse.MonitoringFailed(proposal.ProviderID, proposal.ServiceType) {
 			delete(resultMap, k)
-		}
-	}
-
-	s.enhancer.EnhanceWithMetrics(resultMap, opts.from)
-	for key, proposal := range resultMap {
-		if proposal.Quality.Quality < opts.qualityMin {
-			delete(resultMap, key)
 		}
 	}
 
