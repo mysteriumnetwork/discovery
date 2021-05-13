@@ -15,6 +15,7 @@ import (
 	"github.com/mysteriumnetwork/discovery/db"
 	_ "github.com/mysteriumnetwork/discovery/docs"
 	"github.com/mysteriumnetwork/discovery/listener"
+	"github.com/mysteriumnetwork/discovery/price"
 	"github.com/mysteriumnetwork/discovery/proposal"
 	"github.com/mysteriumnetwork/discovery/quality"
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
@@ -62,6 +63,7 @@ func main() {
 	v3 := r.Group("/api/v3")
 
 	proposal.NewAPI(proposalService).RegisterRoutes(v3)
+	price.NewAPI().RegisterRoutes(v3)
 
 	brokerListener := listener.New(cfg.BrokerURL.String(), proposalRepo)
 
