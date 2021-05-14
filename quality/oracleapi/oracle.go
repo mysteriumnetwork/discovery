@@ -44,7 +44,7 @@ func (a *API) Quality(country string) (*ProposalQualityResponse, error) {
 }
 
 func (a *API) Sessions(country string) (*SessionsResponse, error) {
-	resp, err := a.client.Get(fmt.Sprintf("%s/api/v1/providers/sessions?country=%s", a.url, country))
+	resp, err := a.client.Get(fmt.Sprintf("%s/api/v2/providers/sessions?country=%s", a.url, country))
 	if err != nil {
 		return nil, fmt.Errorf("request failed: %w", err)
 	}

@@ -26,7 +26,7 @@ type ProposalUnregisterMessage struct {
 }
 
 func (p ProposalUnregisterMessage) IsEmpty() bool {
-	return reflect.DeepEqual(p, ProposalPingMessage{})
+	return reflect.DeepEqual(p, ProposalUnregisterMessage{})
 }
 
 func (p ProposalUnregisterMessage) Key() string {
