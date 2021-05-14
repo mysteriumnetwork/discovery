@@ -21,8 +21,6 @@ var sessionCache *bigcache.BigCache
 var latencyCache *bigcache.BigCache
 var bandwidthCache *bigcache.BigCache
 
-const sessionsKey = "sessions-monitoring"
-
 func init() {
 	cfg := bigcache.DefaultConfig(cacheDuration)
 	cfg.CleanWindow = 10 * time.Second
@@ -55,6 +53,10 @@ func keyBandwidth(fromCountry string) string {
 	return fmt.Sprintf("bandwidth:%s", fromCountry)
 }
 
+func keySessions(fromCountry string) string {
+	return fmt.Sprintf("session:%s", fromCountry)
+}
+
 func (s *Service) Quality(fromCountry string) (*oracleapi.ProposalQualityResponse, error) {
 	res, err := qualityCache.Get(keyQuality(fromCountry))
 	if err != nil {
@@ -77,17 +79,17 @@ func (s *Service) Quality(fromCountry string) (*oracleapi.ProposalQualityRespons
 	return &result, nil
 }
 
-func (s *Service) Sessions() (*oracleapi.SessionsResponse, error) {
-	res, err := sessionCache.Get(sessionsKey)
+func (s *Service) Sessions(fromCountry string) (*oracleapi.SessionsResponse, error) {
+	res, err := sessionCache.Get(keySessions(fromCountry))
 	if err != nil {
-		sessions, err := s.qualityAPI.Sessions()
+		sessions, err := s.qualityAPI.Sessions(fromCountry)
 		if err != nil {
 			return nil, err
 		}
 		response, err := json.Marshal(sessions)
 		if err != nil {
 			log.Err(err).Msg("Failed to marshal sessions response for caching")
-		} else if err := sessionCache.Set(sessionsKey, response); err != nil {
+		} else if err := sessionCache.Set(keySessions(fromCountry), response); err != nil {
 			log.Err(err).Msg("Failed to cache sessions response")
 		}
 		return sessions, nil
