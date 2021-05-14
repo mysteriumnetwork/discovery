@@ -26,6 +26,10 @@ func (p ProposalUnregisterMessage) IsEmpty() bool {
 	return reflect.DeepEqual(p, ProposalUnregisterMessage{})
 }
 
+func (p ProposalUnregisterMessage) Key() string {
+	return p.Proposal.ServiceType + ":" + p.Proposal.ProviderID
+}
+
 const Format = "service-proposal/v2"
 
 type Proposal struct {
