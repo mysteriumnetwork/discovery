@@ -7,7 +7,24 @@ package v2
 import (
 	"encoding/json"
 	"math/big"
+	"reflect"
 )
+
+type ProposalPingMessage struct {
+	Proposal Proposal `json:"proposal"`
+}
+
+func (p ProposalPingMessage) IsEmpty() bool {
+	return reflect.DeepEqual(p, ProposalPingMessage{})
+}
+
+type ProposalUnregisterMessage struct {
+	Proposal Proposal `json:"proposal"`
+}
+
+func (p ProposalUnregisterMessage) IsEmpty() bool {
+	return reflect.DeepEqual(p, ProposalUnregisterMessage{})
+}
 
 const Format = "service-proposal/v2"
 

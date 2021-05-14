@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"errors"
 
+	v2 "github.com/mysteriumnetwork/discovery/proposal/v2"
+
 	"github.com/mysteriumnetwork/discovery/proposal"
 	v1 "github.com/mysteriumnetwork/discovery/proposal/v1"
 	"github.com/nats-io/nats.go"
@@ -35,6 +37,25 @@ func (l *Listener) Listen() error {
 	log.Info().Msgf("Connected to broker")
 	l.conn = conn
 
+	if _, err := conn.Subscribe("*.proposal-ping.v2", func(msg *nats.Msg) {
+		//log.Info().Msgf("Received a message [%s] %s", msg.Subject, string(msg.Data))
+		pingMsg := v2.ProposalPingMessage{}
+		if err := json.Unmarshal(msg.Data, &pingMsg); err != nil {
+			log.Err(err).Msg("Failed to parse proposal")
+		} else if pingMsg.IsEmpty() {
+			log.Err(errors.New("unknown format")).
+				Bytes("message", msg.Data).
+				Msg("Failed to parse proposal")
+		} else {
+			err := l.repository.Store(pingMsg.Proposal)
+			if err != nil {
+				log.Err(err).Msg("Failed to store proposal")
+			}
+		}
+	}); err != nil {
+		return err
+	}
+
 	if _, err := conn.Subscribe("*.proposal-ping", func(msg *nats.Msg) {
 		//log.Info().Msgf("Received a message [%s] %s", msg.Subject, string(msg.Data))
 		pingMsg := v1.ProposalPingMessage{}
@@ -55,7 +76,7 @@ func (l *Listener) Listen() error {
 		return err
 	}
 
-	if _, err := conn.Subscribe("*.proposal-unregister", func(msg *nats.Msg) {
+	if _, err := conn.Subscribe("*.proposal-unregister.v2", func(msg *nats.Msg) {
 		unregisterMsg := v1.ProposalUnregisterMessage{}
 		if err := json.Unmarshal(msg.Data, &unregisterMsg); err != nil {
 			log.Err(err).Msg("Failed to unregister proposal")
