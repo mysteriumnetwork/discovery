@@ -65,7 +65,7 @@ func (t *template) unregister() error {
 
 var proposalTemplate = v2.ProposalPingMessage{
 	Proposal: v2.Proposal{
-		Format:        "service-proposal/v1",
+		Format:        "service-proposal/v2",
 		Compatibility: 0,
 		ProviderID:    "0xfa7855e183c3474eddd9d3a0088d2b1abddde837",
 		ServiceType:   "openvpn",

@@ -131,6 +131,7 @@ func Test_ProposalFiltering(t *testing.T) {
 
 	t.Run("quality", func(t *testing.T) {
 		for _, query := range []Query{
+			{QualityMin: 0.0},
 			{QualityMin: 1.0},
 			{QualityMin: 1.4},
 			{QualityMin: 2.5},
@@ -161,6 +162,16 @@ func Test_ProposalFiltering(t *testing.T) {
 			assert.NoError(t, err)
 			return len(proposals) == 0
 		}, time.Second*10, time.Millisecond*500, "proposals did not unregister")
+	})
+
+	t.Run("return unmonitored", func(t *testing.T) {
+		providerID := "notMockedInWiremock"
+		err := newTemplate().providerID(providerID).publishPing()
+		assert.NoError(t, err)
+		assert.Eventuallyf(t, func() bool {
+			proposals, err := api.ListFilters(Query{ProviderID: "notMockedInWiremock"})
+			return len(proposals) == 1 && proposals[0].ProviderID == providerID && err == nil
+		}, time.Second*5, time.Millisecond*200, "proposal %s was not returned", providerID)
 	})
 }
 

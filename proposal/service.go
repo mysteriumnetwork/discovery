@@ -68,7 +68,7 @@ func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
 	// filter by quality
 	for key := range resultMap {
 		p := resultMap[key]
-		if opts.qualityMin >= p.Quality.Quality {
+		if p.Quality.Quality < opts.qualityMin {
 			delete(resultMap, key)
 		}
 	}

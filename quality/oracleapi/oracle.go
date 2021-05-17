@@ -154,7 +154,7 @@ func (s *SessionsResponse) index() {
 func (s *SessionsResponse) MonitoringFailed(providerID, serviceType string) bool {
 	session, ok := s.ConnectsMap[serviceType+providerID]
 	if !ok {
-		return true
+		return false
 	}
 	return session.MonitoringFailed
 }
