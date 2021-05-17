@@ -33,6 +33,7 @@ func (p ProposalUnregisterMessage) Key() string {
 const Format = "service-proposal/v2"
 
 type Proposal struct {
+	ID             int            `json:"id"`
 	Format         string         `json:"format"`
 	Compatibility  int            `json:"compatibility"`
 	ProviderID     string         `json:"provider_id"`

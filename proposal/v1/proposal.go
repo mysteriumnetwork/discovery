@@ -65,6 +65,7 @@ type ServiceProposal struct {
 
 func (s *ServiceProposal) ConvertToV2() *v2.Proposal {
 	p := v2.NewProposal(s.ProviderID, s.ServiceType)
+	p.ID = s.ID
 	loc := s.ServiceDefinition.Location
 	p.Location = v2.Location{
 		Continent: loc.Continent,
