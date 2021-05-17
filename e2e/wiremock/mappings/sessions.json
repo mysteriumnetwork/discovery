@@ -1,0 +1,256 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/api/v2/providers/sessions.*"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "jsonBody": {
+      "connects": [
+        {
+          "proposalId": {
+            "providerId": "0x1",
+            "serviceType": "wireguard"
+          },
+          "connectCount": {
+            "success": 566,
+            "fail": 16,
+            "timeout": 14
+          },
+          "monitoringFailed": false
+        },
+        {
+          "proposalId": {
+            "providerId": "0x1",
+            "serviceType": "openvpn"
+          },
+          "connectCount": {
+            "success": 566,
+            "fail": 16,
+            "timeout": 14
+          },
+          "monitoringFailed": false
+        },
+        {
+          "proposalId": {
+            "providerId": "0x2",
+            "serviceType": "wireguard"
+          },
+          "connectCount": {
+            "success": 566,
+            "fail": 16,
+            "timeout": 14
+          },
+          "monitoringFailed": false
+        },
+        {
+          "proposalId": {
+            "providerId": "0x2",
+            "serviceType": "openvpn"
+          },
+          "connectCount": {
+            "success": 566,
+            "fail": 16,
+            "timeout": 14
+          },
+          "monitoringFailed": false
+        },
+        {
+          "proposalId": {
+            "providerId": "0x3",
+            "serviceType": "wireguard"
+          },
+          "connectCount": {
+            "success": 566,
+            "fail": 16,
+            "timeout": 14
+          },
+          "monitoringFailed": false
+        },
+        {
+          "proposalId": {
+            "providerId": "0x3",
+            "serviceType": "openvpn"
+          },
+          "connectCount": {
+            "success": 566,
+            "fail": 16,
+            "timeout": 14
+          },
+          "monitoringFailed": false
+        },
+        {
+          "proposalId": {
+            "providerId": "0x4",
+            "serviceType": "wireguard"
+          },
+          "connectCount": {
+            "success": 566,
+            "fail": 16,
+            "timeout": 14
+          },
+          "monitoringFailed": false
+        },
+        {
+          "proposalId": {
+            "providerId": "0x4",
+            "serviceType": "openvpn"
+          },
+          "connectCount": {
+            "success": 566,
+            "fail": 16,
+            "timeout": 14
+          },
+          "monitoringFailed": false
+        },
+        {
+          "proposalId": {
+            "providerId": "0x5",
+            "serviceType": "wireguard"
+          },
+          "connectCount": {
+            "success": 566,
+            "fail": 16,
+            "timeout": 14
+          },
+          "monitoringFailed": false
+        },
+        {
+          "proposalId": {
+            "providerId": "0x5",
+            "serviceType": "openvpn"
+          },
+          "connectCount": {
+            "success": 566,
+            "fail": 16,
+            "timeout": 14
+          },
+          "monitoringFailed": false
+        },
+        {
+          "proposalId": {
+            "providerId": "0x6",
+            "serviceType": "wireguard"
+          },
+          "connectCount": {
+            "success": 566,
+            "fail": 16,
+            "timeout": 14
+          },
+          "monitoringFailed": false
+        },
+        {
+          "proposalId": {
+            "providerId": "0x6",
+            "serviceType": "openvpn"
+          },
+          "connectCount": {
+            "success": 566,
+            "fail": 16,
+            "timeout": 14
+          },
+          "monitoringFailed": false
+        },
+        {
+          "proposalId": {
+            "providerId": "0x7",
+            "serviceType": "wireguard"
+          },
+          "connectCount": {
+            "success": 566,
+            "fail": 16,
+            "timeout": 14
+          },
+          "monitoringFailed": false
+        },
+        {
+          "proposalId": {
+            "providerId": "0x7",
+            "serviceType": "openvpn"
+          },
+          "connectCount": {
+            "success": 566,
+            "fail": 16,
+            "timeout": 14
+          },
+          "monitoringFailed": false
+        },
+        {
+          "proposalId": {
+            "providerId": "0x8",
+            "serviceType": "wireguard"
+          },
+          "connectCount": {
+            "success": 566,
+            "fail": 16,
+            "timeout": 14
+          },
+          "monitoringFailed": false
+        },
+        {
+          "proposalId": {
+            "providerId": "0x8",
+            "serviceType": "openvpn"
+          },
+          "connectCount": {
+            "success": 566,
+            "fail": 16,
+            "timeout": 14
+          },
+          "monitoringFailed": false
+        },
+        {
+          "proposalId": {
+            "providerId": "0x9",
+            "serviceType": "wireguard"
+          },
+          "connectCount": {
+            "success": 566,
+            "fail": 16,
+            "timeout": 14
+          },
+          "monitoringFailed": false
+        },
+        {
+          "proposalId": {
+            "providerId": "0x9",
+            "serviceType": "openvpn"
+          },
+          "connectCount": {
+            "success": 566,
+            "fail": 16,
+            "timeout": 14
+          },
+          "monitoringFailed": false
+        },
+        {
+          "proposalId": {
+            "providerId": "0x1",
+            "serviceType": "wireguard"
+          },
+          "connectCount": {
+            "success": 566,
+            "fail": 16,
+            "timeout": 14
+          },
+          "monitoringFailed": false
+        },
+        {
+          "proposalId": {
+            "providerId": "0x1",
+            "serviceType": "openvpn"
+          },
+          "connectCount": {
+            "success": 566,
+            "fail": 16,
+            "timeout": 14
+          },
+          "monitoringFailed": false
+        }
+      ]
+    }
+  }
+}
