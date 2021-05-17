@@ -17,6 +17,14 @@ type PaymentMethod struct {
 	Type     string        `json:"type"`
 }
 
+func (pm PaymentMethod) PricePerHour() *big.Int {
+	return pm.pricePerHour()
+}
+
+func (pm PaymentMethod) PricePerGiB() *big.Int {
+	return pm.pricePerGiB()
+}
+
 func (pm PaymentMethod) pricePerHour() *big.Int {
 	pricePerHour := new(big.Int)
 	perDuration := new(big.Float).SetInt64(int64(pm.Duration))

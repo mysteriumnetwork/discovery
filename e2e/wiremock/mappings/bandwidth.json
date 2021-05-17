@@ -1,0 +1,154 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/api/v2/providers/bandwidth.*"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "jsonBody": [
+      {
+        "proposalId": {
+          "providerId": "0x1",
+          "serviceType": "wireguard"
+        },
+        "bandwidth": 218.155434
+      },
+      {
+        "proposalId": {
+          "providerId": "0x1",
+          "serviceType": "openvpn"
+        },
+        "bandwidth": 218.155434
+      },
+      {
+        "proposalId": {
+          "providerId": "0x2",
+          "serviceType": "wireguard"
+        },
+        "bandwidth": 218.155434
+      },
+      {
+        "proposalId": {
+          "providerId": "0x2",
+          "serviceType": "openvpn"
+        },
+        "bandwidth": 218.155434
+      },
+      {
+        "proposalId": {
+          "providerId": "0x3",
+          "serviceType": "wireguard"
+        },
+        "bandwidth": 218.155434
+      },
+      {
+        "proposalId": {
+          "providerId": "0x3",
+          "serviceType": "openvpn"
+        },
+        "bandwidth": 218.155434
+      },
+      {
+        "proposalId": {
+          "providerId": "0x4",
+          "serviceType": "wireguard"
+        },
+        "bandwidth": 218.155434
+      },
+      {
+        "proposalId": {
+          "providerId": "0x4",
+          "serviceType": "openvpn"
+        },
+        "bandwidth": 218.155434
+      },
+      {
+        "proposalId": {
+          "providerId": "0x5",
+          "serviceType": "wireguard"
+        },
+        "bandwidth": 218.155434
+      },
+      {
+        "proposalId": {
+          "providerId": "0x5",
+          "serviceType": "openvpn"
+        },
+        "bandwidth": 218.155434
+      },
+      {
+        "proposalId": {
+          "providerId": "0x6",
+          "serviceType": "wireguard"
+        },
+        "bandwidth": 218.155434
+      },
+      {
+        "proposalId": {
+          "providerId": "0x6",
+          "serviceType": "openvpn"
+        },
+        "bandwidth": 218.155434
+      },
+      {
+        "proposalId": {
+          "providerId": "0x7",
+          "serviceType": "wireguard"
+        },
+        "bandwidth": 218.155434
+      },
+      {
+        "proposalId": {
+          "providerId": "0x7",
+          "serviceType": "openvpn"
+        },
+        "bandwidth": 218.155434
+      },
+      {
+        "proposalId": {
+          "providerId": "0x8",
+          "serviceType": "wireguard"
+        },
+        "bandwidth": 218.155434
+      },
+      {
+        "proposalId": {
+          "providerId": "0x8",
+          "serviceType": "openvpn"
+        },
+        "bandwidth": 218.155434
+      },
+      {
+        "proposalId": {
+          "providerId": "0x9",
+          "serviceType": "wireguard"
+        },
+        "bandwidth": 218.155434
+      },
+      {
+        "proposalId": {
+          "providerId": "0x9",
+          "serviceType": "openvpn"
+        },
+        "bandwidth": 218.155434
+      },
+      {
+        "proposalId": {
+          "providerId": "0x10",
+          "serviceType": "wireguard"
+        },
+        "bandwidth": 218.155434
+      },
+      {
+        "proposalId": {
+          "providerId": "0x10",
+          "serviceType": "openvpn"
+        },
+        "bandwidth": 218.155434
+      }
+    ]
+  }
+}

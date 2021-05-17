@@ -1,0 +1,84 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/api/v2/providers/latency.*"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "jsonBody": [
+      {
+        "proposalId": {
+          "providerId": "0x1",
+          "serviceType": ""
+        },
+        "latency": 218.155434
+      },
+      {
+        "proposalId": {
+          "providerId": "0x2",
+          "serviceType": ""
+        },
+        "latency": 50.11
+      },
+      {
+        "proposalId": {
+          "providerId": "0x3",
+          "serviceType": ""
+        },
+        "latency": 38.5
+      },
+      {
+        "proposalId": {
+          "providerId": "0x4",
+          "serviceType": ""
+        },
+        "latency": 11.587
+      },
+      {
+        "proposalId": {
+          "providerId": "0x5",
+          "serviceType": ""
+        },
+        "latency": 66.77
+      },
+      {
+        "proposalId": {
+          "providerId": "0x6",
+          "serviceType": ""
+        },
+        "latency": 300.33
+      },
+      {
+        "proposalId": {
+          "providerId": "0x7",
+          "serviceType": ""
+        },
+        "latency": 9000.0055
+      },
+      {
+        "proposalId": {
+          "providerId": "0x8",
+          "serviceType": ""
+        },
+        "latency": 70.33
+      },
+      {
+        "proposalId": {
+          "providerId": "0x9",
+          "serviceType": ""
+        },
+        "latency": 150.33
+      },
+      {
+        "proposalId": {
+          "providerId": "0x10",
+          "serviceType": ""
+        },
+        "latency": 1111.1111
+      }
+    ]
+  }
+}
