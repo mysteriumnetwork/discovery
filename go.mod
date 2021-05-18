@@ -13,13 +13,13 @@ require (
 	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/golang-migrate/migrate/v4 v4.13.1-0.20201118180611-fedbe42fc818
-	github.com/google/go-cmp v0.5.4 // indirect
 	github.com/jackc/pgx/v4 v4.11.0
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/magefile/mage v1.11.0
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mysteriumnetwork/go-ci v0.0.0-20210330121512-2a81be082445
+	github.com/mysteriumnetwork/payments v0.0.14-0.20210512102056-7f1323a314af
 	github.com/nats-io/nats-server/v2 v2.2.0 // indirect
 	github.com/nats-io/nats.go v1.10.1-0.20210228004050-ed743748acac
 	github.com/rs/zerolog v1.20.0
