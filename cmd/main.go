@@ -9,6 +9,9 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
+
+	"github.com/mysteriumnetwork/discovery/price/pricing"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mysteriumnetwork/discovery/config"
@@ -63,7 +66,17 @@ func main() {
 	v3 := r.Group("/api/v3")
 
 	proposal.NewAPI(proposalService, proposalRepo).RegisterRoutes(v3)
-	price.NewAPI().RegisterRoutes(v3)
+	pricer, err := pricing.NewPricer(
+		pricing.SampleCFG,
+		&pricing.MockPriceAPI{},
+		time.Minute*5,
+		pricing.Bound{Min: 0.1, Max: 3.0},
+	)
+	if err != nil {
+		log.Err(err).Msg("Failed to initialize Pricer")
+		return
+	}
+	price.NewAPI(pricer).RegisterRoutes(v3)
 
 	brokerListener := listener.New(cfg.BrokerURL.String(), proposalRepo)
 

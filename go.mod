@@ -7,6 +7,7 @@ require (
 	github.com/allegro/bigcache v1.2.1
 	github.com/dghubble/sling v1.3.0
 	github.com/fatih/color v1.10.0
+	github.com/fln/pprotect v0.0.0-20160819093714-7d932ef9e7a2 // indirect
 	github.com/georgysavva/scany v0.2.8
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-openapi/spec v0.20.3 // indirect
@@ -23,12 +24,13 @@ require (
 	github.com/nats-io/nats-server/v2 v2.2.0 // indirect
 	github.com/nats-io/nats.go v1.10.1-0.20210228004050-ed743748acac
 	github.com/rs/zerolog v1.20.0
+	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14
 	github.com/swaggo/gin-swagger v1.3.0
 	github.com/swaggo/swag v1.7.0
 	github.com/ugorji/go v1.2.4 // indirect
-	golang.org/x/net v0.0.0-20210520170846-37e1c6afe023 // indirect
+	golang.org/x/net v0.0.0-20210510120150-4163338589ed // indirect
 	golang.org/x/sys v0.0.0-20210514084401-e8d321eab015 // indirect
 	golang.org/x/tools v0.1.1 // indirect
 )

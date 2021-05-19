@@ -58,8 +58,8 @@ func Test_calculatePrice(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := calculatePrice(tt.args.mystPriceUSD, tt.args.basePriceUSD, tt.args.multiplier); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("calculatePrice() = %v, want %v", got, tt.want)
+			if got := calculatePriceMYST(tt.args.mystPriceUSD, tt.args.basePriceUSD, tt.args.multiplier); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("calculatePriceMYST() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -110,8 +110,8 @@ func TestPricer_isMystInSensibleLimit(t *testing.T) {
 			p := &Pricer{
 				mystBound: tt.fields.mystBound,
 			}
-			if err := p.isMystInSensibleLimit(tt.args.price); (err != nil) != tt.wantErr {
-				t.Errorf("Pricer.isMystInSensibleLimit() error = %v, wantErr %v", err, tt.wantErr)
+			if err := p.withinBounds(tt.args.price); (err != nil) != tt.wantErr {
+				t.Errorf("Pricer.withinBounds() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -136,7 +136,7 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 			fields: fields{
 				lp: LatestPrices{},
 				cfg: Config{
-					BasePrice: PriceByTypeUSD{
+					BasePrices: PriceByTypeUSD{
 						Residential: &PriceUSD{
 							PricePerHour: 0.01,
 							PricePerGiB:  0.02,
@@ -192,7 +192,7 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 					},
 				},
 				cfg: Config{
-					BasePrice: PriceByTypeUSD{
+					BasePrices: PriceByTypeUSD{
 						Residential: &PriceUSD{
 							PricePerHour: 0.01,
 							PricePerGiB:  0.02,
@@ -263,7 +263,7 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 			fields: fields{
 				lp: LatestPrices{},
 				cfg: Config{
-					BasePrice: PriceByTypeUSD{
+					BasePrices: PriceByTypeUSD{
 						Residential: &PriceUSD{
 							PricePerHour: 0.01,
 							PricePerGiB:  0.02,
@@ -273,7 +273,7 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 							PricePerGiB:  0.04,
 						},
 					},
-					CountryModifiers: map[ISO3166CountryCode]Multiplier{
+					CountryModifiers: map[ISO3166CountryCode]Modifier{
 						"US": {
 							Residential: 2,
 							Other:       3,
@@ -288,22 +288,22 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 				"US": {
 					Current: &PriceByType{
 						Residential: &Price{
-							PricePerHour: calculatePrice(1, 0.01, 2),
-							PricePerGiB:  calculatePrice(1, 0.02, 2),
+							PricePerHour: calculatePriceMYST(1, 0.01, 2),
+							PricePerGiB:  calculatePriceMYST(1, 0.02, 2),
 						},
 						Other: &Price{
-							PricePerHour: calculatePrice(1, 0.03, 3),
-							PricePerGiB:  calculatePrice(1, 0.04, 3),
+							PricePerHour: calculatePriceMYST(1, 0.03, 3),
+							PricePerGiB:  calculatePriceMYST(1, 0.04, 3),
 						},
 					},
 					Previous: &PriceByType{
 						Residential: &Price{
-							PricePerHour: calculatePrice(1, 0.01, 2),
-							PricePerGiB:  calculatePrice(1, 0.02, 2),
+							PricePerHour: calculatePriceMYST(1, 0.01, 2),
+							PricePerGiB:  calculatePriceMYST(1, 0.02, 2),
 						},
 						Other: &Price{
-							PricePerHour: calculatePrice(1, 0.03, 3),
-							PricePerGiB:  calculatePrice(1, 0.04, 3),
+							PricePerHour: calculatePriceMYST(1, 0.03, 3),
+							PricePerGiB:  calculatePriceMYST(1, 0.04, 3),
 						},
 					},
 				},
@@ -330,7 +330,7 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 					},
 				},
 				cfg: Config{
-					BasePrice: PriceByTypeUSD{
+					BasePrices: PriceByTypeUSD{
 						Residential: &PriceUSD{
 							PricePerHour: 0.01,
 							PricePerGiB:  0.02,
@@ -340,7 +340,7 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 							PricePerGiB:  0.04,
 						},
 					},
-					CountryModifiers: map[ISO3166CountryCode]Multiplier{
+					CountryModifiers: map[ISO3166CountryCode]Modifier{
 						"US": {
 							Residential: 2,
 							Other:       3,
@@ -355,12 +355,12 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 				"US": {
 					Current: &PriceByType{
 						Residential: &Price{
-							PricePerHour: calculatePrice(1, 0.01, 2),
-							PricePerGiB:  calculatePrice(1, 0.02, 2),
+							PricePerHour: calculatePriceMYST(1, 0.01, 2),
+							PricePerGiB:  calculatePriceMYST(1, 0.02, 2),
 						},
 						Other: &Price{
-							PricePerHour: calculatePrice(1, 0.03, 3),
-							PricePerGiB:  calculatePrice(1, 0.04, 3),
+							PricePerHour: calculatePriceMYST(1, 0.03, 3),
+							PricePerGiB:  calculatePriceMYST(1, 0.04, 3),
 						},
 					},
 					Previous: &PriceByType{
@@ -384,7 +384,7 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 					PerCountry: map[string]*PriceHistory{},
 				},
 				cfg: Config{
-					BasePrice: PriceByTypeUSD{
+					BasePrices: PriceByTypeUSD{
 						Residential: &PriceUSD{
 							PricePerHour: 0.01,
 							PricePerGiB:  0.02,
@@ -394,7 +394,7 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 							PricePerGiB:  0.04,
 						},
 					},
-					CountryModifiers: map[ISO3166CountryCode]Multiplier{
+					CountryModifiers: map[ISO3166CountryCode]Modifier{
 						"US": {
 							Residential: 2,
 							Other:       3,
@@ -409,22 +409,22 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 				"US": {
 					Current: &PriceByType{
 						Residential: &Price{
-							PricePerHour: calculatePrice(1, 0.01, 2),
-							PricePerGiB:  calculatePrice(1, 0.02, 2),
+							PricePerHour: calculatePriceMYST(1, 0.01, 2),
+							PricePerGiB:  calculatePriceMYST(1, 0.02, 2),
 						},
 						Other: &Price{
-							PricePerHour: calculatePrice(1, 0.03, 3),
-							PricePerGiB:  calculatePrice(1, 0.04, 3),
+							PricePerHour: calculatePriceMYST(1, 0.03, 3),
+							PricePerGiB:  calculatePriceMYST(1, 0.04, 3),
 						},
 					},
 					Previous: &PriceByType{
 						Residential: &Price{
-							PricePerHour: calculatePrice(1, 0.01, 2),
-							PricePerGiB:  calculatePrice(1, 0.02, 2),
+							PricePerHour: calculatePriceMYST(1, 0.01, 2),
+							PricePerGiB:  calculatePriceMYST(1, 0.02, 2),
 						},
 						Other: &Price{
-							PricePerHour: calculatePrice(1, 0.03, 3),
-							PricePerGiB:  calculatePrice(1, 0.04, 3),
+							PricePerHour: calculatePriceMYST(1, 0.03, 3),
+							PricePerGiB:  calculatePriceMYST(1, 0.04, 3),
 						},
 					},
 				},

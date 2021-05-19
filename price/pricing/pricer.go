@@ -6,6 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/fln/pprotect"
+
 	"github.com/mysteriumnetwork/payments/crypto"
 	"github.com/rs/zerolog/log"
 )
@@ -16,7 +18,7 @@ type Bound struct {
 }
 
 type PriceAPI interface {
-	MystInUSD() (float64, error)
+	MystUSD() (float64, error)
 }
 
 type Pricer struct {
@@ -29,16 +31,24 @@ type Pricer struct {
 	lp   LatestPrices
 }
 
-func NewPricer(cfg Config, priceAPI PriceAPI, priceLifetime time.Duration, sensibleMystBound Bound) *Pricer {
-	return &Pricer{
+func NewPricer(cfg Config, priceAPI PriceAPI, priceLifetime time.Duration, sensibleMystBound Bound) (*Pricer, error) {
+	pricer := &Pricer{
 		cfg:           cfg,
 		priceAPI:      priceAPI,
 		priceLifetime: priceLifetime,
 		mystBound:     sensibleMystBound,
 	}
+	pprotect.CallLoop(func() {
+		err := pricer.updatePrices()
+		log.Err(err).Msg("Failed to update prices")
+	}, priceLifetime)
+	if err := pricer.init(); err != nil {
+		return nil, err
+	}
+	return pricer, nil
 }
 
-func (p *Pricer) Init() error {
+func (p *Pricer) init() error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
@@ -67,45 +77,45 @@ func (p *Pricer) GetPrices() LatestPrices {
 }
 
 func (p *Pricer) updatePrices() error {
-	mystInUSD, err := p.fetchMystPrice()
+	mystUSD, err := p.fetchMystPrice()
 	if err != nil {
 		return err
 	}
 
 	log.Info().Msg("prices updated")
-	p.lp = p.generateNewLatestPrice(mystInUSD)
+	p.lp = p.generateNewLatestPrice(mystUSD)
 	return nil
 }
 
-func (p *Pricer) generateNewLatestPrice(mystInUSD float64) LatestPrices {
+func (p *Pricer) generateNewLatestPrice(mystUSD float64) LatestPrices {
 	tm := time.Now().UTC()
 
 	newLP := LatestPrices{
-		Defaults:          p.generateNewDefaults(mystInUSD),
-		PerCountry:        p.generateNewPerCountry(mystInUSD),
+		Defaults:          p.generateNewDefaults(mystUSD),
+		PerCountry:        p.generateNewPerCountry(mystUSD),
 		CurrentValidUntil: tm.Add(p.priceLifetime),
 	}
 
 	if !p.lp.isInitialized() {
 		newLP.Defaults.Previous = newLP.Defaults.Current
-		newLP.PreviousValidUNtil = tm.Add(-p.priceLifetime)
+		newLP.PreviousValidUntil = tm.Add(-p.priceLifetime)
 	} else {
 		newLP.Defaults.Previous = p.lp.Defaults.Current
-		newLP.PreviousValidUNtil = p.lp.CurrentValidUntil
+		newLP.PreviousValidUntil = p.lp.CurrentValidUntil
 	}
 	return newLP
 }
 
-func (p *Pricer) generateNewDefaults(mystInUSD float64) *PriceHistory {
+func (p *Pricer) generateNewDefaults(mystUSD float64) *PriceHistory {
 	ph := &PriceHistory{
 		Current: &PriceByType{
 			Residential: &Price{
-				PricePerHour: calculatePrice(mystInUSD, p.cfg.BasePrice.Residential.PricePerHour, 1),
-				PricePerGiB:  calculatePrice(mystInUSD, p.cfg.BasePrice.Residential.PricePerGiB, 1),
+				PricePerHour: calculatePriceMYST(mystUSD, p.cfg.BasePrices.Residential.PricePerHour, 1),
+				PricePerGiB:  calculatePriceMYST(mystUSD, p.cfg.BasePrices.Residential.PricePerGiB, 1),
 			},
 			Other: &Price{
-				PricePerHour: calculatePrice(mystInUSD, p.cfg.BasePrice.Other.PricePerHour, 1),
-				PricePerGiB:  calculatePrice(mystInUSD, p.cfg.BasePrice.Other.PricePerGiB, 1),
+				PricePerHour: calculatePriceMYST(mystUSD, p.cfg.BasePrices.Other.PricePerHour, 1),
+				PricePerGiB:  calculatePriceMYST(mystUSD, p.cfg.BasePrices.Other.PricePerGiB, 1),
 			},
 		},
 	}
@@ -117,18 +127,18 @@ func (p *Pricer) generateNewDefaults(mystInUSD float64) *PriceHistory {
 	return ph
 }
 
-func (p *Pricer) generateNewPerCountry(mystInUSD float64) map[string]*PriceHistory {
+func (p *Pricer) generateNewPerCountry(mystUSD float64) map[string]*PriceHistory {
 	countries := make(map[string]*PriceHistory)
 	for k, v := range p.cfg.CountryModifiers {
 		ph := &PriceHistory{
 			Current: &PriceByType{
 				Residential: &Price{
-					PricePerHour: calculatePrice(mystInUSD, p.cfg.BasePrice.Residential.PricePerHour, v.Residential),
-					PricePerGiB:  calculatePrice(mystInUSD, p.cfg.BasePrice.Residential.PricePerGiB, v.Residential),
+					PricePerHour: calculatePriceMYST(mystUSD, p.cfg.BasePrices.Residential.PricePerHour, v.Residential),
+					PricePerGiB:  calculatePriceMYST(mystUSD, p.cfg.BasePrices.Residential.PricePerGiB, v.Residential),
 				},
 				Other: &Price{
-					PricePerHour: calculatePrice(mystInUSD, p.cfg.BasePrice.Other.PricePerHour, v.Other),
-					PricePerGiB:  calculatePrice(mystInUSD, p.cfg.BasePrice.Other.PricePerGiB, v.Other),
+					PricePerHour: calculatePriceMYST(mystUSD, p.cfg.BasePrices.Other.PricePerHour, v.Other),
+					PricePerGiB:  calculatePriceMYST(mystUSD, p.cfg.BasePrices.Other.PricePerGiB, v.Other),
 				},
 			},
 		}
@@ -152,26 +162,25 @@ func (p *Pricer) generateNewPerCountry(mystInUSD float64) map[string]*PriceHisto
 
 // Take note that this is not 100% correct as we're rounding a bit due to accuracy issues with floats.
 // This, however, is not important here as the accuracy will be more than good enough to a few zeroes after the dot.
-func calculatePrice(mystPriceUSD float64, basePriceUSD float64, multiplier float64) *big.Int {
-	return crypto.FloatToBigMyst((basePriceUSD / mystPriceUSD) * multiplier)
+func calculatePriceMYST(mystUSD, priceUSD, multiplier float64) *big.Int {
+	return crypto.FloatToBigMyst((priceUSD / mystUSD) * multiplier)
 }
 
 func (p *Pricer) fetchMystPrice() (float64, error) {
-	mystInUSD, err := p.priceAPI.MystInUSD()
+	mystUSD, err := p.priceAPI.MystUSD()
 	if err != nil {
 		return 0, err
 	}
 
-	err = p.isMystInSensibleLimit(mystInUSD)
-	if err != nil {
+	if err := p.withinBounds(mystUSD); err != nil {
 		return 0, err
 	}
 
-	return mystInUSD, nil
+	return mystUSD, nil
 }
 
-// isMystInSensibleLimit used to filter out any possible nonsense that the external pricing services might return.
-func (p *Pricer) isMystInSensibleLimit(price float64) error {
+// withinBounds used to filter out any possible nonsense that the external pricing services might return.
+func (p *Pricer) withinBounds(price float64) error {
 	if price > p.mystBound.Max || price < p.mystBound.Min {
 		return fmt.Errorf("myst exceeds sensible bounds: %.6f < %.6f(current price) < %.6f", p.mystBound.Min, price, p.mystBound.Max)
 	}
@@ -179,13 +188,13 @@ func (p *Pricer) isMystInSensibleLimit(price float64) error {
 }
 
 type Config struct {
-	BasePrice        PriceByTypeUSD
-	CountryModifiers map[ISO3166CountryCode]Multiplier
+	BasePrices       PriceByTypeUSD
+	CountryModifiers map[ISO3166CountryCode]Modifier
 }
 
 type ISO3166CountryCode string
 
-type Multiplier struct {
+type Modifier struct {
 	Residential float64
 	Other       float64
 }
@@ -197,7 +206,7 @@ type LatestPrices struct {
 	Defaults           *PriceHistory            `json:"defaults"`
 	PerCountry         map[string]*PriceHistory `json:"per_country"`
 	CurrentValidUntil  time.Time                `json:"current_valid_until"`
-	PreviousValidUNtil time.Time                `json:"previous_valid_until"`
+	PreviousValidUntil time.Time                `json:"previous_valid_until"`
 }
 
 func (lp *LatestPrices) isInitialized() bool {
@@ -225,12 +234,12 @@ type PriceUSD struct {
 }
 
 type Price struct {
-	PricePerHour *big.Int `json:"price_per_hour"`
-	PricePerGiB  *big.Int `json:"price_per_gib"`
+	PricePerHour *big.Int `json:"price_per_hour" swaggertype:"integer"`
+	PricePerGiB  *big.Int `json:"price_per_gib" swaggertype:"integer"`
 }
 
-var exampleCFG = Config{
-	BasePrice: PriceByTypeUSD{
+var SampleCFG = Config{
+	BasePrices: PriceByTypeUSD{
 		Residential: &PriceUSD{
 			PricePerHour: 0.00036,
 			PricePerGiB:  0.06,
@@ -240,7 +249,7 @@ var exampleCFG = Config{
 			PricePerGiB:  0.06,
 		},
 	},
-	CountryModifiers: map[ISO3166CountryCode]Multiplier{
+	CountryModifiers: map[ISO3166CountryCode]Modifier{
 		ISO3166CountryCode("US"): {
 			Residential: 1.5,
 			Other:       1.2,

@@ -28,11 +28,34 @@
                 }
             }
         },
+        "/prices": {
+            "get": {
+                "description": "Latest Prices",
+                "tags": [
+                    "prices"
+                ],
+                "summary": "Latest Prices",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/pricing.LatestPrices"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/proposals": {
             "get": {
                 "description": "List proposals",
                 "consumes": [
                     "application/json"
+                ],
+                "tags": [
+                    "proposals"
                 ],
                 "summary": "List proposals",
                 "parameters": [
@@ -152,6 +175,59 @@
         }
     },
     "definitions": {
+        "pricing.LatestPrices": {
+            "type": "object",
+            "properties": {
+                "current_valid_until": {
+                    "type": "string"
+                },
+                "defaults": {
+                    "$ref": "#/definitions/pricing.PriceHistory"
+                },
+                "per_country": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/pricing.PriceHistory"
+                    }
+                },
+                "previous_valid_until": {
+                    "type": "string"
+                }
+            }
+        },
+        "pricing.Price": {
+            "type": "object",
+            "properties": {
+                "price_per_gib": {
+                    "type": "integer"
+                },
+                "price_per_hour": {
+                    "type": "integer"
+                }
+            }
+        },
+        "pricing.PriceByType": {
+            "type": "object",
+            "properties": {
+                "other": {
+                    "$ref": "#/definitions/pricing.Price"
+                },
+                "residential": {
+                    "$ref": "#/definitions/pricing.Price"
+                }
+            }
+        },
+        "pricing.PriceHistory": {
+            "type": "object",
+            "properties": {
+                "current": {
+                    "$ref": "#/definitions/pricing.PriceByType"
+                },
+                "previous": {
+                    "$ref": "#/definitions/pricing.PriceByType"
+                }
+            }
+        },
         "proposal.PingResponse": {
             "type": "object",
             "properties": {
