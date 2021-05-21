@@ -11,8 +11,8 @@
   },
   "country_modifiers": {
     "US": {
-      "Residential": 1.5,
-      "Other": 1.2
+      "residential": 1.5,
+      "other": 1.2
     }
   }
 }

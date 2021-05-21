@@ -13,17 +13,16 @@ import (
 )
 
 type Bound struct {
-	Min float64
-	Max float64
+	Min, Max float64
 }
 
-type PriceAPI interface {
+type FiatPriceAPI interface {
 	MystUSD() (float64, error)
 }
 
 type Pricer struct {
 	cfg           Config
-	priceAPI      PriceAPI
+	priceAPI      FiatPriceAPI
 	priceLifetime time.Duration
 	mystBound     Bound
 
@@ -31,7 +30,7 @@ type Pricer struct {
 	lp   LatestPrices
 }
 
-func NewPricer(provider ConfigProvider, priceAPI PriceAPI, priceLifetime time.Duration, sensibleMystBound Bound) (*Pricer, error) {
+func NewPricer(provider ConfigProvider, priceAPI FiatPriceAPI, priceLifetime time.Duration, sensibleMystBound Bound) (*Pricer, error) {
 	cfg, err := provider.Get()
 	if err != nil {
 		return nil, err

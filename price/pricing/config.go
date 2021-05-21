@@ -37,6 +37,6 @@ type PriceUSD struct {
 }
 
 type Modifier struct {
-	Residential float64
-	Other       float64
+	Residential float64 `json:"residential"`
+	Other       float64 `json:"other"`
 }
