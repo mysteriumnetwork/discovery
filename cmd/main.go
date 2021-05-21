@@ -62,7 +62,7 @@ func main() {
 
 	v3 := r.Group("/api/v3")
 
-	proposal.NewAPI(proposalService).RegisterRoutes(v3)
+	proposal.NewAPI(proposalService, proposalRepo).RegisterRoutes(v3)
 	price.NewAPI().RegisterRoutes(v3)
 
 	brokerListener := listener.New(cfg.BrokerURL.String(), proposalRepo)
