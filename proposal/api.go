@@ -5,6 +5,7 @@
 package proposal
 
 import (
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -13,11 +14,12 @@ import (
 )
 
 type API struct {
-	service *Service
+	service    *Service
+	repository *Repository
 }
 
-func NewAPI(service *Service) *API {
-	return &API{service: service}
+func NewAPI(service *Service, repository *Repository) *API {
+	return &API{service: service, repository: repository}
 }
 
 // Ping godoc.
@@ -84,14 +86,36 @@ func (a *API) Proposals(c *gin.Context) {
 
 	if err != nil {
 		log.Err(err).Msg("Failed to list proposals")
-		c.JSON(500, gorest.Err500)
+		c.JSON(http.StatusInternalServerError, gorest.Err500)
 		return
 	}
 
-	c.JSON(200, proposals)
+	c.JSON(http.StatusOK, proposals)
+}
+
+// ProposalsMetadata list proposals' metadata.
+// @Summary List proposals' metadata.
+// @Description List proposals' metadata
+// @Param provider_id query string false "Provider ID"
+// @Accept json
+// @Product json
+// @Success 200 {array} v2.Metadata
+// @Router /proposals-metadata [get]
+func (a *API) ProposalsMetadata(c *gin.Context) {
+	opts := repoMetadataOpts{
+		providerID: c.Query("provider_id"),
+	}
+	metadata, err := a.repository.Metadata(opts)
+	if err != nil {
+		log.Err(err).Msg("Failed to list proposal metadata")
+		c.JSON(http.StatusInternalServerError, gorest.Err500)
+		return
+	}
+	c.JSON(http.StatusOK, metadata)
 }
 
 func (a *API) RegisterRoutes(r gin.IRoutes) {
 	r.GET("/ping", a.Ping)
 	r.GET("/proposals", a.Proposals)
+	r.GET("/proposals-metadata", a.ProposalsMetadata)
 }

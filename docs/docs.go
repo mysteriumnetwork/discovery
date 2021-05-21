@@ -137,6 +137,34 @@ var doc = `{
                     }
                 }
             }
+        },
+        "/proposals-metadata": {
+            "get": {
+                "description": "List proposals' metadata",
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "List proposals' metadata.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Provider ID",
+                        "name": "provider_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v2.Metadata"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -193,6 +221,38 @@ var doc = `{
                 }
             }
         },
+        "v2.Metadata": {
+            "type": "object",
+            "properties": {
+                "country": {
+                    "type": "string"
+                },
+                "ip_type": {
+                    "type": "string"
+                },
+                "isp": {
+                    "type": "string"
+                },
+                "price_per_gib": {
+                    "type": "integer"
+                },
+                "price_per_hour": {
+                    "type": "integer"
+                },
+                "provider_id": {
+                    "type": "string"
+                },
+                "service_type": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "whitelist": {
+                    "type": "boolean"
+                }
+            }
+        },
         "v2.Price": {
             "type": "object",
             "properties": {
@@ -227,6 +287,9 @@ var doc = `{
                 },
                 "format": {
                     "type": "string"
+                },
+                "id": {
+                    "type": "integer"
                 },
                 "location": {
                     "$ref": "#/definitions/v2.Location"

@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/georgysavva/scany/pgxscan"
 	"github.com/mysteriumnetwork/discovery/db"
 	v2 "github.com/mysteriumnetwork/discovery/proposal/v2"
 )
@@ -117,6 +118,52 @@ func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
 	}
 
 	return proposals, nil
+}
+
+type repoMetadataOpts struct {
+	providerID string
+}
+
+func (r *Repository) Metadata(opts repoMetadataOpts) ([]v2.Metadata, error) {
+	q := strings.Builder{}
+	var args []interface{}
+
+	q.WriteString(`
+        SELECT proposal->>'provider_id'                                             AS provider_id,
+               proposal->>'service_type'                                            AS service_type,
+               proposal->'location'->>'country'                                     AS country,
+               proposal->'location'->>'isp'                                         AS isp,
+               proposal->'location'->>'ip_type'                                     AS ip_type,
+               COALESCE(proposal->'access_policies'@>'[{"id":"mysterium"}]', FALSE) AS whitelist,
+               proposal->'price'->'per_gib'                                         AS price_per_gib,
+               proposal->'price'->'per_hour'                                        AS price_per_hour,
+               updated_at                                                           AS updated_at
+        FROM proposals
+        WHERE 1=1
+	`)
+	if opts.providerID != "" {
+		args = append(args, opts.providerID)
+		q.WriteString(fmt.Sprintf(" AND proposal->>'provider_id' = $%v", len(args)))
+	}
+
+	conn, err := r.db.Connection()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+
+	rows, _ := conn.Query(context.Background(), q.String(), args...)
+	defer rows.Close()
+
+	var meta []v2.Metadata
+	for rows.Next() {
+		var m v2.Metadata
+		if err := pgxscan.ScanRow(&m, rows); err != nil {
+			return nil, err
+		}
+		meta = append(meta, m)
+	}
+	return meta, nil
 }
 
 func (r *Repository) Store(proposal v2.Proposal) error {
