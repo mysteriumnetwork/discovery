@@ -67,7 +67,7 @@ func main() {
 
 	proposal.NewAPI(proposalService, proposalRepo).RegisterRoutes(v3)
 	pricer, err := pricing.NewPricer(
-		pricing.SampleCFG,
+		&pricing.DefaultCountryModifiers{},
 		&pricing.MockPriceAPI{},
 		time.Minute*5,
 		pricing.Bound{Min: 0.1, Max: 3.0},

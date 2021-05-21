@@ -31,7 +31,11 @@ type Pricer struct {
 	lp   LatestPrices
 }
 
-func NewPricer(cfg Config, priceAPI PriceAPI, priceLifetime time.Duration, sensibleMystBound Bound) (*Pricer, error) {
+func NewPricer(provider ConfigProvider, priceAPI PriceAPI, priceLifetime time.Duration, sensibleMystBound Bound) (*Pricer, error) {
+	cfg, err := provider.Get()
+	if err != nil {
+		return nil, err
+	}
 	pricer := &Pricer{
 		cfg:           cfg,
 		priceAPI:      priceAPI,
@@ -187,18 +191,6 @@ func (p *Pricer) withinBounds(price float64) error {
 	return nil
 }
 
-type Config struct {
-	BasePrices       PriceByTypeUSD
-	CountryModifiers map[ISO3166CountryCode]Modifier
-}
-
-type ISO3166CountryCode string
-
-type Modifier struct {
-	Residential float64
-	Other       float64
-}
-
 // LatestPrices holds two sets of prices. The Previous should be used in case
 // a race condition between obtaining prices by Consumer and Provider
 // upon agreement
@@ -223,36 +215,7 @@ type PriceByType struct {
 	Other       *Price `json:"other"`
 }
 
-type PriceByTypeUSD struct {
-	Residential *PriceUSD `json:"residential"`
-	Other       *PriceUSD `json:"other"`
-}
-
-type PriceUSD struct {
-	PricePerHour float64 `json:"price_per_hour"`
-	PricePerGiB  float64 `json:"price_per_gib"`
-}
-
 type Price struct {
 	PricePerHour *big.Int `json:"price_per_hour" swaggertype:"integer"`
 	PricePerGiB  *big.Int `json:"price_per_gib" swaggertype:"integer"`
-}
-
-var SampleCFG = Config{
-	BasePrices: PriceByTypeUSD{
-		Residential: &PriceUSD{
-			PricePerHour: 0.00036,
-			PricePerGiB:  0.06,
-		},
-		Other: &PriceUSD{
-			PricePerHour: 0.00036,
-			PricePerGiB:  0.06,
-		},
-	},
-	CountryModifiers: map[ISO3166CountryCode]Modifier{
-		ISO3166CountryCode("US"): {
-			Residential: 1.5,
-			Other:       1.2,
-		},
-	},
 }
