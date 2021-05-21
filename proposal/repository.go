@@ -134,13 +134,14 @@ func (r *Repository) Store(proposal v2.Proposal) error {
 	defer conn.Release()
 
 	_, err = conn.Exec(context.Background(), `
-		INSERT INTO proposals (proposal, key, expires_at)
-		VALUES ($1, $2, $3)
+		INSERT INTO proposals (proposal, key, expires_at, updated_at)
+		VALUES ($1, $2, $3, $4)
 		ON CONFLICT (key) DO UPDATE
 			SET proposal = $1,
-				expires_at = $3;
+				expires_at = $3,
+				updated_at = $4;
 		`,
-		proposalJSON, proposal.Key(), expiresAt.UTC(),
+		proposalJSON, proposal.Key(), expiresAt.UTC(), time.Now().UTC(),
 	)
 	if err != nil {
 		return err
