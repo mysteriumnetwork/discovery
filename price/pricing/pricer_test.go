@@ -237,10 +237,9 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Pricer{
-				cfg: tt.fields.cfg,
-				lp:  tt.fields.lp,
+				lp: tt.fields.lp,
 			}
-			if got := p.generateNewDefaults(tt.args.mystInUSD); !reflect.DeepEqual(got, tt.want) {
+			if got := p.generateNewDefaults(tt.args.mystInUSD, tt.fields.cfg); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Pricer.generateNewDefaults() = %v, want %v", got, tt.want)
 			}
 		})
@@ -437,10 +436,9 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Pricer{
-				cfg: tt.fields.cfg,
-				lp:  tt.fields.lp,
+				lp: tt.fields.lp,
 			}
-			if got := p.generateNewPerCountry(tt.args.mystInUSD); !reflect.DeepEqual(got, tt.want) {
+			if got := p.generateNewPerCountry(tt.args.mystInUSD, tt.fields.cfg); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Pricer.generateNewPerCountry() = %v, want %v", got, tt.want)
 			}
 		})

@@ -21,22 +21,18 @@ type FiatPriceAPI interface {
 }
 
 type Pricer struct {
-	cfg           Config
 	priceAPI      FiatPriceAPI
 	priceLifetime time.Duration
 	mystBound     Bound
 
-	lock sync.Mutex
-	lp   LatestPrices
+	lock        sync.Mutex
+	lp          LatestPrices
+	cfgProvider ConfigProvider
 }
 
-func NewPricer(provider ConfigProvider, priceAPI FiatPriceAPI, priceLifetime time.Duration, sensibleMystBound Bound) (*Pricer, error) {
-	cfg, err := provider.Get()
-	if err != nil {
-		return nil, err
-	}
+func NewPricer(cfgProvider ConfigProvider, priceAPI FiatPriceAPI, priceLifetime time.Duration, sensibleMystBound Bound) (*Pricer, error) {
 	pricer := &Pricer{
-		cfg:           cfg,
+		cfgProvider:   cfgProvider,
 		priceAPI:      priceAPI,
 		priceLifetime: priceLifetime,
 		mystBound:     sensibleMystBound,
@@ -56,13 +52,6 @@ func (p *Pricer) init() error {
 	defer p.lock.Unlock()
 
 	return p.updatePrices()
-}
-
-func (p *Pricer) UpdateConfig(cfg Config) {
-	p.lock.Lock()
-	defer p.lock.Unlock()
-
-	p.cfg = cfg
 }
 
 func (p *Pricer) GetPrices() LatestPrices {
@@ -85,17 +74,22 @@ func (p *Pricer) updatePrices() error {
 		return err
 	}
 
+	cfg, err := p.cfgProvider.Get()
+	if err != nil {
+		return err
+	}
+
 	log.Info().Msg("prices updated")
-	p.lp = p.generateNewLatestPrice(mystUSD)
+	p.lp = p.generateNewLatestPrice(mystUSD, cfg)
 	return nil
 }
 
-func (p *Pricer) generateNewLatestPrice(mystUSD float64) LatestPrices {
+func (p *Pricer) generateNewLatestPrice(mystUSD float64, cfg Config) LatestPrices {
 	tm := time.Now().UTC()
 
 	newLP := LatestPrices{
-		Defaults:          p.generateNewDefaults(mystUSD),
-		PerCountry:        p.generateNewPerCountry(mystUSD),
+		Defaults:          p.generateNewDefaults(mystUSD, cfg),
+		PerCountry:        p.generateNewPerCountry(mystUSD, cfg),
 		CurrentValidUntil: tm.Add(p.priceLifetime),
 	}
 
@@ -109,16 +103,16 @@ func (p *Pricer) generateNewLatestPrice(mystUSD float64) LatestPrices {
 	return newLP
 }
 
-func (p *Pricer) generateNewDefaults(mystUSD float64) *PriceHistory {
+func (p *Pricer) generateNewDefaults(mystUSD float64, cfg Config) *PriceHistory {
 	ph := &PriceHistory{
 		Current: &PriceByType{
 			Residential: &Price{
-				PricePerHour: calculatePriceMYST(mystUSD, p.cfg.BasePrices.Residential.PricePerHour, 1),
-				PricePerGiB:  calculatePriceMYST(mystUSD, p.cfg.BasePrices.Residential.PricePerGiB, 1),
+				PricePerHour: calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.PricePerHour, 1),
+				PricePerGiB:  calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.PricePerGiB, 1),
 			},
 			Other: &Price{
-				PricePerHour: calculatePriceMYST(mystUSD, p.cfg.BasePrices.Other.PricePerHour, 1),
-				PricePerGiB:  calculatePriceMYST(mystUSD, p.cfg.BasePrices.Other.PricePerGiB, 1),
+				PricePerHour: calculatePriceMYST(mystUSD, cfg.BasePrices.Other.PricePerHour, 1),
+				PricePerGiB:  calculatePriceMYST(mystUSD, cfg.BasePrices.Other.PricePerGiB, 1),
 			},
 		},
 	}
@@ -130,18 +124,18 @@ func (p *Pricer) generateNewDefaults(mystUSD float64) *PriceHistory {
 	return ph
 }
 
-func (p *Pricer) generateNewPerCountry(mystUSD float64) map[string]*PriceHistory {
+func (p *Pricer) generateNewPerCountry(mystUSD float64, cfg Config) map[string]*PriceHistory {
 	countries := make(map[string]*PriceHistory)
-	for k, v := range p.cfg.CountryModifiers {
+	for k, mod := range cfg.CountryModifiers {
 		ph := &PriceHistory{
 			Current: &PriceByType{
 				Residential: &Price{
-					PricePerHour: calculatePriceMYST(mystUSD, p.cfg.BasePrices.Residential.PricePerHour, v.Residential),
-					PricePerGiB:  calculatePriceMYST(mystUSD, p.cfg.BasePrices.Residential.PricePerGiB, v.Residential),
+					PricePerHour: calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.PricePerHour, mod.Residential),
+					PricePerGiB:  calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.PricePerGiB, mod.Residential),
 				},
 				Other: &Price{
-					PricePerHour: calculatePriceMYST(mystUSD, p.cfg.BasePrices.Other.PricePerHour, v.Other),
-					PricePerGiB:  calculatePriceMYST(mystUSD, p.cfg.BasePrices.Other.PricePerGiB, v.Other),
+					PricePerHour: calculatePriceMYST(mystUSD, cfg.BasePrices.Other.PricePerHour, mod.Other),
+					PricePerGiB:  calculatePriceMYST(mystUSD, cfg.BasePrices.Other.PricePerGiB, mod.Other),
 				},
 			},
 		}

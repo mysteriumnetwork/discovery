@@ -1,5 +1,39 @@
 basePath: /api/v3
 definitions:
+  pricing.LatestPrices:
+    properties:
+      current_valid_until:
+        type: string
+      defaults:
+        $ref: '#/definitions/pricing.PriceHistory'
+      per_country:
+        additionalProperties:
+          $ref: '#/definitions/pricing.PriceHistory'
+        type: object
+      previous_valid_until:
+        type: string
+    type: object
+  pricing.Price:
+    properties:
+      price_per_gib:
+        type: integer
+      price_per_hour:
+        type: integer
+    type: object
+  pricing.PriceByType:
+    properties:
+      other:
+        $ref: '#/definitions/pricing.Price'
+      residential:
+        $ref: '#/definitions/pricing.Price'
+    type: object
+  pricing.PriceHistory:
+    properties:
+      current:
+        $ref: '#/definitions/pricing.PriceByType'
+      previous:
+        $ref: '#/definitions/pricing.PriceByType'
+    type: object
   proposal.PingResponse:
     properties:
       message:
@@ -122,6 +156,21 @@ paths:
           schema:
             $ref: '#/definitions/proposal.PingResponse'
       summary: Ping
+      tags:
+      - system
+  /prices:
+    get:
+      description: Latest Prices
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/pricing.LatestPrices'
+            type: array
+      summary: Latest Prices
+      tags:
+      - prices
   /proposals:
     get:
       consumes:
@@ -188,6 +237,8 @@ paths:
               $ref: '#/definitions/v2.Proposal'
             type: array
       summary: List proposals
+      tags:
+      - proposals
   /proposals-metadata:
     get:
       consumes:
