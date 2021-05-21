@@ -45,15 +45,9 @@ type repoListOpts struct {
 }
 
 func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
-	conn, err := r.db.Connection()
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Release()
-
-	var args []interface{}
-	//start := time.Now()
 	q := strings.Builder{}
+	var args []interface{}
+
 	q.WriteString("SELECT proposal FROM proposals WHERE 1=1")
 	if opts.providerID != "" {
 		args = append(args, opts.providerID)
@@ -101,6 +95,13 @@ func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
 		args = append(args, opts.priceHourMax)
 		q.WriteString(fmt.Sprintf(" AND (proposal->'price'->>'per_hour')::decimal <= $%v", len(args)))
 	}
+
+	conn, err := r.db.Connection()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+
 	rows, _ := conn.Query(context.Background(), q.String(), args...)
 	defer rows.Close()
 	//log.Info().Msgf("select: %s", time.Since(start))
