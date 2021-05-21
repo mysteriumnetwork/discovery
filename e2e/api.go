@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"github.com/dghubble/sling"
+	"github.com/mysteriumnetwork/discovery/price/pricing"
 	v2 "github.com/mysteriumnetwork/discovery/proposal/v2"
 )
 
@@ -15,6 +16,11 @@ func newAPI(basePath string) *api {
 
 type api struct {
 	basePath string
+}
+
+func (a *api) LatestPrices() (latestPrices pricing.LatestPrices, err error) {
+	_, err = sling.New().Base(a.basePath).Get("/api/v3/prices").Receive(&latestPrices, nil)
+	return latestPrices, err
 }
 
 func (a *api) ListFilters(query Query) (proposals []v2.Proposal, err error) {
