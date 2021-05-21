@@ -33,6 +33,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "system"
+                ],
                 "summary": "Ping",
                 "responses": {
                     "200": {
