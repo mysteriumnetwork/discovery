@@ -1,0 +1,17 @@
+{
+    "request": {
+      "method": "GET",
+      "urlPattern": "/simple/price.*"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json; charset=utf-8"
+      },
+      "jsonBody": {
+        "mysterium":{
+            "usd":0.6
+        }
+      }
+    }
+  }

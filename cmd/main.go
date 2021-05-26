@@ -22,6 +22,7 @@ import (
 	"github.com/mysteriumnetwork/discovery/proposal"
 	"github.com/mysteriumnetwork/discovery/quality"
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
+	payprice "github.com/mysteriumnetwork/payments/fees/price"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	swaggerFiles "github.com/swaggo/files"
@@ -64,11 +65,17 @@ func main() {
 	defer proposalService.Shutdown()
 
 	v3 := r.Group("/api/v3")
-
 	proposal.NewAPI(proposalService, proposalRepo).RegisterRoutes(v3)
+
+	mrkt, stopMarket, err := buildMarket(cfg)
+	if err != nil {
+		log.Fatal().Err(err).Msg("could not build market")
+	}
+	defer stopMarket()
+
 	pricer, err := pricing.NewPricer(
 		&pricing.DefaultCountryModifiers{},
-		&pricing.MockPriceAPI{},
+		mrkt,
 		time.Minute*5,
 		pricing.Bound{Min: 0.1, Max: 3.0},
 	)
@@ -89,6 +96,15 @@ func main() {
 		log.Err(err).Send()
 		return
 	}
+}
+
+func buildMarket(cfg *config.Options) (*pricing.Market, func(), error) {
+	apis := []pricing.ExternalPriceAPI{
+		payprice.NewGecko(cfg.GeckoURL.String()),
+		payprice.NewCoinRanking(cfg.CoinRankingURL.String(), &cfg.CoinRankingToken),
+	}
+	mrkt := pricing.NewMarket(apis, time.Minute*15)
+	return mrkt, mrkt.Stop, mrkt.Start()
 }
 
 func configureLogger() {

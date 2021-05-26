@@ -10,6 +10,9 @@ services:
       - DB_DSN=postgresql://discovery:discovery@db:5432/discovery
       - QUALITY_ORACLE_URL=http://wiremock:8080
       - BROKER_URL=nats://broker
+      - GECKO_URL=http://wiremock:8080
+      - COINRANKING_URL=http://wiremock:8080
+      - COINRANKING_TOKEN=suchtoken
     depends_on:
       - db
       - broker

@@ -9,12 +9,17 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+
+	"github.com/mysteriumnetwork/payments/fees/price"
 )
 
 type Options struct {
 	DbDSN            string
 	QualityOracleURL url.URL
 	BrokerURL        url.URL
+	GeckoURL         url.URL
+	CoinRankingURL   url.URL
+	CoinRankingToken string
 }
 
 func Read() (*Options, error) {
@@ -30,10 +35,25 @@ func Read() (*Options, error) {
 	if err != nil {
 		return nil, err
 	}
+	geckoURL, err := optionalEnvURL("GECKO_URL", price.DefaultGeckoURI)
+	if err != nil {
+		return nil, err
+	}
+	coinRankingURL, err := optionalEnvURL("COINRANKING_URL", price.DefaultCoinRankingURI)
+	if err != nil {
+		return nil, err
+	}
+	coinRankingToken, err := requiredEnv("COINRANKING_TOKEN")
+	if err != nil {
+		return nil, err
+	}
 	return &Options{
 		DbDSN:            dsn,
 		QualityOracleURL: *qualityOracleURL,
 		BrokerURL:        *brokerURL,
+		GeckoURL:         *geckoURL,
+		CoinRankingURL:   *coinRankingURL,
+		CoinRankingToken: coinRankingToken,
 	}, nil
 }
 
@@ -50,6 +70,15 @@ func requiredEnvURL(key string) (*url.URL, error) {
 	if err != nil {
 		return nil, err
 	}
+	parsedURL, err := url.Parse(strVal)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse %s from value '%s'", key, strVal)
+	}
+	return parsedURL, nil
+}
+
+func optionalEnvURL(key string, defaults string) (*url.URL, error) {
+	strVal := optionalEnv(key, defaults)
 	parsedURL, err := url.Parse(strVal)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse %s from value '%s'", key, strVal)

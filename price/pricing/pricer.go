@@ -17,7 +17,7 @@ type Bound struct {
 }
 
 type FiatPriceAPI interface {
-	MystUSD() (float64, error)
+	MystUSD() float64
 }
 
 type Pricer struct {
@@ -164,11 +164,7 @@ func calculatePriceMYST(mystUSD, priceUSD, multiplier float64) *big.Int {
 }
 
 func (p *Pricer) fetchMystPrice() (float64, error) {
-	mystUSD, err := p.priceAPI.MystUSD()
-	if err != nil {
-		return 0, err
-	}
-
+	mystUSD := p.priceAPI.MystUSD()
 	if err := p.withinBounds(mystUSD); err != nil {
 		return 0, err
 	}
