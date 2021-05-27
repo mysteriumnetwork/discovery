@@ -1,12 +1,9 @@
 package pricing
 
 import (
-	"encoding/json"
 	"math/big"
 	"reflect"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 
 	"github.com/mysteriumnetwork/payments/crypto"
 )
@@ -443,12 +440,4 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 			}
 		})
 	}
-}
-
-func Test_Config(t *testing.T) {
-	config, err := (&DefaultCountryModifiers{}).Get()
-	assert.NoError(t, err)
-	configBytes, err := json.Marshal(config)
-	assert.NoError(t, err)
-	assert.JSONEq(t, string(configJSON), string(configBytes))
 }

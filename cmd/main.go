@@ -73,8 +73,14 @@ func main() {
 	}
 	defer stopMarket()
 
+	cfger := pricing.NewConfigProviderDB(database)
+	_, err = cfger.Get()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to load cfg")
+	}
+
 	pricer, err := pricing.NewPricer(
-		&pricing.DefaultCountryModifiers{},
+		cfger,
 		mrkt,
 		time.Minute*5,
 		pricing.Bound{Min: 0.1, Max: 3.0},
@@ -83,7 +89,7 @@ func main() {
 		log.Err(err).Msg("Failed to initialize Pricer")
 		return
 	}
-	price.NewAPI(pricer).RegisterRoutes(v3)
+	price.NewAPI(pricer, cfger, cfg.UniverseJWTSecret).RegisterRoutes(v3)
 
 	brokerListener := listener.New(cfg.BrokerURL.String(), proposalRepo)
 

@@ -14,12 +14,13 @@ import (
 )
 
 type Options struct {
-	DbDSN            string
-	QualityOracleURL url.URL
-	BrokerURL        url.URL
-	GeckoURL         url.URL
-	CoinRankingURL   url.URL
-	CoinRankingToken string
+	DbDSN             string
+	QualityOracleURL  url.URL
+	BrokerURL         url.URL
+	GeckoURL          url.URL
+	CoinRankingURL    url.URL
+	CoinRankingToken  string
+	UniverseJWTSecret string
 }
 
 func Read() (*Options, error) {
@@ -47,13 +48,18 @@ func Read() (*Options, error) {
 	if err != nil {
 		return nil, err
 	}
+	universeJWTSecret, err := requiredEnv("UNIVERSE_JWT_SECRET")
+	if err != nil {
+		return nil, err
+	}
 	return &Options{
-		DbDSN:            dsn,
-		QualityOracleURL: *qualityOracleURL,
-		BrokerURL:        *brokerURL,
-		GeckoURL:         *geckoURL,
-		CoinRankingURL:   *coinRankingURL,
-		CoinRankingToken: coinRankingToken,
+		DbDSN:             dsn,
+		QualityOracleURL:  *qualityOracleURL,
+		BrokerURL:         *brokerURL,
+		GeckoURL:          *geckoURL,
+		CoinRankingURL:    *coinRankingURL,
+		CoinRankingToken:  coinRankingToken,
+		UniverseJWTSecret: universeJWTSecret,
 	}, nil
 }
 

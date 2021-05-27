@@ -13,6 +13,7 @@ services:
       - GECKO_URL=http://wiremock:8080
       - COINRANKING_URL=http://wiremock:8080
       - COINRANKING_TOKEN=suchtoken
+      - UNIVERSE_JWT_SECRET=suchsecret
     depends_on:
       - db
       - broker

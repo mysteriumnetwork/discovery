@@ -10,6 +10,10 @@ services:
       - DB_DSN=postgresql://discovery:discovery@db:5432/discovery
       - QUALITY_ORACLE_URL=https://testnet2-quality.mysterium.network
       - BROKER_URL=nats://testnet2-broker.mysterium.network
+      - GECKO_URL=https://api.coingecko.com/api/v3
+      - COINRANKING_URL=http://wiremock:8080
+      - COINRANKING_TOKEN=suchtoken
+      - UNIVERSE_JWT_SECRET=suchsecret
   db:
     image: postgres:13-alpine
     container_name: discovery_db

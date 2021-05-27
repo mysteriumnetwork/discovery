@@ -6,6 +6,7 @@ require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/allegro/bigcache v1.2.1
 	github.com/dghubble/sling v1.3.0
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fatih/color v1.10.0
 	github.com/fln/pprotect v0.0.0-20160819093714-7d932ef9e7a2
 	github.com/georgysavva/scany v0.2.8
