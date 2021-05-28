@@ -37,17 +37,31 @@ func NewPricer(cfgProvider ConfigProvider, priceAPI FiatPriceAPI, priceLifetime 
 		priceLifetime: priceLifetime,
 		mystBound:     sensibleMystBound,
 	}
-	pprotect.CallLoop(func() {
-		err := pricer.updatePrices()
-		log.Err(err).Msg("Failed to update prices")
-	}, priceLifetime)
-	if err := pricer.init(); err != nil {
+
+	go schedulePriceUpdate(priceLifetime, pricer)
+	if err := pricer.threadSafePriceUpdate(); err != nil {
 		return nil, err
 	}
 	return pricer, nil
 }
 
-func (p *Pricer) init() error {
+func schedulePriceUpdate(priceLifetime time.Duration, pricer *Pricer) {
+	for {
+		select {
+		case <-time.After(priceLifetime):
+			pprotect.CallLoop(func() {
+				err := pricer.threadSafePriceUpdate()
+				if err != nil {
+					log.Err(err).Msg("failed to update prices")
+				}
+			}, time.Second, func(val interface{}, stack []byte) {
+				log.Warn().Msg("panic on scheduled price update: " + fmt.Sprint(val))
+			})
+		}
+	}
+}
+
+func (p *Pricer) threadSafePriceUpdate() error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
