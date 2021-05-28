@@ -67,6 +67,49 @@ var doc = `{
                 }
             }
         },
+        "/prices/config": {
+            "get": {
+                "description": "price config",
+                "tags": [
+                    "prices"
+                ],
+                "summary": "Price config",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/pricing.Config"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "update price config",
+                "tags": [
+                    "prices"
+                ],
+                "summary": "update price config",
+                "parameters": [
+                    {
+                        "description": "config object",
+                        "name": "config",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/pricing.Config"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/proposals": {
             "get": {
                 "description": "List proposals",
@@ -194,6 +237,20 @@ var doc = `{
         }
     },
     "definitions": {
+        "pricing.Config": {
+            "type": "object",
+            "properties": {
+                "base_prices": {
+                    "$ref": "#/definitions/pricing.PriceByTypeUSD"
+                },
+                "country_modifiers": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/pricing.Modifier"
+                    }
+                }
+            }
+        },
         "pricing.LatestPrices": {
             "type": "object",
             "properties": {
@@ -211,6 +268,17 @@ var doc = `{
                 },
                 "previous_valid_until": {
                     "type": "string"
+                }
+            }
+        },
+        "pricing.Modifier": {
+            "type": "object",
+            "properties": {
+                "other": {
+                    "type": "number"
+                },
+                "residential": {
+                    "type": "number"
                 }
             }
         },
@@ -236,6 +304,17 @@ var doc = `{
                 }
             }
         },
+        "pricing.PriceByTypeUSD": {
+            "type": "object",
+            "properties": {
+                "other": {
+                    "$ref": "#/definitions/pricing.PriceUSD"
+                },
+                "residential": {
+                    "$ref": "#/definitions/pricing.PriceUSD"
+                }
+            }
+        },
         "pricing.PriceHistory": {
             "type": "object",
             "properties": {
@@ -244,6 +323,17 @@ var doc = `{
                 },
                 "previous": {
                     "$ref": "#/definitions/pricing.PriceByType"
+                }
+            }
+        },
+        "pricing.PriceUSD": {
+            "type": "object",
+            "properties": {
+                "price_per_gib_usd": {
+                    "type": "number"
+                },
+                "price_per_hour_usd": {
+                    "type": "number"
                 }
             }
         },
