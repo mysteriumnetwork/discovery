@@ -49,7 +49,7 @@ func (a *API) GetConfig(c *gin.Context) {
 	cfg, err := a.cfger.Get()
 	if err != nil {
 		log.Err(err).Msg("Failed to get config")
-		c.JSON(http.StatusBadRequest, gorest.NewErrResponse(err.Error()))
+		c.JSON(http.StatusInternalServerError, gorest.NewErrResponse(err.Error()))
 		return
 	}
 	c.JSON(http.StatusOK, cfg)
@@ -92,9 +92,7 @@ func JWTAuthorized(secret string) func(*gin.Context) {
 		if len(authHeader) != 2 {
 			c.AbortWithStatusJSON(
 				http.StatusUnauthorized,
-				map[string]string{
-					"error": "Malformed Token",
-				},
+				gorest.NewErrResponse("Malformed Token"),
 			)
 			return
 		}
@@ -108,9 +106,7 @@ func JWTAuthorized(secret string) func(*gin.Context) {
 		if err != nil {
 			c.AbortWithStatusJSON(
 				http.StatusUnauthorized,
-				map[string]string{
-					"error": "Unauthorized",
-				},
+				gorest.NewErrResponse("Unauthorized"),
 			)
 			return
 		}
@@ -119,9 +115,7 @@ func JWTAuthorized(secret string) func(*gin.Context) {
 			if !claims.VerifyExpiresAt(time.Now().Unix(), true) {
 				c.AbortWithStatusJSON(
 					http.StatusUnauthorized,
-					map[string]string{
-						"error": "Token expired",
-					},
+					gorest.NewErrResponse("Token expired"),
 				)
 				return
 			}

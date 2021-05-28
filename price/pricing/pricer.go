@@ -58,7 +58,7 @@ func (p *Pricer) GetPrices() LatestPrices {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
-	if p.lp.CurrentValidUntil.UTC().Before(time.Now().UTC()) {
+	if !p.lp.isValid() {
 		err := p.updatePrices()
 		if err != nil {
 			log.Err(err).Msg("could not update prices")
@@ -192,6 +192,10 @@ type LatestPrices struct {
 
 func (lp *LatestPrices) isInitialized() bool {
 	return lp.Defaults != nil
+}
+
+func (lp *LatestPrices) isValid() bool {
+	return lp.CurrentValidUntil.UTC().After(time.Now().UTC())
 }
 
 type PriceHistory struct {
