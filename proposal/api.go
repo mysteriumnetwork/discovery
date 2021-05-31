@@ -29,6 +29,7 @@ func NewAPI(service *Service, repository *Repository) *API {
 // @Produce json
 // @Success 200 {object} PingResponse
 // @Router /ping [get]
+// @Tags system
 func (a *API) Ping(c *gin.Context) {
 	c.JSON(200, PingResponse{"pong"})
 }
@@ -56,6 +57,7 @@ type PingResponse struct {
 // @Product json
 // @Success 200 {array} v2.Proposal
 // @Router /proposals [get]
+// @Tags proposals
 func (a *API) Proposals(c *gin.Context) {
 	opts := ListOpts{
 		providerID:         c.Query("provider_id"),

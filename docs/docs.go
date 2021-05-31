@@ -33,6 +33,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "system"
+                ],
                 "summary": "Ping",
                 "responses": {
                     "200": {
@@ -44,11 +47,77 @@ var doc = `{
                 }
             }
         },
+        "/prices": {
+            "get": {
+                "description": "Latest Prices",
+                "tags": [
+                    "prices"
+                ],
+                "summary": "Latest Prices",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/pricing.LatestPrices"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/prices/config": {
+            "get": {
+                "description": "price config",
+                "tags": [
+                    "prices"
+                ],
+                "summary": "Price config",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/pricing.Config"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "update price config",
+                "tags": [
+                    "prices"
+                ],
+                "summary": "update price config",
+                "parameters": [
+                    {
+                        "description": "config object",
+                        "name": "config",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/pricing.Config"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/proposals": {
             "get": {
                 "description": "List proposals",
                 "consumes": [
                     "application/json"
+                ],
+                "tags": [
+                    "proposals"
                 ],
                 "summary": "List proposals",
                 "parameters": [
@@ -168,6 +237,106 @@ var doc = `{
         }
     },
     "definitions": {
+        "pricing.Config": {
+            "type": "object",
+            "properties": {
+                "base_prices": {
+                    "$ref": "#/definitions/pricing.PriceByTypeUSD"
+                },
+                "country_modifiers": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/pricing.Modifier"
+                    }
+                }
+            }
+        },
+        "pricing.LatestPrices": {
+            "type": "object",
+            "properties": {
+                "current_valid_until": {
+                    "type": "string"
+                },
+                "defaults": {
+                    "$ref": "#/definitions/pricing.PriceHistory"
+                },
+                "per_country": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/pricing.PriceHistory"
+                    }
+                },
+                "previous_valid_until": {
+                    "type": "string"
+                }
+            }
+        },
+        "pricing.Modifier": {
+            "type": "object",
+            "properties": {
+                "other": {
+                    "type": "number"
+                },
+                "residential": {
+                    "type": "number"
+                }
+            }
+        },
+        "pricing.Price": {
+            "type": "object",
+            "properties": {
+                "price_per_gib": {
+                    "type": "integer"
+                },
+                "price_per_hour": {
+                    "type": "integer"
+                }
+            }
+        },
+        "pricing.PriceByType": {
+            "type": "object",
+            "properties": {
+                "other": {
+                    "$ref": "#/definitions/pricing.Price"
+                },
+                "residential": {
+                    "$ref": "#/definitions/pricing.Price"
+                }
+            }
+        },
+        "pricing.PriceByTypeUSD": {
+            "type": "object",
+            "properties": {
+                "other": {
+                    "$ref": "#/definitions/pricing.PriceUSD"
+                },
+                "residential": {
+                    "$ref": "#/definitions/pricing.PriceUSD"
+                }
+            }
+        },
+        "pricing.PriceHistory": {
+            "type": "object",
+            "properties": {
+                "current": {
+                    "$ref": "#/definitions/pricing.PriceByType"
+                },
+                "previous": {
+                    "$ref": "#/definitions/pricing.PriceByType"
+                }
+            }
+        },
+        "pricing.PriceUSD": {
+            "type": "object",
+            "properties": {
+                "price_per_gib_usd": {
+                    "type": "number"
+                },
+                "price_per_hour_usd": {
+                    "type": "number"
+                }
+            }
+        },
         "proposal.PingResponse": {
             "type": "object",
             "properties": {
