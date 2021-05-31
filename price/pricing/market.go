@@ -64,7 +64,7 @@ func (m *Market) setPrice(in float64) {
 
 func (m *Market) fetchPricing() (float64, error) {
 	for _, v := range m.apis {
-		resp, err := v.GetCoinPrice([]string{string(price.MYST)}, []string{string(price.ETH)})
+		resp, err := v.GetCoinPrice([]string{string(price.MYST)}, []string{string(price.USD)})
 		if err != nil {
 			log.Warn().Err(err).Msg("could not load pricing info")
 			continue
