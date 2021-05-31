@@ -86,7 +86,7 @@ func main() {
 		pricing.Bound{Min: 0.1, Max: 3.0},
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to initialize Pricer")
+		log.Fatal().Err(err).Msg("Failed to initialize Pricer")
 		return
 	}
 	price.NewAPI(pricer, cfger, cfg.UniverseJWTSecret).RegisterRoutes(v3)
