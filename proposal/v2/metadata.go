@@ -4,7 +4,10 @@
 
 package v2
 
-import "time"
+import (
+	"math/big"
+	"time"
+)
 
 // Metadata provides metadata (such as last updated timestamp) about the proposal.
 // Used by the MMN.
@@ -15,7 +18,7 @@ type Metadata struct {
 	ISP          *string   `json:"isp"`
 	IPType       *string   `json:"ip_type"`
 	Whitelist    bool      `json:"whitelist"`
-	PricePerGib  uint64    `json:"price_per_gib"`
-	PricePerHour uint64    `json:"price_per_hour"`
+	PricePerGib  *big.Int  `json:"price_per_gib" swaggertype:"integer"`
+	PricePerHour *big.Int  `json:"price_per_hour" swaggertype:"integer"`
 	UpdatedAt    time.Time `json:"updated_at"`
 }
