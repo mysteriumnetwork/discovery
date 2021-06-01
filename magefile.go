@@ -48,9 +48,11 @@ func Build() error {
 //goland:noinspection GoUnusedExportedFunction
 func Run() error {
 	envs := map[string]string{
-		"DB_DSN":             "postgresql://discovery:discovery@localhost:5432/discovery",
-		"QUALITY_ORACLE_URL": "https://testnet2-quality.mysterium.network",
-		"BROKER_URL":         "nats://testnet2-broker.mysterium.network",
+		"DB_DSN":              "postgresql://discovery:discovery@localhost:5432/discovery",
+		"QUALITY_ORACLE_URL":  "https://testnet2-quality.mysterium.network",
+		"BROKER_URL":          "nats://testnet2-broker.mysterium.network",
+		"COINRANKING_TOKEN":   "",
+		"UNIVERSE_JWT_SECRET": "",
 	}
 	return sh.RunWithV(envs, "go", "run", "./cmd/main.go")
 }
