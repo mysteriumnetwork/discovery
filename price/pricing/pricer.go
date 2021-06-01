@@ -20,22 +20,35 @@ type FiatPriceAPI interface {
 	MystUSD() float64
 }
 
+// NetworkLoadByCountryProvider calculates the price multiplier according to the load of the network for the given country.
+type NetworkLoadByCountryProvider interface {
+	GetMultiplier(isoCode ISO3166CountryCode) float64
+}
+
 type Pricer struct {
-	priceAPI      FiatPriceAPI
-	priceLifetime time.Duration
-	mystBound     Bound
+	priceAPI              FiatPriceAPI
+	priceLifetime         time.Duration
+	mystBound             Bound
+	loadByCountryProvider NetworkLoadByCountryProvider
 
 	lock        sync.Mutex
 	lp          LatestPrices
 	cfgProvider ConfigProvider
 }
 
-func NewPricer(cfgProvider ConfigProvider, priceAPI FiatPriceAPI, priceLifetime time.Duration, sensibleMystBound Bound) (*Pricer, error) {
+func NewPricer(
+	cfgProvider ConfigProvider,
+	priceAPI FiatPriceAPI,
+	priceLifetime time.Duration,
+	sensibleMystBound Bound,
+	loadByCountryProvider NetworkLoadByCountryProvider,
+) (*Pricer, error) {
 	pricer := &Pricer{
-		cfgProvider:   cfgProvider,
-		priceAPI:      priceAPI,
-		priceLifetime: priceLifetime,
-		mystBound:     sensibleMystBound,
+		cfgProvider:           cfgProvider,
+		priceAPI:              priceAPI,
+		priceLifetime:         priceLifetime,
+		mystBound:             sensibleMystBound,
+		loadByCountryProvider: loadByCountryProvider,
 	}
 
 	go schedulePriceUpdate(priceLifetime, pricer)
@@ -93,8 +106,9 @@ func (p *Pricer) updatePrices() error {
 		return err
 	}
 
-	log.Info().Msg("prices updated")
 	p.lp = p.generateNewLatestPrice(mystUSD, cfg)
+	log.Info().Msg("prices updated")
+
 	return nil
 }
 
@@ -121,12 +135,16 @@ func (p *Pricer) generateNewDefaults(mystUSD float64, cfg Config) *PriceHistory 
 	ph := &PriceHistory{
 		Current: &PriceByType{
 			Residential: &Price{
-				PricePerHour: calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.PricePerHour, 1),
-				PricePerGiB:  calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.PricePerGiB, 1),
+				PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.PricePerHour, 1),
+				PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.PricePerHour, 1),
+				PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.PricePerGiB, 1),
+				PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.PricePerGiB, 1),
 			},
 			Other: &Price{
-				PricePerHour: calculatePriceMYST(mystUSD, cfg.BasePrices.Other.PricePerHour, 1),
-				PricePerGiB:  calculatePriceMYST(mystUSD, cfg.BasePrices.Other.PricePerGiB, 1),
+				PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.PricePerHour, 1),
+				PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.PricePerHour, 1),
+				PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.PricePerGiB, 1),
+				PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.PricePerGiB, 1),
 			},
 		},
 	}
@@ -140,23 +158,39 @@ func (p *Pricer) generateNewDefaults(mystUSD float64, cfg Config) *PriceHistory 
 
 func (p *Pricer) generateNewPerCountry(mystUSD float64, cfg Config) map[string]*PriceHistory {
 	countries := make(map[string]*PriceHistory)
-	for k, mod := range cfg.CountryModifiers {
+	for countryCode := range CountryCodeToName {
+		mod, ok := cfg.CountryModifiers[ISO3166CountryCode(countryCode)]
+		if !ok {
+			mod = Modifier{
+				Residential: 1,
+				Other:       1,
+			}
+		}
+
+		loadModifier := p.loadByCountryProvider.GetMultiplier(countryCode)
+		mod.Other *= loadModifier
+		mod.Residential *= loadModifier
+
 		ph := &PriceHistory{
 			Current: &PriceByType{
 				Residential: &Price{
-					PricePerHour: calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.PricePerHour, mod.Residential),
-					PricePerGiB:  calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.PricePerGiB, mod.Residential),
+					PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.PricePerHour, mod.Residential),
+					PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.PricePerHour, mod.Residential),
+					PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.PricePerGiB, mod.Residential),
+					PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.PricePerGiB, mod.Residential),
 				},
 				Other: &Price{
-					PricePerHour: calculatePriceMYST(mystUSD, cfg.BasePrices.Other.PricePerHour, mod.Other),
-					PricePerGiB:  calculatePriceMYST(mystUSD, cfg.BasePrices.Other.PricePerGiB, mod.Other),
+					PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.PricePerHour, mod.Other),
+					PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.PricePerHour, mod.Residential),
+					PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.PricePerGiB, mod.Other),
+					PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.PricePerGiB, mod.Residential),
 				},
 			},
 		}
 
 		// if current exists in previous lp, take it, otherwise set it to current
 		if p.lp.isInitialized() {
-			older, ok := p.lp.PerCountry[string(k)]
+			older, ok := p.lp.PerCountry[string(countryCode)]
 			if ok {
 				ph.Previous = older.Current
 			} else {
@@ -166,7 +200,7 @@ func (p *Pricer) generateNewPerCountry(mystUSD float64, cfg Config) map[string]*
 			ph.Previous = ph.Current
 		}
 
-		countries[string(k)] = ph
+		countries[string(countryCode)] = ph
 	}
 	return countries
 }
@@ -175,6 +209,10 @@ func (p *Pricer) generateNewPerCountry(mystUSD float64, cfg Config) map[string]*
 // This, however, is not important here as the accuracy will be more than good enough to a few zeroes after the dot.
 func calculatePriceMYST(mystUSD, priceUSD, multiplier float64) *big.Int {
 	return crypto.FloatToBigMyst((priceUSD / mystUSD) * multiplier)
+}
+
+func calculatePriceMystFloat(mystUSD, priceUSD, multiplier float64) float64 {
+	return crypto.BigMystToFloat(calculatePriceMYST(mystUSD, priceUSD, multiplier))
 }
 
 func (p *Pricer) fetchMystPrice() (float64, error) {
@@ -223,6 +261,8 @@ type PriceByType struct {
 }
 
 type Price struct {
-	PricePerHour *big.Int `json:"price_per_hour" swaggertype:"integer"`
-	PricePerGiB  *big.Int `json:"price_per_gib" swaggertype:"integer"`
+	PricePerHour              *big.Int `json:"price_per_hour" swaggertype:"integer"`
+	PricePerHourHumanReadable float64  `json:"price_per_hour_human_readable" swaggertype:"number"`
+	PricePerGiB               *big.Int `json:"price_per_gib" swaggertype:"integer"`
+	PricePerGiBHumanReadable  float64  `json:"price_per_gib_human_readable" swaggertype:"number"`
 }

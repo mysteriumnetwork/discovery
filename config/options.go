@@ -21,6 +21,9 @@ type Options struct {
 	CoinRankingURL    url.URL
 	CoinRankingToken  string
 	UniverseJWTSecret string
+	PromAddress       string
+	PromUser          string
+	PromPass          string
 }
 
 func Read() (*Options, error) {
@@ -52,6 +55,18 @@ func Read() (*Options, error) {
 	if err != nil {
 		return nil, err
 	}
+	promAddress, err := requiredEnv("PROM_ADDRESS")
+	if err != nil {
+		return nil, err
+	}
+	promUser, err := requiredEnv("PROM_USER")
+	if err != nil {
+		return nil, err
+	}
+	promPass, err := requiredEnv("PROM_PASS")
+	if err != nil {
+		return nil, err
+	}
 	return &Options{
 		DbDSN:             dsn,
 		QualityOracleURL:  *qualityOracleURL,
@@ -60,6 +75,9 @@ func Read() (*Options, error) {
 		CoinRankingURL:    *coinRankingURL,
 		CoinRankingToken:  coinRankingToken,
 		UniverseJWTSecret: universeJWTSecret,
+		PromAddress:       promAddress,
+		PromUser:          promUser,
+		PromPass:          promPass,
 	}, nil
 }
 

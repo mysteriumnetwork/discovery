@@ -79,11 +79,18 @@ func main() {
 		log.Fatal().Err(err).Msg("Failed to load cfg")
 	}
 
+	calc, calcStop, err := buildLoadPricingProvider(cfg, database)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to build load pricing provider")
+	}
+	defer calcStop()
+
 	pricer, err := pricing.NewPricer(
 		cfger,
 		mrkt,
 		time.Minute*5,
 		pricing.Bound{Min: 0.1, Max: 3.0},
+		calc,
 	)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to initialize Pricer")
@@ -102,6 +109,14 @@ func main() {
 		log.Err(err).Send()
 		return
 	}
+}
+
+func buildLoadPricingProvider(cfg *config.Options, db *db.DB) (*pricing.NetworkLoadMultiplierCalculator, func(), error) {
+	calc := pricing.NewNetworkLoadMultiplierCalculator(
+		pricing.NewPromClient(cfg.PromAddress, cfg.PromUser, cfg.PromPass),
+		db,
+	)
+	return calc, calc.Stop, calc.Start()
 }
 
 func buildMarket(cfg *config.Options) (*pricing.Market, func(), error) {

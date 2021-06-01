@@ -1,0 +1,2 @@
+DROP INDEX country_price_multipliers_country_code_idx;
+DROP TABLE country_price_multipliers;
