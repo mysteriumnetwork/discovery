@@ -686,6 +686,8 @@ github.com/mysteriumnetwork/go-ci v0.0.0-20210330121512-2a81be082445 h1:Eq8wYVLa
 github.com/mysteriumnetwork/go-ci v0.0.0-20210330121512-2a81be082445/go.mod h1:FdrIqN3Z27igwo8A4aKZcmds7q894iGcdUIPz0+vOXY=
 github.com/mysteriumnetwork/payments v0.0.14-0.20210526084843-a09899b66554 h1:XJkoAVAkJty/faRvipbzyu5S3Ywe4R98siEWU8n8U8s=
 github.com/mysteriumnetwork/payments v0.0.14-0.20210526084843-a09899b66554/go.mod h1:aC+9Bez+lFp19Fs8plh51HnblVJC0CDzHnnEzyidhpQ=
+github.com/mysteriumnetwork/payments v0.2.0 h1:3UzLNPvp4itdWHqrJIMifgbwPitIrhe8ujhvKhhnfkc=
+github.com/mysteriumnetwork/payments v0.2.0/go.mod h1:aC+9Bez+lFp19Fs8plh51HnblVJC0CDzHnnEzyidhpQ=
 github.com/nakagami/firebirdsql v0.0.0-20190310045651-3c02a58cfed8/go.mod h1:86wM1zFnC6/uDBfZGNwB65O+pR2OFi5q/YQaEUid1qA=
 github.com/naoina/go-stringutil v0.1.0/go.mod h1:XJ2SJL9jCtBh+P9q5btrd/Ylo8XwT/h1USek5+NqSA0=
 github.com/naoina/toml v0.1.2-0.20170918210437-9fafd6967416/go.mod h1:NBIhNtsFMo3G2szEBne+bO4gS192HuIYRqfvOWb4i1E=

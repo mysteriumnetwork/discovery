@@ -21,7 +21,7 @@ require (
 	github.com/magefile/mage v1.11.0
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mysteriumnetwork/go-ci v0.0.0-20210330121512-2a81be082445
-	github.com/mysteriumnetwork/payments v0.0.14-0.20210526084843-a09899b66554
+	github.com/mysteriumnetwork/payments v0.2.0
 	github.com/nats-io/nats-server/v2 v2.2.0 // indirect
 	github.com/nats-io/nats.go v1.10.1-0.20210228004050-ed743748acac
 	github.com/rs/zerolog v1.20.0
