@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 	"sync"
 	"time"
 
@@ -110,15 +109,6 @@ func (cpd *ConfigProviderDB) fetchConfig() (Config, error) {
 	}
 
 	return res, nil
-}
-
-type ISO3166CountryCode string
-
-func (i ISO3166CountryCode) Validate() error {
-	if len(i) != 2 || strings.ToUpper(string(i)) != string(i) {
-		return fmt.Errorf("%v is an invalid country code, please use capitalized ISO3166 alpha-2 codes", string(i))
-	}
-	return nil
 }
 
 type Config struct {

@@ -14,13 +14,14 @@ import (
 )
 
 type Options struct {
-	DbDSN             string
-	QualityOracleURL  url.URL
-	BrokerURL         url.URL
-	GeckoURL          url.URL
-	CoinRankingURL    url.URL
-	CoinRankingToken  string
-	UniverseJWTSecret string
+	DbDSN                string
+	QualityOracleURL     url.URL
+	BrokerURL            url.URL
+	GeckoURL             url.URL
+	CoinRankingURL       url.URL
+	CoinRankingToken     string
+	UniverseJWTSecret    string
+	DisablePricingUpdate bool
 }
 
 func Read() (*Options, error) {
@@ -52,14 +53,16 @@ func Read() (*Options, error) {
 	if err != nil {
 		return nil, err
 	}
+	disablePricingUpdate := optionalEnvBool("DISABLE_PRICING_UPDATE")
 	return &Options{
-		DbDSN:             dsn,
-		QualityOracleURL:  *qualityOracleURL,
-		BrokerURL:         *brokerURL,
-		GeckoURL:          *geckoURL,
-		CoinRankingURL:    *coinRankingURL,
-		CoinRankingToken:  coinRankingToken,
-		UniverseJWTSecret: universeJWTSecret,
+		DbDSN:                dsn,
+		QualityOracleURL:     *qualityOracleURL,
+		BrokerURL:            *brokerURL,
+		GeckoURL:             *geckoURL,
+		CoinRankingURL:       *coinRankingURL,
+		CoinRankingToken:     coinRankingToken,
+		UniverseJWTSecret:    universeJWTSecret,
+		DisablePricingUpdate: disablePricingUpdate,
 	}, nil
 }
 

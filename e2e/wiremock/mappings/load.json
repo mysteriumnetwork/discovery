@@ -1,0 +1,314 @@
+{
+    "request": {
+        "method": "GET",
+        "urlPattern": "/api/v2/countries/load.*"
+    },
+    "response": {
+        "status": 200,
+        "headers": {
+            "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+            "": {
+                "providers": 1,
+                "sessions": 3
+            },
+            "AD": {
+                "providers": 1,
+                "sessions": 0
+            },
+            "AE": {
+                "providers": 6,
+                "sessions": 19
+            },
+            "AM": {
+                "providers": 1,
+                "sessions": 0
+            },
+            "AR": {
+                "providers": 4,
+                "sessions": 28
+            },
+            "AT": {
+                "providers": 10,
+                "sessions": 26
+            },
+            "AU": {
+                "providers": 30,
+                "sessions": 85
+            },
+            "BA": {
+                "providers": 1,
+                "sessions": 0
+            },
+            "BD": {
+                "providers": 1,
+                "sessions": 0
+            },
+            "BE": {
+                "providers": 20,
+                "sessions": 8
+            },
+            "BG": {
+                "providers": 9,
+                "sessions": 4
+            },
+            "BH": {
+                "providers": 2,
+                "sessions": 5
+            },
+            "BR": {
+                "providers": 9,
+                "sessions": 18
+            },
+            "BY": {
+                "providers": 2,
+                "sessions": 1
+            },
+            "CA": {
+                "providers": 59,
+                "sessions": 108
+            },
+            "CH": {
+                "providers": 18,
+                "sessions": 9
+            },
+            "CL": {
+                "providers": 2,
+                "sessions": 0
+            },
+            "CN": {
+                "providers": 3,
+                "sessions": 2
+            },
+            "CO": {
+                "providers": 2,
+                "sessions": 0
+            },
+            "CR": {
+                "providers": 3,
+                "sessions": 3
+            },
+            "CY": {
+                "providers": 2,
+                "sessions": 3
+            },
+            "CZ": {
+                "providers": 7,
+                "sessions": 7
+            },
+            "DE": {
+                "providers": 109,
+                "sessions": 67
+            },
+            "DK": {
+                "providers": 5,
+                "sessions": 5
+            },
+            "EE": {
+                "providers": 3,
+                "sessions": 3
+            },
+            "ES": {
+                "providers": 27,
+                "sessions": 20
+            },
+            "FI": {
+                "providers": 18,
+                "sessions": 19
+            },
+            "FR": {
+                "providers": 48,
+                "sessions": 197
+            },
+            "GB": {
+                "providers": 185,
+                "sessions": 253
+            },
+            "GI": {
+                "providers": 1,
+                "sessions": 3
+            },
+            "GR": {
+                "providers": 4,
+                "sessions": 4
+            },
+            "HK": {
+                "providers": 19,
+                "sessions": 24
+            },
+            "HR": {
+                "providers": 2,
+                "sessions": 2
+            },
+            "HU": {
+                "providers": 6,
+                "sessions": 5
+            },
+            "ID": {
+                "providers": 11,
+                "sessions": 17
+            },
+            "IE": {
+                "providers": 6,
+                "sessions": 0
+            },
+            "IL": {
+                "providers": 4,
+                "sessions": 4
+            },
+            "IN": {
+                "providers": 38,
+                "sessions": 83
+            },
+            "IS": {
+                "providers": 2,
+                "sessions": 4
+            },
+            "IT": {
+                "providers": 23,
+                "sessions": 20
+            },
+            "JM": {
+                "providers": 1,
+                "sessions": 1
+            },
+            "JO": {
+                "providers": 1,
+                "sessions": 6
+            },
+            "JP": {
+                "providers": 22,
+                "sessions": 14
+            },
+            "KG": {
+                "providers": 2,
+                "sessions": 0
+            },
+            "KR": {
+                "providers": 10,
+                "sessions": 3
+            },
+            "KZ": {
+                "providers": 2,
+                "sessions": 1
+            },
+            "LT": {
+                "providers": 12,
+                "sessions": 3
+            },
+            "LU": {
+                "providers": 7,
+                "sessions": 1
+            },
+            "LV": {
+                "providers": 5,
+                "sessions": 0
+            },
+            "MD": {
+                "providers": 6,
+                "sessions": 5
+            },
+            "MK": {
+                "providers": 1,
+                "sessions": 2
+            },
+            "MT": {
+                "providers": 1,
+                "sessions": 1
+            },
+            "MX": {
+                "providers": 2,
+                "sessions": 0
+            },
+            "MY": {
+                "providers": 3,
+                "sessions": 14
+            },
+            "NL": {
+                "providers": 78,
+                "sessions": 53
+            },
+            "NO": {
+                "providers": 9,
+                "sessions": 5
+            },
+            "NP": {
+                "providers": 1,
+                "sessions": 0
+            },
+            "NZ": {
+                "providers": 4,
+                "sessions": 6
+            },
+            "PH": {
+                "providers": 2,
+                "sessions": 0
+            },
+            "PL": {
+                "providers": 17,
+                "sessions": 12
+            },
+            "PT": {
+                "providers": 5,
+                "sessions": 10
+            },
+            "RO": {
+                "providers": 14,
+                "sessions": 11
+            },
+            "RS": {
+                "providers": 2,
+                "sessions": 0
+            },
+            "RU": {
+                "providers": 82,
+                "sessions": 44
+            },
+            "SE": {
+                "providers": 13,
+                "sessions": 9
+            },
+            "SG": {
+                "providers": 40,
+                "sessions": 63
+            },
+            "SI": {
+                "providers": 3,
+                "sessions": 2
+            },
+            "SK": {
+                "providers": 1,
+                "sessions": 1
+            },
+            "TH": {
+                "providers": 1,
+                "sessions": 0
+            },
+            "TR": {
+                "providers": 3,
+                "sessions": 5
+            },
+            "TW": {
+                "providers": 9,
+                "sessions": 8
+            },
+            "UA": {
+                "providers": 23,
+                "sessions": 17
+            },
+            "US": {
+                "providers": 356,
+                "sessions": 818
+            },
+            "VN": {
+                "providers": 2,
+                "sessions": 3
+            },
+            "ZA": {
+                "providers": 6,
+                "sessions": 0
+            }
+        }
+    }
+}

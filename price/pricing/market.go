@@ -1,4 +1,3 @@
-// Package market provides market information for the myst-usd pairing.
 package pricing
 
 import (
