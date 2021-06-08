@@ -2,36 +2,36 @@ package pricing
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
 
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/mysteriumnetwork/discovery/db"
-	promV1 "github.com/prometheus/client_golang/api/prometheus/v1"
-	"github.com/prometheus/common/model"
+	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
 	"github.com/rs/zerolog/log"
 )
 
-type promClient interface {
-	Query(ctx context.Context, query string, ts time.Time) (model.Value, promV1.Warnings, error)
+type qualityAPI interface {
+	NetworkLoad() (oracleapi.NetworkLoadByCountry, error)
 }
 
 type NetworkLoadMultiplierCalculator struct {
-	promClient        promClient
+	networkLoadGetter qualityAPI
 	db                *db.DB
 	lock              sync.Mutex
 	cachedMultipliers map[ISO3166CountryCode]float64
 	stop              chan struct{}
 	stopOne           sync.Once
+	disableUpdate     bool
 }
 
-func NewNetworkLoadMultiplierCalculator(promClient promClient, db *db.DB) *NetworkLoadMultiplierCalculator {
+func NewNetworkLoadMultiplierCalculator(networkLoadGetter qualityAPI, db *db.DB, disableUpdate bool) *NetworkLoadMultiplierCalculator {
 	return &NetworkLoadMultiplierCalculator{
-		promClient:        promClient,
+		networkLoadGetter: networkLoadGetter,
 		db:                db,
 		stop:              make(chan struct{}),
 		cachedMultipliers: make(map[ISO3166CountryCode]float64),
+		disableUpdate:     disableUpdate,
 	}
 }
 
@@ -70,6 +70,11 @@ func (nlmc *NetworkLoadMultiplierCalculator) Start() error {
 	log.Info().Msgf("NetworkLoadMultiplierCalculator initial map loaded")
 
 	go func() {
+		if nlmc.disableUpdate {
+			log.Info().Msgf("NetworkLoadMultiplierCalculator update disabled")
+			return
+		}
+
 		log.Info().Msgf("NetworkLoadMultiplierCalculator started")
 		for {
 			select {
@@ -127,11 +132,18 @@ func (nlmc *NetworkLoadMultiplierCalculator) fetchMultipliersFromDB() (map[ISO31
 
 func (nlmc *NetworkLoadMultiplierCalculator) updateCountries() {
 	log.Debug().Msgf("country update started")
+
+	load, err := nlmc.networkLoadGetter.NetworkLoad()
+	if err != nil {
+		log.Err(err).Msgf("could not get network load from quality oracle")
+		return
+	}
+
 	newCache := make(map[ISO3166CountryCode]float64)
 	for k := range CountryCodeToName {
-		mul, err := nlmc.updateMultiplierForCountryByLoad(k)
+		mul, err := nlmc.updateMultiplierForCountryByLoad(k, load)
 		if err != nil {
-			log.Err(err).Msgf("could not update multiplier for %s", k)
+			log.Err(err).Msgf("could not update multiplier for %s, will default to 1", k)
 		}
 		newCache[k] = mul
 		log.Trace().Msgf("updated multiplier for %s to %v", k, mul)
@@ -140,12 +152,13 @@ func (nlmc *NetworkLoadMultiplierCalculator) updateCountries() {
 	log.Debug().Msgf("country update complete")
 }
 
-func (nlmc *NetworkLoadMultiplierCalculator) updateMultiplierForCountryByLoad(isoCode ISO3166CountryCode) (float64, error) {
-	mul, err := nlmc.fetchMultiplierFromProm(isoCode)
-	if err != nil {
-		return mul, err
+func (nlmc *NetworkLoadMultiplierCalculator) updateMultiplierForCountryByLoad(isoCode ISO3166CountryCode, loadMap oracleapi.NetworkLoadByCountry) (float64, error) {
+	v, ok := loadMap[isoCode.String()]
+	if !ok {
+		return 1, nil
 	}
 
+	mul := nlmc.calculateMultiplier(v.Providers, v.Sessions)
 	return mul, nlmc.storeMultiplier(isoCode, mul)
 }
 
@@ -169,27 +182,10 @@ func (nlmc *NetworkLoadMultiplierCalculator) storeMultiplier(isoCode ISO3166Coun
 	return err
 }
 
-func (nlmc *NetworkLoadMultiplierCalculator) fetchMultiplierFromProm(isoCode ISO3166CountryCode) (float64, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
-	defer cancel()
-	providers, err := nlmc.getActiveProvidersForCountry(ctx, isoCode)
-	if err != nil {
-		return 0, err
-	}
-
-	activeSessions, err := nlmc.getSessionsForCountry(ctx, isoCode)
-	if err != nil {
-		return 0, err
-	}
-
-	mul := nlmc.calculateMultiplier(providers, activeSessions)
-	return mul, nil
-}
-
 // calculateMultiplier calculates a coefficient for price multiplication.
 // It returns a value of 0.5 < x < 2.0.
 // If there are more active sessions than providers, we want to incentivise providers by increasing service price in that region.
-func (nlmc *NetworkLoadMultiplierCalculator) calculateMultiplier(providers, activeSessions int64) float64 {
+func (nlmc *NetworkLoadMultiplierCalculator) calculateMultiplier(providers, activeSessions uint64) float64 {
 	if providers == 0 {
 		return 1
 	}
@@ -203,40 +199,4 @@ func (nlmc *NetworkLoadMultiplierCalculator) calculateMultiplier(providers, acti
 	}
 
 	return coeff
-}
-
-func (nlmc *NetworkLoadMultiplierCalculator) getActiveProvidersForCountry(ctx context.Context, isoCode ISO3166CountryCode) (int64, error) {
-	v, _, err := nlmc.promClient.Query(
-		ctx,
-		fmt.Sprintf("count(sum(proposal_event{country='%s'}[1h]) by (provider_id))", isoCode),
-		time.Now(),
-	)
-	if err != nil {
-		return 0, fmt.Errorf("could not fetch proposals for country %s", isoCode)
-	}
-
-	casted := v.(model.Vector)
-	if len(casted) == 0 {
-		return 0, nil
-	}
-
-	return int64(casted[0].Value), nil
-}
-
-func (nlmc *NetworkLoadMultiplierCalculator) getSessionsForCountry(ctx context.Context, isoCode ISO3166CountryCode) (int64, error) {
-	v, _, err := nlmc.promClient.Query(
-		ctx,
-		fmt.Sprintf("count(count(session_data{provider_country='%s'}[1h]) by (session_id))", isoCode),
-		time.Now(),
-	)
-	if err != nil {
-		return 0, fmt.Errorf("could not fetch sessions for country %s", isoCode)
-	}
-
-	casted := v.(model.Vector)
-	if len(casted) == 0 {
-		return 0, nil
-	}
-
-	return int64(casted[0].Value), nil
 }

@@ -16,9 +16,6 @@ services:
       - COINRANKING_URL=http://wiremock:8080
       - COINRANKING_TOKEN=suchtoken
       - UNIVERSE_JWT_SECRET=suchsecret
-      - PROM_ADDRESS=https://testnet2-prometheus.mysterium.network/vm/
-      - PROM_USER=
-      - PROM_PASS=
   db:
     image: postgres:13-alpine
     container_name: discovery_db

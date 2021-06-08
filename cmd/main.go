@@ -79,11 +79,15 @@ func main() {
 		log.Fatal().Err(err).Msg("Failed to load cfg")
 	}
 
-	calc, calcStop, err := buildLoadPricingProvider(cfg, database)
+	calc, err := buildLoadPricingProvider(cfg, database, qualityOracleAPI)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to build load pricing provider")
 	}
-	defer calcStop()
+	err = calc.Start()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Could not start calculator")
+	}
+	defer calc.Stop()
 
 	pricer, err := pricing.NewPricer(
 		cfger,
@@ -111,12 +115,13 @@ func main() {
 	}
 }
 
-func buildLoadPricingProvider(cfg *config.Options, db *db.DB) (*pricing.NetworkLoadMultiplierCalculator, func(), error) {
+func buildLoadPricingProvider(cfg *config.Options, db *db.DB, oracle *oracleapi.API) (*pricing.NetworkLoadMultiplierCalculator, error) {
 	calc := pricing.NewNetworkLoadMultiplierCalculator(
-		pricing.NewPromClient(cfg.PromAddress, cfg.PromUser, cfg.PromPass),
+		oracle,
 		db,
+		cfg.DisablePricingUpdate,
 	)
-	return calc, calc.Stop, calc.Start()
+	return calc, nil
 }
 
 func buildMarket(cfg *config.Options) (*pricing.Market, func(), error) {

@@ -25,6 +25,25 @@ func New(url string) *API {
 	}
 }
 
+func (a *API) NetworkLoad() (NetworkLoadByCountry, error) {
+	resp, err := a.client.Get(fmt.Sprintf("%s/api/v2/countries/load", a.url))
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return nil, fmt.Errorf("received response code: %v", resp.StatusCode)
+	}
+
+	var res NetworkLoadByCountry
+	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return res, err
+}
+
 func (a *API) Quality(country string) (*ProposalQualityResponse, error) {
 	resp, err := a.client.Get(fmt.Sprintf("%s/api/v2/providers/quality?country=%s", a.url, country))
 	if err != nil {
@@ -196,3 +215,12 @@ func (p ProposalQualityResponse) MarshalBinary() (data []byte, err error) {
 func (p ProposalQualityResponse) UnmarshalBinary(data []byte) error {
 	return json.Unmarshal(data, &p)
 }
+
+// CountryLoad represents the ratio of providers to active sessions for country.
+type CountryLoad struct {
+	Providers uint64 `json:"providers"`
+	Sessions  uint64 `json:"sessions"`
+}
+
+// NetworkLoadByCountry contains a map of country to relative load.
+type NetworkLoadByCountry map[string]*CountryLoad

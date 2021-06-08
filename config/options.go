@@ -14,16 +14,14 @@ import (
 )
 
 type Options struct {
-	DbDSN             string
-	QualityOracleURL  url.URL
-	BrokerURL         url.URL
-	GeckoURL          url.URL
-	CoinRankingURL    url.URL
-	CoinRankingToken  string
-	UniverseJWTSecret string
-	PromAddress       string
-	PromUser          string
-	PromPass          string
+	DbDSN                string
+	QualityOracleURL     url.URL
+	BrokerURL            url.URL
+	GeckoURL             url.URL
+	CoinRankingURL       url.URL
+	CoinRankingToken     string
+	UniverseJWTSecret    string
+	DisablePricingUpdate bool
 }
 
 func Read() (*Options, error) {
@@ -55,29 +53,16 @@ func Read() (*Options, error) {
 	if err != nil {
 		return nil, err
 	}
-	promAddress, err := requiredEnv("PROM_ADDRESS")
-	if err != nil {
-		return nil, err
-	}
-	promUser, err := requiredEnv("PROM_USER")
-	if err != nil {
-		return nil, err
-	}
-	promPass, err := requiredEnv("PROM_PASS")
-	if err != nil {
-		return nil, err
-	}
+	disablePricingUpdate := optionalEnvBool("DISABLE_PRICING_UPDATE")
 	return &Options{
-		DbDSN:             dsn,
-		QualityOracleURL:  *qualityOracleURL,
-		BrokerURL:         *brokerURL,
-		GeckoURL:          *geckoURL,
-		CoinRankingURL:    *coinRankingURL,
-		CoinRankingToken:  coinRankingToken,
-		UniverseJWTSecret: universeJWTSecret,
-		PromAddress:       promAddress,
-		PromUser:          promUser,
-		PromPass:          promPass,
+		DbDSN:                dsn,
+		QualityOracleURL:     *qualityOracleURL,
+		BrokerURL:            *brokerURL,
+		GeckoURL:             *geckoURL,
+		CoinRankingURL:       *coinRankingURL,
+		CoinRankingToken:     coinRankingToken,
+		UniverseJWTSecret:    universeJWTSecret,
+		DisablePricingUpdate: disablePricingUpdate,
 	}, nil
 }
 
