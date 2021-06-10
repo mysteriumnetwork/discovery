@@ -6,7 +6,7 @@ import (
 
 	"github.com/dghubble/sling"
 	"github.com/mysteriumnetwork/discovery/price/pricing"
-	v2 "github.com/mysteriumnetwork/discovery/proposal/v2"
+	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 )
 
 var discoveryAPI = newAPI(DiscoveryAPIurl)
@@ -26,7 +26,7 @@ func (a *api) LatestPrices() (latestPrices pricing.LatestPrices, err error) {
 	return latestPrices, err
 }
 
-func (a *api) ListFilters(query Query) (proposals []v2.Proposal, err error) {
+func (a *api) ListFilters(query Query) (proposals []v3.Proposal, err error) {
 	_, err = sling.New().Base(a.basePath).Get("/api/v3/proposals").QueryStruct(query).Receive(&proposals, nil)
 	return proposals, err
 }

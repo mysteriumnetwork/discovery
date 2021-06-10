@@ -128,7 +128,7 @@ definitions:
       per_hour:
         type: integer
     type: object
-  v2.Proposal:
+  v3.Proposal:
     properties:
       access_policies:
         items:
@@ -292,7 +292,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/v2.Proposal'
+              $ref: '#/definitions/v3.Proposal'
             type: array
       summary: List proposals
       tags:

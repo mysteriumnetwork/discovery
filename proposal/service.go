@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/mysteriumnetwork/discovery/proposal/metrics"
+	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 
-	v2 "github.com/mysteriumnetwork/discovery/proposal/v2"
 	"github.com/mysteriumnetwork/discovery/quality"
 	"github.com/rs/zerolog/log"
 )
@@ -30,20 +30,19 @@ func NewService(repository *Repository, qualityService *quality.Service) *Servic
 }
 
 type ListOpts struct {
-	from                      string
-	providerID                string
-	serviceType               string
-	locationCountry           string
-	ipType                    string
-	accessPolicy              string
-	accessPolicySource        string
-	compatibilityMin          int
-	compatibilityMax          int
-	qualityMin                float64
-	priceGiBMax, priceHourMax int64
+	from               string
+	providerID         string
+	serviceType        string
+	locationCountry    string
+	ipType             string
+	accessPolicy       string
+	accessPolicySource string
+	compatibilityMin   int
+	compatibilityMax   int
+	qualityMin         float64
 }
 
-func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
+func (s *Service) List(opts ListOpts) ([]v3.Proposal, error) {
 	proposals, err := s.Repository.List(repoListOpts{
 		providerID:         opts.providerID,
 		serviceType:        opts.serviceType,
@@ -53,13 +52,11 @@ func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
 		accessPolicySource: opts.accessPolicySource,
 		compatibilityMin:   opts.compatibilityMin,
 		compatibilityMax:   opts.compatibilityMax,
-		priceGiBMax:        opts.priceGiBMax,
-		priceHourMax:       opts.priceHourMax,
 	})
 	if err != nil {
 		return nil, err
 	}
-	resultMap := make(map[string]*v2.Proposal, len(proposals))
+	resultMap := make(map[string]*v3.Proposal, len(proposals))
 	for i, p := range proposals {
 		resultMap[p.ServiceType+p.ProviderID] = &proposals[i]
 	}
@@ -76,7 +73,7 @@ func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
 	// exclude monitoringFailed nodes
 	sessionsResponse, err := s.qualityService.Sessions(opts.from)
 	if err != nil {
-		log.Warn().Err(err).Msgf("Could not fetch session stats for consumer", opts.from)
+		log.Warn().Err(err).Msgf("Could not fetch session stats for consumer %v", opts.from)
 		return values(resultMap), nil
 	}
 
@@ -106,8 +103,8 @@ func (s *Service) StartExpirationJob() {
 	}
 }
 
-func values(proposalsMap map[string]*v2.Proposal) []v2.Proposal {
-	var res = make([]v2.Proposal, 0)
+func values(proposalsMap map[string]*v3.Proposal) []v3.Proposal {
+	var res = make([]v3.Proposal, 0)
 	for k := range proposalsMap {
 		res = append(res, *proposalsMap[k])
 	}

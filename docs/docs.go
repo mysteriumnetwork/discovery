@@ -200,7 +200,7 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/v2.Proposal"
+                                "$ref": "#/definitions/v3.Proposal"
                             }
                         }
                     }
@@ -436,7 +436,7 @@ var doc = `{
                 }
             }
         },
-        "v2.Proposal": {
+        "v3.Proposal": {
             "type": "object",
             "properties": {
                 "access_policies": {

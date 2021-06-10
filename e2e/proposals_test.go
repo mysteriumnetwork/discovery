@@ -6,7 +6,6 @@ package e2e
 
 import (
 	_ "embed"
-	"math/big"
 	"testing"
 	"time"
 
@@ -87,48 +86,6 @@ func Test_ProposalFiltering(t *testing.T) {
 		}
 	})
 
-	t.Run("price_hour_max", func(t *testing.T) {
-		for _, query := range []Query{
-			{PriceHourMax: 5},
-			{PriceHourMax: 15},
-		} {
-			proposals, err := api.ListFilters(query)
-			assert.NoError(t, err)
-			assert.True(t, len(proposals) > 0, "no results matching query: %+v", query)
-			for _, proposal := range proposals {
-				assert.NotNil(t, proposal.Price.PerHour)
-
-				cmp := proposal.Price.PerHour.Cmp(big.NewInt(query.PriceHourMax))
-				assert.True(t, cmp == -1 || cmp == 0)
-			}
-		}
-
-		proposals, err := api.ListFilters(Query{PriceHourMax: 4})
-		assert.NoError(t, err)
-		assert.Len(t, proposals, 0)
-	})
-
-	t.Run("price_gib_max", func(t *testing.T) {
-		for _, query := range []Query{
-			{PriceGibMax: 15},
-			{PriceGibMax: 20},
-		} {
-			proposals, err := api.ListFilters(query)
-			assert.NoError(t, err)
-			assert.True(t, len(proposals) > 0)
-			for _, proposal := range proposals {
-				assert.NotNil(t, proposal.Price.PerGiB)
-
-				cmp := proposal.Price.PerGiB.Cmp(big.NewInt(query.PriceGibMax))
-				assert.True(t, cmp == -1 || cmp == 0)
-			}
-		}
-
-		proposals, err := api.ListFilters(Query{PriceGibMax: 5})
-		assert.NoError(t, err)
-		assert.Len(t, proposals, 0)
-	})
-
 	t.Run("quality", func(t *testing.T) {
 		for _, query := range []Query{
 			{QualityMin: 0.0},
@@ -177,9 +134,9 @@ func Test_ProposalFiltering(t *testing.T) {
 
 func publishProposals(t *testing.T) ([]*template, error) {
 	templates := []*template{
-		newTemplate().providerID("0x1").country("LT").compatibility(0).serviceType("wireguard").prices(10, 5),
-		newTemplate().providerID("0x2").country("RU").compatibility(1).prices(20, 10),
-		newTemplate().providerID("0x3").country("US").compatibility(2).prices(30, 15),
+		newTemplate().providerID("0x1").country("LT").compatibility(0).serviceType("wireguard"),
+		newTemplate().providerID("0x2").country("RU").compatibility(1),
+		newTemplate().providerID("0x3").country("US").compatibility(2),
 	}
 	for _, t := range templates {
 		if err := t.publishPing(); err != nil {

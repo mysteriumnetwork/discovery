@@ -48,14 +48,12 @@ type PingResponse struct {
 // @Param ip_type query string false "IP type (residential, datacenter, etc.)"
 // @Param access_policy query string false "Access policy. When empty, returns only public proposals (default). Use 'all' to return all."
 // @Param access_policy_source query string false "Access policy source"
-// @Param price_gib_max query number false "Maximum price per GiB. When empty, will not filter by it. Price is set in ethereum wei."
-// @Param price_hour_max query number false "Maximum price per hour. When empty, will not filter by it. Price is set in ethereum wei."
 // @Param compatibility_min query number false "Minimum compatibility. When empty, will not filter by it."
 // @Param compatibility_max query number false "Maximum compatibility. When empty, will not filter by it."
 // @Param quality_min query number false "Minimal quality threshold. When empty will be defaulted to 0. Quality ranges from [0.0; 3.0]"
 // @Accept json
 // @Product json
-// @Success 200 {array} v2.Proposal
+// @Success 200 {array} v3.Proposal
 // @Router /proposals [get]
 // @Tags proposals
 func (a *API) Proposals(c *gin.Context) {
@@ -68,12 +66,6 @@ func (a *API) Proposals(c *gin.Context) {
 		accessPolicySource: c.Query("access_policy_source"),
 		ipType:             c.Query("ip_type"),
 	}
-
-	priceGiBMax, _ := strconv.ParseInt(c.Query("price_gib_max"), 10, 64)
-	opts.priceGiBMax = priceGiBMax
-
-	priceHourMax, _ := strconv.ParseInt(c.Query("price_hour_max"), 10, 64)
-	opts.priceHourMax = priceHourMax
 
 	compatibilityMin, _ := strconv.ParseInt(c.Query("compatibility_min"), 10, 16)
 	opts.compatibilityMin = int(compatibilityMin)
@@ -101,7 +93,7 @@ func (a *API) Proposals(c *gin.Context) {
 // @Param provider_id query string false "Provider ID"
 // @Accept json
 // @Product json
-// @Success 200 {array} v2.Metadata
+// @Success 200 {array} v3.Metadata
 // @Router /proposals-metadata [get]
 func (a *API) ProposalsMetadata(c *gin.Context) {
 	opts := repoMetadataOpts{

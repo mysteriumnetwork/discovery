@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	v2 "github.com/mysteriumnetwork/discovery/proposal/v2"
-
+	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 	"github.com/nats-io/nats.go"
 )
 
@@ -31,15 +30,15 @@ func NewBroker(brokerURL string) (*Broker, error) {
 	}, nil
 }
 
-func (b *Broker) PublishPingOneV2(ppm v2.ProposalPingMessage) error {
+func (b *Broker) PublishPingOneV2(ppm v3.ProposalPingMessage) error {
 	bytes, err := json.Marshal(&ppm)
 	if err != nil {
 		return err
 	}
-	return b.conn.Publish("*.proposal-ping.v2", bytes)
+	return b.conn.Publish("*.proposal-ping.v3", bytes)
 }
 
-func (b *Broker) PublishPingV2(ppm []v2.ProposalPingMessage) error {
+func (b *Broker) PublishPingV2(ppm []v3.ProposalPingMessage) error {
 	for _, p := range ppm {
 		err := b.PublishPingOneV2(p)
 		if err != nil {
@@ -49,10 +48,10 @@ func (b *Broker) PublishPingV2(ppm []v2.ProposalPingMessage) error {
 	return nil
 }
 
-func (b *Broker) PublishUnregisterOneV2(pum v2.ProposalUnregisterMessage) error {
+func (b *Broker) PublishUnregisterOneV2(pum v3.ProposalUnregisterMessage) error {
 	bytes, err := json.Marshal(&pum)
 	if err != nil {
 		return err
 	}
-	return b.conn.Publish("*.proposal-unregister.v2", bytes)
+	return b.conn.Publish("*.proposal-unregister.v3", bytes)
 }

@@ -1,7 +1,7 @@
 package metrics
 
 import (
-	v2 "github.com/mysteriumnetwork/discovery/proposal/v2"
+	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 	"github.com/mysteriumnetwork/discovery/quality"
 	"github.com/rs/zerolog/log"
 )
@@ -14,7 +14,7 @@ func NewEnhancer(qualityService *quality.Service) *Enhancer {
 	return &Enhancer{qualityService: qualityService}
 }
 
-func (s *Enhancer) EnhanceWithMetrics(resultMap map[string]*v2.Proposal, fromCountry string) {
+func (s *Enhancer) EnhanceWithMetrics(resultMap map[string]*v3.Proposal, fromCountry string) {
 	qualityResponse, err := s.qualityService.Quality(fromCountry)
 	if err != nil {
 		log.Warn().Err(err).Msgf("Could not fetch quality for consumer (country=%s)", fromCountry)
