@@ -25,7 +25,7 @@ func Swag() error {
 
 // Test runs the tests.
 func Test() error {
-	return commands.Test("./...")
+	return sh.RunV("go", "test", "-race", "-cover", "-short", "./...")
 }
 
 // Check checks that the source is compliant with all of the checks.
