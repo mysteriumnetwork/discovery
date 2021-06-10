@@ -181,9 +181,9 @@ func (p *Pricer) generateNewPerCountry(mystUSD float64, cfg Config) map[string]*
 				},
 				Other: &Price{
 					PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.PricePerHour, mod.Other),
-					PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.PricePerHour, mod.Residential),
+					PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.PricePerHour, mod.Other),
 					PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.PricePerGiB, mod.Other),
-					PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.PricePerGiB, mod.Residential),
+					PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.PricePerGiB, mod.Other),
 				},
 			},
 		}

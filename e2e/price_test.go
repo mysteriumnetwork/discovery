@@ -7,6 +7,9 @@ package e2e
 import (
 	_ "embed"
 	"encoding/json"
+	"flag"
+	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -14,6 +17,16 @@ import (
 	"github.com/mysteriumnetwork/discovery/price/pricing"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestMain(m *testing.M) {
+	flag.Parse()
+	if testing.Short() {
+		fmt.Println("skipping e2e, 'short' flag set")
+		return
+	}
+
+	os.Exit(m.Run())
+}
 
 func Test_LatestPrices(t *testing.T) {
 	prices, err := discoveryAPI.LatestPrices()
