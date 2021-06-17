@@ -36,8 +36,26 @@ func (l *Listener) Listen() error {
 	log.Info().Msgf("Connected to broker")
 	l.conn = conn
 
+	if _, err := conn.Subscribe("*.proposal-register.v3", func(msg *nats.Msg) {
+		pingMsg := v3.ProposalPingMessage{}
+		if err := json.Unmarshal(msg.Data, &pingMsg); err != nil {
+			log.Err(err).Msg("Failed to parse proposal")
+		} else if pingMsg.IsEmpty() {
+			log.Err(errors.New("unknown format")).
+				Bytes("message", msg.Data).
+				Msg("Failed to parse proposal")
+		} else {
+			err := l.repository.Store(pingMsg.Proposal)
+			if err != nil {
+				log.Err(err).Msg("Failed to store proposal")
+			}
+		}
+	}); err != nil {
+		return err
+	}
+
 	if _, err := conn.Subscribe("*.proposal-ping.v3", func(msg *nats.Msg) {
-		//log.Info().Msgf("Received a message [%s] %s", msg.Subject, string(msg.Data))
+		// log.Info().Msgf("Received a message [%s] %s", msg.Subject, string(msg.Data))
 		pingMsg := v3.ProposalPingMessage{}
 		if err := json.Unmarshal(msg.Data, &pingMsg); err != nil {
 			log.Err(err).Msg("Failed to parse proposal")
