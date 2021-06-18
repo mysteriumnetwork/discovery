@@ -5,6 +5,7 @@ services:
       context: .
     depends_on: 
       - db
+      - wiremock
     ports:
       - 8080:8080
     environment:
@@ -12,7 +13,7 @@ services:
       - DB_DSN=postgresql://discovery:discovery@db:5432/discovery
       - QUALITY_ORACLE_URL=https://testnet2-quality.mysterium.network
       - BROKER_URL=nats://testnet2-broker.mysterium.network
-      - GECKO_URL=https://api.coingecko.com/api/v3
+      - GECKO_URL=http://wiremock:8080
       - COINRANKING_URL=http://wiremock:8080
       - COINRANKING_TOKEN=suchtoken
       - UNIVERSE_JWT_SECRET=suchsecret
@@ -25,3 +26,10 @@ services:
       - POSTGRES_USER=discovery
       - POSTGRES_DB=discovery
       - POSTGRES_PASSWORD=discovery
+  wiremock:
+    image: rodolpheche/wiremock:2.27.2-alpine
+    command: --global-response-templating
+    ports:
+      - "8004:8080"
+    volumes:
+      - ./e2e/wiremock/mappings:/home/wiremock/mappings
