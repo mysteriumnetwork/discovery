@@ -30,17 +30,17 @@ func NewService(repository *Repository, qualityService *quality.Service) *Servic
 }
 
 type ListOpts struct {
-	from                      string
-	providerID                string
-	serviceType               string
-	locationCountry           string
-	ipType                    string
-	accessPolicy              string
-	accessPolicySource        string
-	compatibilityMin          int
-	compatibilityMax          int
-	qualityMin                float64
-	priceGiBMax, priceHourMax int64
+	from                               string
+	providerID                         string
+	serviceType                        string
+	locationCountry                    string
+	ipType                             string
+	accessPolicy                       string
+	accessPolicySource                 string
+	compatibilityMin, compatibilityMax int
+	qualityMin                         float64
+	priceGiBMax, priceHourMax          int64
+	includeMonitoringFailed            bool
 }
 
 func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
@@ -80,9 +80,11 @@ func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
 		return values(resultMap), nil
 	}
 
-	for k, proposal := range resultMap {
-		if sessionsResponse.MonitoringFailed(proposal.ProviderID, proposal.ServiceType) {
-			delete(resultMap, k)
+	if !opts.includeMonitoringFailed {
+		for k, proposal := range resultMap {
+			if sessionsResponse.MonitoringFailed(proposal.ProviderID, proposal.ServiceType) {
+				delete(resultMap, k)
+			}
 		}
 	}
 

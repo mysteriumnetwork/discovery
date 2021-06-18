@@ -78,6 +78,13 @@
           "serviceType": ""
         },
         "latency": 1111.1111
+      },
+      {
+        "proposalId": {
+          "providerId": "0x11",
+          "serviceType": ""
+        },
+        "latency": 999999999
       }
     ]
   }

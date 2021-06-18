@@ -84,6 +84,9 @@ func (a *API) Proposals(c *gin.Context) {
 	qualityMin, _ := strconv.ParseFloat(c.Query("quality_min"), 64)
 	opts.qualityMin = qualityMin
 
+	includeMonitoringFailed, _ := strconv.ParseBool(c.Query("include_monitoring_failed"))
+	opts.includeMonitoringFailed = includeMonitoringFailed
+
 	proposals, err := a.service.List(opts)
 
 	if err != nil {
