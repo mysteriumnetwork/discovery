@@ -73,17 +73,16 @@ func (s *Service) List(opts ListOpts) ([]v2.Proposal, error) {
 		}
 	}
 
-	// exclude monitoringFailed nodes
-	sessionsResponse, err := s.qualityService.Sessions(opts.from)
-	if err != nil {
-		log.Warn().Err(err).Msgf("Could not fetch session stats for consumer", opts.from)
-		return values(resultMap), nil
-	}
-
 	if !opts.includeMonitoringFailed {
-		for k, proposal := range resultMap {
-			if sessionsResponse.MonitoringFailed(proposal.ProviderID, proposal.ServiceType) {
-				delete(resultMap, k)
+		// exclude monitoringFailed nodes
+		sessionsResponse, err := s.qualityService.Sessions(opts.from)
+		if err != nil {
+			log.Warn().Err(err).Msgf("Could not fetch session stats for consumer", opts.from)
+		} else {
+			for k, proposal := range resultMap {
+				if sessionsResponse.MonitoringFailed(proposal.ProviderID, proposal.ServiceType) {
+					delete(resultMap, k)
+				}
 			}
 		}
 	}
