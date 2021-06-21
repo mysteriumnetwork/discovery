@@ -33,3 +33,9 @@ services:
       - "8004:8080"
     volumes:
       - ./e2e/wiremock/mappings:/home/wiremock/mappings
+  dev:
+    image: tianon/true
+    restart: "no"
+    depends_on:
+      - db
+      - wiremock

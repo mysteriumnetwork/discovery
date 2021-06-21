@@ -148,6 +148,20 @@
           "serviceType": "wireguard"
         },
         "quality": 0.3
+      },
+      {
+        "proposalId": {
+          "providerId": "0x11",
+          "serviceType": "openvpn"
+        },
+        "quality": 1
+      },
+      {
+        "proposalId": {
+          "providerId": "0x11",
+          "serviceType": "wireguard"
+        },
+        "quality": 1
       }
     ]
   }
