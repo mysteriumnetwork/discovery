@@ -9,64 +9,63 @@ import (
 	"net/url"
 	"os"
 	"strconv"
-
-	"github.com/mysteriumnetwork/payments/fees/price"
 )
 
 type Options struct {
-	DbDSN                string
-	QualityOracleURL     url.URL
-	BrokerURL            url.URL
-	GeckoURL             url.URL
-	CoinRankingURL       url.URL
-	CoinRankingToken     string
-	UniverseJWTSecret    string
-	DisablePricingUpdate bool
+	DbDSN             string
+	QualityOracleURL  url.URL
+	BrokerURL         url.URL
+	UniverseJWTSecret string
+	RedisAddress      string
+	RedisPass         string
+	RedisDB           int
 }
 
 func Read() (*Options, error) {
-	dsn, err := requiredEnv("DB_DSN")
+	dsn, err := RequiredEnv("DB_DSN")
 	if err != nil {
 		return nil, err
 	}
-	qualityOracleURL, err := requiredEnvURL("QUALITY_ORACLE_URL")
+	qualityOracleURL, err := RequiredEnvURL("QUALITY_ORACLE_URL")
 	if err != nil {
 		return nil, err
 	}
-	brokerURL, err := requiredEnvURL("BROKER_URL")
+	brokerURL, err := RequiredEnvURL("BROKER_URL")
 	if err != nil {
 		return nil, err
 	}
-	geckoURL, err := optionalEnvURL("GECKO_URL", price.DefaultGeckoURI)
+	universeJWTSecret, err := RequiredEnv("UNIVERSE_JWT_SECRET")
 	if err != nil {
 		return nil, err
 	}
-	coinRankingURL, err := optionalEnvURL("COINRANKING_URL", price.DefaultCoinRankingURI)
+	redisAddress, err := RequiredEnv("REDIS_ADDRESS")
 	if err != nil {
 		return nil, err
 	}
-	coinRankingToken, err := requiredEnv("COINRANKING_TOKEN")
-	if err != nil {
-		return nil, err
+
+	redisPass := OptionalEnv("REDIS_PASS", "")
+
+	redisDBint := 0
+	redisDB := OptionalEnv("REDIS_DB", "0")
+	if redisDB != "" {
+		res, err := strconv.Atoi(redisDB)
+		if err != nil {
+			return nil, fmt.Errorf("could not parse redis db from %q: %w", redisDB, err)
+		}
+		redisDBint = res
 	}
-	universeJWTSecret, err := requiredEnv("UNIVERSE_JWT_SECRET")
-	if err != nil {
-		return nil, err
-	}
-	disablePricingUpdate := optionalEnvBool("DISABLE_PRICING_UPDATE")
 	return &Options{
-		DbDSN:                dsn,
-		QualityOracleURL:     *qualityOracleURL,
-		BrokerURL:            *brokerURL,
-		GeckoURL:             *geckoURL,
-		CoinRankingURL:       *coinRankingURL,
-		CoinRankingToken:     coinRankingToken,
-		UniverseJWTSecret:    universeJWTSecret,
-		DisablePricingUpdate: disablePricingUpdate,
+		DbDSN:             dsn,
+		QualityOracleURL:  *qualityOracleURL,
+		BrokerURL:         *brokerURL,
+		UniverseJWTSecret: universeJWTSecret,
+		RedisAddress:      redisAddress,
+		RedisPass:         redisPass,
+		RedisDB:           redisDBint,
 	}, nil
 }
 
-func requiredEnv(key string) (string, error) {
+func RequiredEnv(key string) (string, error) {
 	val, ok := os.LookupEnv(key)
 	if !ok {
 		return "", fmt.Errorf("required environment variable is misssing: %s", key)
@@ -74,8 +73,8 @@ func requiredEnv(key string) (string, error) {
 	return val, nil
 }
 
-func requiredEnvURL(key string) (*url.URL, error) {
-	strVal, err := requiredEnv(key)
+func RequiredEnvURL(key string) (*url.URL, error) {
+	strVal, err := RequiredEnv(key)
 	if err != nil {
 		return nil, err
 	}
@@ -86,8 +85,8 @@ func requiredEnvURL(key string) (*url.URL, error) {
 	return parsedURL, nil
 }
 
-func optionalEnvURL(key string, defaults string) (*url.URL, error) {
-	strVal := optionalEnv(key, defaults)
+func OptionalEnvURL(key string, defaults string) (*url.URL, error) {
+	strVal := OptionalEnv(key, defaults)
 	parsedURL, err := url.Parse(strVal)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse %s from value '%s'", key, strVal)
@@ -95,7 +94,7 @@ func optionalEnvURL(key string, defaults string) (*url.URL, error) {
 	return parsedURL, nil
 }
 
-func optionalEnv(key string, defaults string) string {
+func OptionalEnv(key string, defaults string) string {
 	val, ok := os.LookupEnv(key)
 	if !ok {
 		return defaults
@@ -103,7 +102,7 @@ func optionalEnv(key string, defaults string) string {
 	return val
 }
 
-func optionalEnvBool(key string) bool {
+func OptionalEnvBool(key string) bool {
 	val, _ := strconv.ParseBool(os.Getenv(key))
 	return val
 }

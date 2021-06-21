@@ -8,52 +8,33 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mysteriumnetwork/discovery/db"
+	"github.com/go-redis/redis/v8"
 	"github.com/rs/zerolog/log"
 )
+
+const PricingConfigRedisKey = "DISCOVERY_PRICE_BASE_CONFIG"
 
 type ConfigProvider interface {
 	Get() (Config, error)
 	Update(Config) error
 }
 
-type cachedConfig struct {
-	Config     Config
-	ValidUntil time.Time
-}
-
-func (cc cachedConfig) isValid() bool {
-	return time.Now().Before(cc.ValidUntil)
-}
-
 type ConfigProviderDB struct {
-	db   *db.DB
-	cc   cachedConfig
+	db   *redis.Client
 	lock sync.Mutex
 }
 
-func NewConfigProviderDB(db *db.DB) *ConfigProviderDB {
+func NewConfigProviderDB(redis *redis.Client) *ConfigProviderDB {
 	return &ConfigProviderDB{
-		db: db,
+		db: redis,
 	}
 }
 
 func (cpd *ConfigProviderDB) Get() (Config, error) {
-	cpd.lock.Lock()
-	defer cpd.lock.Unlock()
-	if cpd.cc.isValid() {
-		return cpd.cc.Config, nil
-	}
-
 	cfg, err := cpd.fetchConfig()
 	if err != nil {
 		log.Err(err).Msg("could not fetch config")
 		return Config{}, errors.New("internal error")
-	}
-
-	cpd.cc = cachedConfig{
-		Config:     cfg,
-		ValidUntil: time.Now().Add(time.Minute * 5),
 	}
 
 	return cfg, nil
@@ -72,43 +53,35 @@ func (cpd *ConfigProviderDB) Update(in Config) error {
 	if err != nil {
 		return err
 	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 
-	conn, err := cpd.db.Connection()
+	err = cpd.db.Set(ctx, PricingConfigRedisKey, string(cfgJSON), 0).Err()
 	if err != nil {
 		return err
 	}
-	defer conn.Release()
-
-	query := `INSERT INTO pricing_config(cfg) VALUES ($1);`
-	_, err = conn.Exec(context.Background(), query, cfgJSON)
-	if err != nil {
-		return err
-	}
-
-	// invalidate the cache so that the pricing is updated on next Get.
-	cpd.cc.ValidUntil = time.Time{}
 
 	return nil
 }
 
 func (cpd *ConfigProviderDB) fetchConfig() (Config, error) {
-	conn, err := cpd.db.Connection()
-	if err != nil {
-		return Config{}, err
-	}
-	defer conn.Release()
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
+	val, err := cpd.db.Get(ctx, PricingConfigRedisKey).Result()
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			err = cpd.db.Set(ctx, PricingConfigRedisKey, defaultPriceConfig, 0).Err()
+			if err != nil {
+				return Config{}, err
+			}
+			val = defaultPriceConfig
+		} else {
+			return Config{}, err
+		}
+	}
 
 	res := Config{}
-	row := conn.QueryRow(ctx, "SELECT cfg FROM pricing_config order by id desc limit 1;")
-	err = row.Scan(&res)
-	if err != nil {
-		return Config{}, err
-	}
-
-	return res, nil
+	return res, json.Unmarshal([]byte(val), &res)
 }
 
 type Config struct {
@@ -179,3 +152,22 @@ func (m Modifier) Validate() error {
 	}
 	return nil
 }
+
+var defaultPriceConfig = `{
+	"base_prices": {
+	  "residential": {
+		"price_per_hour_usd": 0.00036,
+		"price_per_gib_usd": 0.06
+	  },
+	  "other": {
+		"price_per_hour_usd": 0.00036,
+		"price_per_gib_usd": 0.06
+	  }
+	},
+	"country_modifiers": {
+	  "US": {
+		"residential": 1.5,
+		"other": 1.2
+	  }
+	}
+  }`

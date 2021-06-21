@@ -44,6 +44,12 @@ func Build() error {
 	return sh.Run("go", "build", "-o", path.Join("build", "discovery"), path.Join("cmd", "main.go"))
 }
 
+// Build builds the sidecar binary.
+//goland:noinspection GoUnusedExportedFunction
+func BuildSidecar() error {
+	return sh.Run("go", "build", "-o", path.Join("build", "sidecar"), path.Join("sidecar", "cmd", "main.go"))
+}
+
 // Run runs the app (without the DB).
 //goland:noinspection GoUnusedExportedFunction
 func Run() error {

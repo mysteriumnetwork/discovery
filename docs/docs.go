@@ -165,18 +165,6 @@ var doc = `{
                     },
                     {
                         "type": "number",
-                        "description": "Maximum price per GiB. When empty, will not filter by it. Price is set in ethereum wei.",
-                        "name": "price_gib_max",
-                        "in": "query"
-                    },
-                    {
-                        "type": "number",
-                        "description": "Maximum price per hour. When empty, will not filter by it. Price is set in ethereum wei.",
-                        "name": "price_hour_max",
-                        "in": "query"
-                    },
-                    {
-                        "type": "number",
                         "description": "Minimum compatibility. When empty, will not filter by it.",
                         "name": "compatibility_min",
                         "in": "query"
@@ -228,7 +216,7 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/v2.Metadata"
+                                "$ref": "#/definitions/v3.Metadata"
                             }
                         }
                     }
@@ -288,8 +276,14 @@ var doc = `{
                 "price_per_gib": {
                     "type": "integer"
                 },
+                "price_per_gib_human_readable": {
+                    "type": "number"
+                },
                 "price_per_hour": {
                     "type": "integer"
+                },
+                "price_per_hour_human_readable": {
+                    "type": "number"
                 }
             }
         },
@@ -345,7 +339,7 @@ var doc = `{
                 }
             }
         },
-        "v2.AccessPolicy": {
+        "v3.AccessPolicy": {
             "type": "object",
             "properties": {
                 "id": {
@@ -356,7 +350,7 @@ var doc = `{
                 }
             }
         },
-        "v2.Contact": {
+        "v3.Contact": {
             "type": "object",
             "properties": {
                 "definition": {
@@ -367,7 +361,7 @@ var doc = `{
                 }
             }
         },
-        "v2.Location": {
+        "v3.Location": {
             "type": "object",
             "properties": {
                 "asn": {
@@ -390,7 +384,7 @@ var doc = `{
                 }
             }
         },
-        "v2.Metadata": {
+        "v3.Metadata": {
             "type": "object",
             "properties": {
                 "country": {
@@ -401,12 +395,6 @@ var doc = `{
                 },
                 "isp": {
                     "type": "string"
-                },
-                "price_per_gib": {
-                    "type": "integer"
-                },
-                "price_per_hour": {
-                    "type": "integer"
                 },
                 "provider_id": {
                     "type": "string"
@@ -422,27 +410,13 @@ var doc = `{
                 }
             }
         },
-        "v2.Price": {
-            "type": "object",
-            "properties": {
-                "currency": {
-                    "type": "string"
-                },
-                "per_gib": {
-                    "type": "integer"
-                },
-                "per_hour": {
-                    "type": "integer"
-                }
-            }
-        },
         "v3.Proposal": {
             "type": "object",
             "properties": {
                 "access_policies": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/v2.AccessPolicy"
+                        "$ref": "#/definitions/v3.AccessPolicy"
                     }
                 },
                 "compatibility": {
@@ -451,7 +425,7 @@ var doc = `{
                 "contacts": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/v2.Contact"
+                        "$ref": "#/definitions/v3.Contact"
                     }
                 },
                 "format": {
@@ -461,23 +435,20 @@ var doc = `{
                     "type": "integer"
                 },
                 "location": {
-                    "$ref": "#/definitions/v2.Location"
-                },
-                "price": {
-                    "$ref": "#/definitions/v2.Price"
+                    "$ref": "#/definitions/v3.Location"
                 },
                 "provider_id": {
                     "type": "string"
                 },
                 "quality": {
-                    "$ref": "#/definitions/v2.Quality"
+                    "$ref": "#/definitions/v3.Quality"
                 },
                 "service_type": {
                     "type": "string"
                 }
             }
         },
-        "v2.Quality": {
+        "v3.Quality": {
             "type": "object",
             "properties": {
                 "bandwidth": {
