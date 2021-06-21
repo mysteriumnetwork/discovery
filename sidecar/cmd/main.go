@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	stdlog "log"
+	"net/http"
 	"net/url"
 	"os"
 	"os/signal"
@@ -11,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"github.com/mysteriumnetwork/discovery/config"
 	"github.com/mysteriumnetwork/discovery/price/pricing"
@@ -85,9 +87,48 @@ func main() {
 	log.Info().Msg("pricer started")
 	defer pricer.Stop()
 
+	router := gin.Default()
+	router.GET("/status", func(c *gin.Context) {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		err := rdb.Ping(ctx).Err()
+		if err != nil {
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+		c.String(http.StatusOK, "OK")
+	})
+
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%v", getPort()),
+		Handler: router,
+	}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil {
+			log.Printf("listen: %s\n", err)
+		}
+	}()
+
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	<-sigs
+
+	gctx, gcancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer gcancel()
+	if err := srv.Shutdown(gctx); err != nil {
+		log.Fatal().Err(err).Msg("server shutdown failed")
+	}
+}
+
+func getPort() int {
+	p := os.Getenv("PORT")
+	if p == "" {
+		return 8080
+	}
+
+	port, _ := strconv.Atoi(p)
+	return port
 }
 
 func buildLoadPricingProvider(cfg *Options, oracle *oracleapi.API) (*pricing.NetworkLoadMultiplierCalculator, error) {

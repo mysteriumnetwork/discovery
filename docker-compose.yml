@@ -20,6 +20,8 @@ services:
     build:
       context: .
       dockerfile: sidecar/Dockerfile
+    ports:
+        - 8888:8080
     depends_on: 
       - wiremock
       - redis
