@@ -6,6 +6,7 @@ services:
     depends_on: 
       - db
       - wiremock
+      - redis
     ports:
       - 8080:8080
     environment:
@@ -13,10 +14,24 @@ services:
       - DB_DSN=postgresql://discovery:discovery@db:5432/discovery
       - QUALITY_ORACLE_URL=https://testnet2-quality.mysterium.network
       - BROKER_URL=nats://testnet2-broker.mysterium.network
+      - UNIVERSE_JWT_SECRET=suchsecret
+      - REDIS_ADDRESS=redis:6379
+  discosidecar:
+    build:
+      context: .
+      dockerfile: sidecar/Dockerfile
+    ports:
+        - 8888:8080
+    depends_on: 
+      - wiremock
+      - redis
+    environment:
+      - QUALITY_ORACLE_URL=https://testnet2-quality.mysterium.network
+      - BROKER_URL=nats://testnet2-broker.mysterium.network
+      - REDIS_ADDRESS=redis:6379
       - GECKO_URL=http://wiremock:8080
       - COINRANKING_URL=http://wiremock:8080
       - COINRANKING_TOKEN=suchtoken
-      - UNIVERSE_JWT_SECRET=suchsecret
   db:
     image: postgres:13-alpine
     container_name: discovery_db
@@ -33,3 +48,8 @@ services:
       - "8004:8080"
     volumes:
       - ./e2e/wiremock/mappings:/home/wiremock/mappings
+  redis:
+    image: "redis:alpine"
+    ports:
+      - 6379:6379
+    

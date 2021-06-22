@@ -1,16 +1,21 @@
 package pricing
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"math/big"
 	"sync"
 	"time"
 
 	"github.com/fln/pprotect"
+	"github.com/go-redis/redis/v8"
 
 	"github.com/mysteriumnetwork/payments/crypto"
 	"github.com/rs/zerolog/log"
 )
+
+const PriceRedisKey = "DISCOVERY_CURRENT_PRICE"
 
 type Bound struct {
 	Min, Max float64
@@ -25,15 +30,19 @@ type NetworkLoadByCountryProvider interface {
 	GetMultiplier(isoCode ISO3166CountryCode) float64
 }
 
-type Pricer struct {
+type PriceUpdater struct {
 	priceAPI              FiatPriceAPI
 	priceLifetime         time.Duration
 	mystBound             Bound
 	loadByCountryProvider NetworkLoadByCountryProvider
+	db                    *redis.Client
 
 	lock        sync.Mutex
 	lp          LatestPrices
 	cfgProvider ConfigProvider
+
+	stop chan struct{}
+	once sync.Once
 }
 
 func NewPricer(
@@ -42,28 +51,35 @@ func NewPricer(
 	priceLifetime time.Duration,
 	sensibleMystBound Bound,
 	loadByCountryProvider NetworkLoadByCountryProvider,
-) (*Pricer, error) {
-	pricer := &Pricer{
+	db *redis.Client,
+) (*PriceUpdater, error) {
+	pricer := &PriceUpdater{
 		cfgProvider:           cfgProvider,
 		priceAPI:              priceAPI,
 		priceLifetime:         priceLifetime,
 		mystBound:             sensibleMystBound,
 		loadByCountryProvider: loadByCountryProvider,
+		stop:                  make(chan struct{}),
+		db:                    db,
 	}
 
-	go schedulePriceUpdate(priceLifetime, pricer)
+	go pricer.schedulePriceUpdate(priceLifetime)
 	if err := pricer.threadSafePriceUpdate(); err != nil {
 		return nil, err
 	}
 	return pricer, nil
 }
 
-func schedulePriceUpdate(priceLifetime time.Duration, pricer *Pricer) {
+func (p *PriceUpdater) schedulePriceUpdate(priceLifetime time.Duration) {
+	log.Info().Msg("price update started")
 	for {
 		select {
+		case <-p.stop:
+			log.Info().Msg("price update stopped")
+			return
 		case <-time.After(priceLifetime):
 			pprotect.CallLoop(func() {
-				err := pricer.threadSafePriceUpdate()
+				err := p.threadSafePriceUpdate()
 				if err != nil {
 					log.Err(err).Msg("failed to update prices")
 				}
@@ -74,28 +90,14 @@ func schedulePriceUpdate(priceLifetime time.Duration, pricer *Pricer) {
 	}
 }
 
-func (p *Pricer) threadSafePriceUpdate() error {
+func (p *PriceUpdater) threadSafePriceUpdate() error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
 	return p.updatePrices()
 }
 
-func (p *Pricer) GetPrices() LatestPrices {
-	p.lock.Lock()
-	defer p.lock.Unlock()
-
-	if !p.lp.isValid() {
-		err := p.updatePrices()
-		if err != nil {
-			log.Err(err).Msg("could not update prices")
-		}
-	}
-
-	return p.lp
-}
-
-func (p *Pricer) updatePrices() error {
+func (p *PriceUpdater) updatePrices() error {
 	mystUSD, err := p.fetchMystPrice()
 	if err != nil {
 		return err
@@ -107,12 +109,27 @@ func (p *Pricer) updatePrices() error {
 	}
 
 	p.lp = p.generateNewLatestPrice(mystUSD, cfg)
-	log.Info().Msg("prices updated")
 
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+	marshalled, err := json.Marshal(p.lp)
+	if err != nil {
+		return err
+	}
+
+	err = p.db.Set(ctx, PriceRedisKey, string(marshalled), 0).Err()
+	if err != nil {
+		return err
+	}
+	log.Info().Msgf("price update complete")
 	return nil
 }
 
-func (p *Pricer) generateNewLatestPrice(mystUSD float64, cfg Config) LatestPrices {
+func (p *PriceUpdater) Stop() {
+	p.once.Do(func() { close(p.stop) })
+}
+
+func (p *PriceUpdater) generateNewLatestPrice(mystUSD float64, cfg Config) LatestPrices {
 	tm := time.Now().UTC()
 
 	newLP := LatestPrices{
@@ -131,7 +148,7 @@ func (p *Pricer) generateNewLatestPrice(mystUSD float64, cfg Config) LatestPrice
 	return newLP
 }
 
-func (p *Pricer) generateNewDefaults(mystUSD float64, cfg Config) *PriceHistory {
+func (p *PriceUpdater) generateNewDefaults(mystUSD float64, cfg Config) *PriceHistory {
 	ph := &PriceHistory{
 		Current: &PriceByType{
 			Residential: &Price{
@@ -156,7 +173,7 @@ func (p *Pricer) generateNewDefaults(mystUSD float64, cfg Config) *PriceHistory 
 	return ph
 }
 
-func (p *Pricer) generateNewPerCountry(mystUSD float64, cfg Config) map[string]*PriceHistory {
+func (p *PriceUpdater) generateNewPerCountry(mystUSD float64, cfg Config) map[string]*PriceHistory {
 	countries := make(map[string]*PriceHistory)
 	for countryCode := range CountryCodeToName {
 		mod, ok := cfg.CountryModifiers[ISO3166CountryCode(countryCode)]
@@ -215,7 +232,7 @@ func calculatePriceMystFloat(mystUSD, priceUSD, multiplier float64) float64 {
 	return crypto.BigMystToFloat(calculatePriceMYST(mystUSD, priceUSD, multiplier))
 }
 
-func (p *Pricer) fetchMystPrice() (float64, error) {
+func (p *PriceUpdater) fetchMystPrice() (float64, error) {
 	mystUSD := p.priceAPI.MystUSD()
 	if err := p.withinBounds(mystUSD); err != nil {
 		return 0, err
@@ -225,7 +242,7 @@ func (p *Pricer) fetchMystPrice() (float64, error) {
 }
 
 // withinBounds used to filter out any possible nonsense that the external pricing services might return.
-func (p *Pricer) withinBounds(price float64) error {
+func (p *PriceUpdater) withinBounds(price float64) error {
 	if price > p.mystBound.Max || price < p.mystBound.Min {
 		return fmt.Errorf("myst exceeds sensible bounds: %.6f < %.6f(current price) < %.6f", p.mystBound.Min, price, p.mystBound.Max)
 	}

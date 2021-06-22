@@ -5,12 +5,14 @@
 package main
 
 import (
+	"context"
 	stdlog "log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/mysteriumnetwork/discovery/price/pricing"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +24,6 @@ import (
 	"github.com/mysteriumnetwork/discovery/proposal"
 	"github.com/mysteriumnetwork/discovery/quality"
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
-	payprice "github.com/mysteriumnetwork/payments/fees/price"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	swaggerFiles "github.com/swaggo/files"
@@ -57,6 +58,19 @@ func main() {
 	}
 	defer database.Close()
 
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     cfg.RedisAddress,
+		Password: cfg.RedisPass,
+		DB:       cfg.RedisDB,
+	})
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+	st := rdb.Ping(ctx)
+	err = st.Err()
+	if err != nil {
+		log.Fatal().Err(err).Msg("could not reach redis")
+	}
+
 	proposalRepo := proposal.NewRepository(database)
 	qualityOracleAPI := oracleapi.New(cfg.QualityOracleURL.String())
 	qualityService := quality.NewService(qualityOracleAPI)
@@ -67,40 +81,18 @@ func main() {
 	v3 := r.Group("/api/v3")
 	proposal.NewAPI(proposalService, proposalRepo).RegisterRoutes(v3)
 
-	mrkt, stopMarket, err := buildMarket(cfg)
-	if err != nil {
-		log.Fatal().Err(err).Msg("could not build market")
-	}
-	defer stopMarket()
-
-	cfger := pricing.NewConfigProviderDB(database)
+	cfger := pricing.NewConfigProviderDB(rdb)
 	_, err = cfger.Get()
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to load cfg")
 	}
 
-	calc, err := buildLoadPricingProvider(cfg, database, qualityOracleAPI)
+	getter, err := pricing.NewPriceGetter(rdb)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to build load pricing provider")
+		log.Fatal().Err(err).Msg("failed to initialize price getter")
 	}
-	err = calc.Start()
-	if err != nil {
-		log.Fatal().Err(err).Msg("Could not start calculator")
-	}
-	defer calc.Stop()
 
-	pricer, err := pricing.NewPricer(
-		cfger,
-		mrkt,
-		time.Minute*5,
-		pricing.Bound{Min: 0.1, Max: 3.0},
-		calc,
-	)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to initialize Pricer")
-		return
-	}
-	price.NewAPI(pricer, cfger, cfg.UniverseJWTSecret).RegisterRoutes(v3)
+	price.NewAPI(getter, cfger, cfg.UniverseJWTSecret).RegisterRoutes(v3)
 
 	brokerListener := listener.New(cfg.BrokerURL.String(), proposalRepo)
 
@@ -113,24 +105,6 @@ func main() {
 		log.Err(err).Send()
 		return
 	}
-}
-
-func buildLoadPricingProvider(cfg *config.Options, db *db.DB, oracle *oracleapi.API) (*pricing.NetworkLoadMultiplierCalculator, error) {
-	calc := pricing.NewNetworkLoadMultiplierCalculator(
-		oracle,
-		db,
-		cfg.DisablePricingUpdate,
-	)
-	return calc, nil
-}
-
-func buildMarket(cfg *config.Options) (*pricing.Market, func(), error) {
-	apis := []pricing.ExternalPriceAPI{
-		payprice.NewGecko(cfg.GeckoURL.String()),
-		payprice.NewCoinRanking(cfg.CoinRankingURL.String(), &cfg.CoinRankingToken),
-	}
-	mrkt := pricing.NewMarket(apis, time.Minute*15)
-	return mrkt, mrkt.Stop, mrkt.Start()
 }
 
 func configureLogger() {

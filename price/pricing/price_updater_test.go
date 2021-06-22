@@ -107,7 +107,7 @@ func TestPricer_isMystInSensibleLimit(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := &Pricer{
+			p := &PriceUpdater{
 				mystBound: tt.fields.mystBound,
 			}
 			if err := p.withinBounds(tt.args.price); (err != nil) != tt.wantErr {
@@ -253,7 +253,7 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := &Pricer{
+			p := &PriceUpdater{
 				lp: tt.fields.lp,
 			}
 			if got := p.generateNewDefaults(tt.args.mystInUSD, tt.fields.cfg); !reflect.DeepEqual(got, tt.want) {
@@ -480,7 +480,7 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := &Pricer{
+			p := &PriceUpdater{
 				loadByCountryProvider: &mockNetworkLoadByCountryProvider{},
 				lp:                    tt.fields.lp,
 			}
