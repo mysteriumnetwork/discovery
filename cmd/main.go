@@ -28,6 +28,9 @@ import (
 	"github.com/rs/zerolog/log"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+
+	// unconfuse the number of cores go can use in k8s
+	_ "go.uber.org/automaxprocs"
 )
 
 var Version = "<dev>"

@@ -21,6 +21,9 @@ import (
 	payprice "github.com/mysteriumnetwork/payments/fees/price"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
+	// unconfuse the number of cores go can use in k8s
+	_ "go.uber.org/automaxprocs"
 )
 
 func main() {
