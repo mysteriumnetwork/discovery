@@ -127,8 +127,6 @@ func (r *Repository) Metadata(opts repoMetadataOpts) ([]v3.Metadata, error) {
                proposal->'location'->>'isp'                                         AS isp,
                proposal->'location'->>'ip_type'                                     AS ip_type,
                COALESCE(proposal->'access_policies'@>'[{"id":"mysterium"}]', FALSE) AS whitelist,
-               proposal->'price'->'per_gib'                                         AS price_per_gib,
-               proposal->'price'->'per_hour'                                        AS price_per_hour,
                updated_at                                                           AS updated_at
         FROM proposals
         WHERE 1=1
