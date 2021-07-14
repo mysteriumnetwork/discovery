@@ -8,23 +8,21 @@ import (
 	"context"
 	stdlog "log"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
-	"github.com/go-redis/redis/v8"
-	"github.com/mysteriumnetwork/discovery/price/pricing"
-
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 	"github.com/mysteriumnetwork/discovery/config"
 	"github.com/mysteriumnetwork/discovery/db"
 	_ "github.com/mysteriumnetwork/discovery/docs"
 	"github.com/mysteriumnetwork/discovery/listener"
 	"github.com/mysteriumnetwork/discovery/price"
+	"github.com/mysteriumnetwork/discovery/price/pricing"
 	"github.com/mysteriumnetwork/discovery/proposal"
 	"github.com/mysteriumnetwork/discovery/quality"
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
-	"github.com/rs/zerolog"
+	mlog "github.com/mysteriumnetwork/logger"
 	"github.com/rs/zerolog/log"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -49,6 +47,7 @@ func main() {
 
 	r := gin.New()
 	r.Use(gin.Recovery())
+	r.Use(mlog.GinLogFunc())
 
 	r.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
@@ -111,9 +110,7 @@ func main() {
 }
 
 func configureLogger() {
-	writer := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "2006-01-02T15:04:05.000"}
-	logger := log.Output(writer).Level(zerolog.DebugLevel).With().Caller().Timestamp().Logger()
-	log.Logger = logger
+	mlog.BootstrapDefaultLogger()
 	stdlog.SetFlags(0)
 	stdlog.SetOutput(log.Logger)
 }

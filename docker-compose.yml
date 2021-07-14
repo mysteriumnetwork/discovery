@@ -10,6 +10,7 @@ services:
     ports:
       - 8080:8080
     environment:
+      - MYSTERIUM_LOG_MODE=json
       - PORT=8080
       - DB_DSN=postgresql://discovery:discovery@db:5432/discovery
       - QUALITY_ORACLE_URL=https://testnet2-quality.mysterium.network
@@ -26,6 +27,7 @@ services:
       - wiremock
       - redis
     environment:
+      - MYSTERIUM_LOG_MODE=json
       - QUALITY_ORACLE_URL=https://testnet2-quality.mysterium.network
       - BROKER_URL=nats://testnet2-broker.mysterium.network
       - REDIS_ADDRESS=redis:6379
