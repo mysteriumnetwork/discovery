@@ -10,7 +10,7 @@ require (
 	github.com/fatih/color v1.10.0
 	github.com/fln/pprotect v0.0.0-20160819093714-7d932ef9e7a2
 	github.com/georgysavva/scany v0.2.8
-	github.com/gin-gonic/gin v1.6.3
+	github.com/gin-gonic/gin v1.7.2
 	github.com/go-openapi/jsonreference v0.19.6 // indirect
 	github.com/go-openapi/spec v0.20.3 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
@@ -23,10 +23,11 @@ require (
 	github.com/magefile/mage v1.11.0
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mysteriumnetwork/go-ci v0.0.0-20210330121512-2a81be082445
+	github.com/mysteriumnetwork/logger v0.0.6 // indirect
 	github.com/mysteriumnetwork/payments v0.2.0
 	github.com/nats-io/nats-server/v2 v2.2.0 // indirect
 	github.com/nats-io/nats.go v1.10.1-0.20210228004050-ed743748acac
-	github.com/rs/zerolog v1.20.0
+	github.com/rs/zerolog v1.23.0
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14

@@ -17,9 +17,8 @@ import (
 	"github.com/mysteriumnetwork/discovery/config"
 	"github.com/mysteriumnetwork/discovery/price/pricing"
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
-	"github.com/mysteriumnetwork/payments/fees/price"
+	mlog "github.com/mysteriumnetwork/logger"
 	payprice "github.com/mysteriumnetwork/payments/fees/price"
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
 	// unconfuse the number of cores go can use in k8s
@@ -90,7 +89,9 @@ func main() {
 	log.Info().Msg("pricer started")
 	defer pricer.Stop()
 
-	router := gin.Default()
+	router := gin.New()
+	router.Use(gin.Recovery())
+	router.Use(mlog.GinLogFunc())
 	router.GET("/status", func(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
@@ -151,9 +152,7 @@ func buildMarket(cfg *Options) *pricing.Market {
 }
 
 func configureLogger() {
-	writer := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "2006-01-02T15:04:05.000"}
-	logger := log.Output(writer).Level(zerolog.DebugLevel).With().Caller().Timestamp().Logger()
-	log.Logger = logger
+	mlog.BootstrapDefaultLogger()
 	stdlog.SetFlags(0)
 	stdlog.SetOutput(log.Logger)
 }
@@ -190,11 +189,11 @@ func ReadConfig() (*Options, error) {
 	if err != nil {
 		return nil, err
 	}
-	geckoURL, err := config.OptionalEnvURL("GECKO_URL", price.DefaultGeckoURI)
+	geckoURL, err := config.OptionalEnvURL("GECKO_URL", payprice.DefaultGeckoURI)
 	if err != nil {
 		return nil, err
 	}
-	coinRankingURL, err := config.OptionalEnvURL("COINRANKING_URL", price.DefaultCoinRankingURI)
+	coinRankingURL, err := config.OptionalEnvURL("COINRANKING_URL", payprice.DefaultCoinRankingURI)
 	if err != nil {
 		return nil, err
 	}
