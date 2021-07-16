@@ -22,13 +22,19 @@ type Repository struct {
 	expirationJobDelay time.Duration
 	expirationDuration time.Duration
 	db                 *db.DB
+	enhancers          []Enhancer
 }
 
-func NewRepository(db *db.DB) *Repository {
+type Enhancer interface {
+	Enhance(proposal *v3.Proposal)
+}
+
+func NewRepository(db *db.DB, enhancers []Enhancer) *Repository {
 	return &Repository{
 		expirationDuration: 3*time.Minute + 10*time.Second,
 		expirationJobDelay: 20 * time.Second,
 		db:                 db,
+		enhancers:          enhancers,
 	}
 }
 
@@ -41,6 +47,7 @@ type repoListOpts struct {
 	accessPolicySource string
 	compatibilityMin   int
 	compatibilityMax   int
+	tags               string
 }
 
 func (r *Repository) List(opts repoListOpts) ([]v3.Proposal, error) {
@@ -85,6 +92,13 @@ func (r *Repository) List(opts repoListOpts) ([]v3.Proposal, error) {
 	}
 	if opts.accessPolicySource != "" {
 		q.WriteString(fmt.Sprintf(` AND proposal->'access_policies' @> '[{"source": "%s"}]'`, opts.accessPolicySource))
+	}
+	if opts.tags != "" {
+		splits := strings.Split(opts.tags, ",")
+		for i := range splits {
+			splits[i] = fmt.Sprintf("'%v'", splits[i])
+		}
+		q.WriteString(fmt.Sprintf(` AND proposal->'tags' ?| ARRAY[%v]`, strings.Join(splits, ",")))
 	}
 
 	conn, err := r.db.Connection()
@@ -156,7 +170,14 @@ func (r *Repository) Metadata(opts repoMetadataOpts) ([]v3.Metadata, error) {
 	return meta, nil
 }
 
+func (r *Repository) enhance(proposal *v3.Proposal) {
+	for i := range r.enhancers {
+		r.enhancers[i].Enhance(proposal)
+	}
+}
+
 func (r *Repository) Store(proposal v3.Proposal) error {
+	r.enhance(&proposal)
 	expiresAt := time.Now().Add(r.expirationDuration)
 
 	proposalJSON, err := json.Marshal(proposal)

@@ -65,6 +65,7 @@ func (a *API) Proposals(c *gin.Context) {
 		accessPolicy:       c.Query("access_policy"),
 		accessPolicySource: c.Query("access_policy_source"),
 		ipType:             c.Query("ip_type"),
+		tags:               c.Query("tags"),
 	}
 
 	compatibilityMin, _ := strconv.ParseInt(c.Query("compatibility_min"), 10, 16)
