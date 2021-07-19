@@ -40,6 +40,7 @@ type ListOpts struct {
 	compatibilityMin   int
 	compatibilityMax   int
 	qualityMin         float64
+	tags               string
 }
 
 func (s *Service) List(opts ListOpts) ([]v3.Proposal, error) {
@@ -52,6 +53,7 @@ func (s *Service) List(opts ListOpts) ([]v3.Proposal, error) {
 		accessPolicySource: opts.accessPolicySource,
 		compatibilityMin:   opts.compatibilityMin,
 		compatibilityMax:   opts.compatibilityMax,
+		tags:               opts.tags,
 	})
 	if err != nil {
 		return nil, err

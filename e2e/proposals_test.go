@@ -102,6 +102,20 @@ func Test_ProposalFiltering(t *testing.T) {
 		}
 	})
 
+	t.Run("tags", func(t *testing.T) {
+		proposals, err := api.ListFilters(Query{Tags: "test,maybe"})
+		assert.NoError(t, err)
+		assert.Len(t, proposals, 3)
+
+		proposals, err = api.ListFilters(Query{Tags: "test"})
+		assert.NoError(t, err)
+		assert.Len(t, proposals, 3)
+
+		proposals, err = api.ListFilters(Query{Tags: "nosuchtag"})
+		assert.NoError(t, err)
+		assert.Len(t, proposals, 0)
+	})
+
 	t.Run("unregister", func(t *testing.T) {
 		for _, id := range []string{"0x1", "0x2", "0x3"} {
 			proposals, err := api.ListFilters(Query{ProviderID: id})

@@ -22,6 +22,7 @@ import (
 	"github.com/mysteriumnetwork/discovery/proposal"
 	"github.com/mysteriumnetwork/discovery/quality"
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
+	"github.com/mysteriumnetwork/discovery/tags"
 	mlog "github.com/mysteriumnetwork/logger"
 	"github.com/rs/zerolog/log"
 	swaggerFiles "github.com/swaggo/files"
@@ -73,7 +74,8 @@ func main() {
 		log.Fatal().Err(err).Msg("could not reach redis")
 	}
 
-	proposalRepo := proposal.NewRepository(database)
+	tagEnhancer := tags.NewEnhancer(tags.NewApi(cfg.BadgerAddress.String()))
+	proposalRepo := proposal.NewRepository(database, []proposal.Enhancer{tagEnhancer})
 	qualityOracleAPI := oracleapi.New(cfg.QualityOracleURL.String())
 	qualityService := quality.NewService(qualityOracleAPI)
 	proposalService := proposal.NewService(proposalRepo, qualityService)

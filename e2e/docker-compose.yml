@@ -9,6 +9,7 @@ services:
       - PORT=8080
       - DB_DSN=postgresql://discovery:discovery@db:5432/discovery
       - QUALITY_ORACLE_URL=http://wiremock:8080
+      - BADGER_ADDRESS=http://wiremock:8080
       - BROKER_URL=nats://broker
       - UNIVERSE_JWT_SECRET=suchsecret
       - REDIS_ADDRESS=redis:6379

@@ -60,4 +60,5 @@ type Query struct {
 	CompatibilityMin   int     `url:"compatibility_min"`
 	CompatibilityMax   int     `url:"compatibility_max"`
 	QualityMin         float64 `url:"quality_min"`
+	Tags               string  `url:"tags"`
 }
