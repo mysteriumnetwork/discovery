@@ -22,22 +22,6 @@ func NewAPI(service *Service, repository *Repository) *API {
 	return &API{service: service, repository: repository}
 }
 
-// Ping godoc.
-// @Summary Ping
-// @Description Ping
-// @Accept json
-// @Produce json
-// @Success 200 {object} PingResponse
-// @Router /ping [get]
-// @Tags system
-func (a *API) Ping(c *gin.Context) {
-	c.JSON(200, PingResponse{"pong"})
-}
-
-type PingResponse struct {
-	Message string `json:"message"`
-}
-
 // Proposals list proposals.
 // @Summary List proposals
 // @Description List proposals
@@ -110,7 +94,6 @@ func (a *API) ProposalsMetadata(c *gin.Context) {
 }
 
 func (a *API) RegisterRoutes(r gin.IRoutes) {
-	r.GET("/ping", a.Ping)
 	r.GET("/proposals", a.Proposals)
 	r.GET("/proposals-metadata", a.ProposalsMetadata)
 }

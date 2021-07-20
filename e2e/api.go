@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/dghubble/sling"
+	"github.com/mysteriumnetwork/discovery/health"
 	"github.com/mysteriumnetwork/discovery/price/pricing"
 	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 )
@@ -37,6 +38,11 @@ func (a *api) GetPriceConfig(token string) (config pricing.Config, err error) {
 		return config, errors.New(fmt.Sprint(resp.StatusCode))
 	}
 	return config, err
+}
+
+func (a *api) GetStatus() (status health.StatusResponse, err error) {
+	_, err = sling.New().Base(a.basePath).Get("/api/v3/status").Receive(&status, nil)
+	return status, err
 }
 
 func (a *api) UpdatePriceConfig(token string, cfg pricing.Config) (err error) {

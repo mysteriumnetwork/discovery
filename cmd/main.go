@@ -16,6 +16,7 @@ import (
 	"github.com/mysteriumnetwork/discovery/config"
 	"github.com/mysteriumnetwork/discovery/db"
 	_ "github.com/mysteriumnetwork/discovery/docs"
+	"github.com/mysteriumnetwork/discovery/health"
 	"github.com/mysteriumnetwork/discovery/listener"
 	"github.com/mysteriumnetwork/discovery/price"
 	"github.com/mysteriumnetwork/discovery/price/pricing"
@@ -84,6 +85,7 @@ func main() {
 
 	v3 := r.Group("/api/v3")
 	proposal.NewAPI(proposalService, proposalRepo).RegisterRoutes(v3)
+	health.NewAPI(rdb, database).RegisterRoutes(v3)
 
 	cfger := pricing.NewConfigProviderDB(rdb)
 	_, err = cfger.Get()
