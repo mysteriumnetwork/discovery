@@ -30,17 +30,18 @@ func NewService(repository *Repository, qualityService *quality.Service) *Servic
 }
 
 type ListOpts struct {
-	from               string
-	providerID         string
-	serviceType        string
-	locationCountry    string
-	ipType             string
-	accessPolicy       string
-	accessPolicySource string
-	compatibilityMin   int
-	compatibilityMax   int
-	qualityMin         float64
-	tags               string
+	from                    string
+	providerID              string
+	serviceType             string
+	locationCountry         string
+	ipType                  string
+	accessPolicy            string
+	accessPolicySource      string
+	compatibilityMin        int
+	compatibilityMax        int
+	qualityMin              float64
+	tags                    string
+	includeMonitoringFailed bool
 }
 
 func (s *Service) List(opts ListOpts) ([]v3.Proposal, error) {
@@ -72,16 +73,17 @@ func (s *Service) List(opts ListOpts) ([]v3.Proposal, error) {
 		}
 	}
 
-	// exclude monitoringFailed nodes
-	sessionsResponse, err := s.qualityService.Sessions(opts.from)
-	if err != nil {
-		log.Warn().Err(err).Msgf("Could not fetch session stats for consumer %v", opts.from)
-		return values(resultMap), nil
-	}
-
-	for k, proposal := range resultMap {
-		if sessionsResponse.MonitoringFailed(proposal.ProviderID, proposal.ServiceType) {
-			delete(resultMap, k)
+	if !opts.includeMonitoringFailed {
+		// exclude monitoringFailed nodes
+		sessionsResponse, err := s.qualityService.Sessions(opts.from)
+		if err != nil {
+			log.Warn().Err(err).Msgf("Could not fetch session stats for consumer %v", opts.from)
+		} else {
+			for k, proposal := range resultMap {
+				if sessionsResponse.MonitoringFailed(proposal.ProviderID, proposal.ServiceType) {
+					delete(resultMap, k)
+				}
+			}
 		}
 	}
 

@@ -7,6 +7,7 @@ package listener
 import (
 	"encoding/json"
 	"errors"
+	"time"
 
 	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 
@@ -29,7 +30,16 @@ func New(brokerURL string, repository *proposal.Repository) *Listener {
 }
 
 func (l *Listener) Listen() error {
-	conn, err := nats.Connect(l.brokerURL)
+	var opts = func(opts *nats.Options) error {
+		opts.PingInterval = time.Second * 5
+		opts.MaxReconnect = 5
+		opts.ClosedCB = func(c *nats.Conn) {
+			panic("nats connection closed")
+		}
+		return nil
+	}
+
+	conn, err := nats.Connect(l.brokerURL, opts)
 	if err != nil {
 		return err
 	}

@@ -54,17 +54,18 @@ func (a *api) UpdatePriceConfig(token string, cfg pricing.Config) (err error) {
 }
 
 type Query struct {
-	From               string  `url:"from"`
-	ProviderID         string  `url:"provider_id"`
-	ServiceType        string  `url:"service_type"`
-	Country            string  `url:"location_country"`
-	IPType             string  `url:"ip_type"`
-	AccessPolicy       string  `url:"access_policy"`
-	AccessPolicySource string  `url:"access_policy_source"`
-	PriceGibMax        int64   `url:"price_gib_max"`
-	PriceHourMax       int64   `url:"price_hour_max"`
-	CompatibilityMin   int     `url:"compatibility_min"`
-	CompatibilityMax   int     `url:"compatibility_max"`
-	QualityMin         float64 `url:"quality_min"`
-	Tags               string  `url:"tags"`
+	From                    string  `url:"from"`
+	ProviderID              string  `url:"provider_id"`
+	ServiceType             string  `url:"service_type"`
+	Country                 string  `url:"location_country"`
+	IPType                  string  `url:"ip_type"`
+	AccessPolicy            string  `url:"access_policy"`
+	AccessPolicySource      string  `url:"access_policy_source"`
+	PriceGibMax             int64   `url:"price_gib_max"`
+	PriceHourMax            int64   `url:"price_hour_max"`
+	CompatibilityMin        int     `url:"compatibility_min"`
+	CompatibilityMax        int     `url:"compatibility_max"`
+	QualityMin              float64 `url:"quality_min"`
+	Tags                    string  `url:"tags"`
+	IncludeMonitoringFailed bool    `url:"include_monitoring_failed"`
 }

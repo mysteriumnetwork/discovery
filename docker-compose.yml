@@ -56,3 +56,9 @@ services:
     ports:
       - 6379:6379
     
+  dev:
+    image: tianon/true
+    restart: "no"
+    depends_on:
+      - db
+      - wiremock
