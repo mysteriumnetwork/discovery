@@ -3,7 +3,7 @@ services:
   discovery:
     build:
       context: .
-    depends_on: 
+    depends_on:
       - db
       - wiremock
       - redis
@@ -18,13 +18,14 @@ services:
       - BROKER_URL=nats://testnet3-broker.mysterium.network
       - UNIVERSE_JWT_SECRET=suchsecret
       - REDIS_ADDRESS=redis:6379
+    restart: always
   discosidecar:
     build:
       context: .
       dockerfile: sidecar/Dockerfile
     ports:
         - 8888:8080
-    depends_on: 
+    depends_on:
       - wiremock
       - redis
     environment:
@@ -35,6 +36,7 @@ services:
       - GECKO_URL=http://wiremock:8080
       - COINRANKING_URL=http://wiremock:8080
       - COINRANKING_TOKEN=suchtoken
+
   db:
     image: postgres:13-alpine
     container_name: discovery_db
@@ -55,7 +57,7 @@ services:
     image: "redis:alpine"
     ports:
       - 6379:6379
-    
+
   dev:
     image: tianon/true
     restart: "no"
