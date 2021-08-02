@@ -7,11 +7,11 @@ package proposal
 import (
 	"time"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/mysteriumnetwork/discovery/proposal/metrics"
 	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
-
 	"github.com/mysteriumnetwork/discovery/quality"
-	"github.com/rs/zerolog/log"
 )
 
 type Service struct {
@@ -42,6 +42,7 @@ type ListOpts struct {
 	qualityMin              float64
 	tags                    string
 	includeMonitoringFailed bool
+	filterRestrictedNodes   bool
 }
 
 func (s *Service) List(opts ListOpts) ([]v3.Proposal, error) {
@@ -87,6 +88,20 @@ func (s *Service) List(opts ListOpts) ([]v3.Proposal, error) {
 		}
 	}
 
+	if opts.filterRestrictedNodes {
+		// exclude restricted nodes
+		qualityResponse, err := s.qualityService.Quality(opts.from)
+		if err != nil {
+			log.Warn().Err(err).Msgf("Could not fetch quality stats for consumer %v", opts.from)
+		} else {
+			for _, p := range qualityResponse.Entries {
+				if p.RestrictedNode {
+					delete(resultMap, p.ProposalID.ServiceType+p.ProposalID.ProviderID)
+				}
+			}
+		}
+	}
+
 	return values(resultMap), nil
 }
 
@@ -108,7 +123,7 @@ func (s *Service) StartExpirationJob() {
 }
 
 func values(proposalsMap map[string]*v3.Proposal) []v3.Proposal {
-	var res = make([]v3.Proposal, 0)
+	res := make([]v3.Proposal, 0)
 	for k := range proposalsMap {
 		res = append(res, *proposalsMap[k])
 	}
