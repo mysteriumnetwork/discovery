@@ -33,8 +33,12 @@ definitions:
     properties:
       price_per_gib:
         type: integer
+      price_per_gib_human_readable:
+        type: number
       price_per_hour:
         type: integer
+      price_per_hour_human_readable:
+        type: number
     type: object
   pricing.PriceByType:
     properties:
@@ -69,21 +73,21 @@ definitions:
       message:
         type: string
     type: object
-  v2.AccessPolicy:
+  v3.AccessPolicy:
     properties:
       id:
         type: string
       source:
         type: string
     type: object
-  v2.Contact:
+  v3.Contact:
     properties:
       definition:
         type: object
       type:
         type: string
     type: object
-  v2.Location:
+  v3.Location:
     properties:
       asn:
         type: integer
@@ -98,7 +102,7 @@ definitions:
       isp:
         type: string
     type: object
-  v2.Metadata:
+  v3.Metadata:
     properties:
       country:
         type: string
@@ -106,10 +110,6 @@ definitions:
         type: string
       isp:
         type: string
-      price_per_gib:
-        type: integer
-      price_per_hour:
-        type: integer
       provider_id:
         type: string
       service_type:
@@ -119,43 +119,32 @@ definitions:
       whitelist:
         type: boolean
     type: object
-  v2.Price:
-    properties:
-      currency:
-        type: string
-      per_gib:
-        type: integer
-      per_hour:
-        type: integer
-    type: object
-  v2.Proposal:
+  v3.Proposal:
     properties:
       access_policies:
         items:
-          $ref: '#/definitions/v2.AccessPolicy'
+          $ref: '#/definitions/v3.AccessPolicy'
         type: array
       compatibility:
         type: integer
       contacts:
         items:
-          $ref: '#/definitions/v2.Contact'
+          $ref: '#/definitions/v3.Contact'
         type: array
       format:
         type: string
       id:
         type: integer
       location:
-        $ref: '#/definitions/v2.Location'
-      price:
-        $ref: '#/definitions/v2.Price'
+        $ref: '#/definitions/v3.Location'
       provider_id:
         type: string
       quality:
-        $ref: '#/definitions/v2.Quality'
+        $ref: '#/definitions/v3.Quality'
       service_type:
         type: string
     type: object
-  v2.Quality:
+  v3.Quality:
     properties:
       bandwidth:
         description: Bandwidth in Mbps.
@@ -264,16 +253,6 @@ paths:
         in: query
         name: access_policy_source
         type: string
-      - description: Maximum price per GiB. When empty, will not filter by it. Price
-          is set in ethereum wei.
-        in: query
-        name: price_gib_max
-        type: number
-      - description: Maximum price per hour. When empty, will not filter by it. Price
-          is set in ethereum wei.
-        in: query
-        name: price_hour_max
-        type: number
       - description: Minimum compatibility. When empty, will not filter by it.
         in: query
         name: compatibility_min
@@ -292,7 +271,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/v2.Proposal'
+              $ref: '#/definitions/v3.Proposal'
             type: array
       summary: List proposals
       tags:
@@ -312,7 +291,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/v2.Metadata'
+              $ref: '#/definitions/v3.Metadata'
             type: array
       summary: List proposals' metadata.
 swagger: "2.0"

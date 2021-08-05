@@ -5,28 +5,32 @@
 package main
 
 import (
+	"context"
 	stdlog "log"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
-	"github.com/mysteriumnetwork/discovery/price/pricing"
-
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 	"github.com/mysteriumnetwork/discovery/config"
 	"github.com/mysteriumnetwork/discovery/db"
 	_ "github.com/mysteriumnetwork/discovery/docs"
+	"github.com/mysteriumnetwork/discovery/health"
 	"github.com/mysteriumnetwork/discovery/listener"
 	"github.com/mysteriumnetwork/discovery/price"
+	"github.com/mysteriumnetwork/discovery/price/pricing"
 	"github.com/mysteriumnetwork/discovery/proposal"
 	"github.com/mysteriumnetwork/discovery/quality"
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
-	payprice "github.com/mysteriumnetwork/payments/fees/price"
-	"github.com/rs/zerolog"
+	"github.com/mysteriumnetwork/discovery/tags"
+	mlog "github.com/mysteriumnetwork/logger"
 	"github.com/rs/zerolog/log"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+
+	// unconfuse the number of cores go can use in k8s
+	_ "go.uber.org/automaxprocs"
 )
 
 var Version = "<dev>"
@@ -45,6 +49,7 @@ func main() {
 
 	r := gin.New()
 	r.Use(gin.Recovery())
+	r.Use(mlog.GinLogFunc())
 
 	r.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
@@ -57,7 +62,21 @@ func main() {
 	}
 	defer database.Close()
 
-	proposalRepo := proposal.NewRepository(database)
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     cfg.RedisAddress,
+		Password: cfg.RedisPass,
+		DB:       cfg.RedisDB,
+	})
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+	st := rdb.Ping(ctx)
+	err = st.Err()
+	if err != nil {
+		log.Fatal().Err(err).Msg("could not reach redis")
+	}
+
+	tagEnhancer := tags.NewEnhancer(tags.NewApi(cfg.BadgerAddress.String()))
+	proposalRepo := proposal.NewRepository(database, []proposal.Enhancer{tagEnhancer})
 	qualityOracleAPI := oracleapi.New(cfg.QualityOracleURL.String())
 	qualityService := quality.NewService(qualityOracleAPI)
 	proposalService := proposal.NewService(proposalRepo, qualityService)
@@ -66,41 +85,20 @@ func main() {
 
 	v3 := r.Group("/api/v3")
 	proposal.NewAPI(proposalService, proposalRepo).RegisterRoutes(v3)
+	health.NewAPI(rdb, database).RegisterRoutes(v3)
 
-	mrkt, stopMarket, err := buildMarket(cfg)
-	if err != nil {
-		log.Fatal().Err(err).Msg("could not build market")
-	}
-	defer stopMarket()
-
-	cfger := pricing.NewConfigProviderDB(database)
+	cfger := pricing.NewConfigProviderDB(rdb)
 	_, err = cfger.Get()
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to load cfg")
 	}
 
-	calc, err := buildLoadPricingProvider(cfg, database, qualityOracleAPI)
+	getter, err := pricing.NewPriceGetter(rdb)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to build load pricing provider")
+		log.Fatal().Err(err).Msg("failed to initialize price getter")
 	}
-	err = calc.Start()
-	if err != nil {
-		log.Fatal().Err(err).Msg("Could not start calculator")
-	}
-	defer calc.Stop()
 
-	pricer, err := pricing.NewPricer(
-		cfger,
-		mrkt,
-		time.Minute*5,
-		pricing.Bound{Min: 0.1, Max: 3.0},
-		calc,
-	)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to initialize Pricer")
-		return
-	}
-	price.NewAPI(pricer, cfger, cfg.UniverseJWTSecret).RegisterRoutes(v3)
+	price.NewAPI(getter, cfger, cfg.UniverseJWTSecret).RegisterRoutes(v3)
 
 	brokerListener := listener.New(cfg.BrokerURL.String(), proposalRepo)
 
@@ -115,28 +113,8 @@ func main() {
 	}
 }
 
-func buildLoadPricingProvider(cfg *config.Options, db *db.DB, oracle *oracleapi.API) (*pricing.NetworkLoadMultiplierCalculator, error) {
-	calc := pricing.NewNetworkLoadMultiplierCalculator(
-		oracle,
-		db,
-		cfg.DisablePricingUpdate,
-	)
-	return calc, nil
-}
-
-func buildMarket(cfg *config.Options) (*pricing.Market, func(), error) {
-	apis := []pricing.ExternalPriceAPI{
-		payprice.NewGecko(cfg.GeckoURL.String()),
-		payprice.NewCoinRanking(cfg.CoinRankingURL.String(), &cfg.CoinRankingToken),
-	}
-	mrkt := pricing.NewMarket(apis, time.Minute*15)
-	return mrkt, mrkt.Stop, mrkt.Start()
-}
-
 func configureLogger() {
-	writer := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "2006-01-02T15:04:05.000"}
-	logger := log.Output(writer).Level(zerolog.DebugLevel).With().Caller().Timestamp().Logger()
-	log.Logger = logger
+	mlog.BootstrapDefaultLogger()
 	stdlog.SetFlags(0)
 	stdlog.SetOutput(log.Logger)
 }

@@ -2,7 +2,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the root directory of this source tree.
 
-package v2
+package v3
 
 import (
 	"encoding/json"
@@ -39,10 +39,10 @@ type Proposal struct {
 	ProviderID     string         `json:"provider_id"`
 	ServiceType    string         `json:"service_type"`
 	Location       Location       `json:"location"`
-	Price          Price          `json:"price"`
 	Contacts       []Contact      `json:"contacts"`
 	AccessPolicies []AccessPolicy `json:"access_policies,omitempty"`
 	Quality        Quality        `json:"quality"`
+	Tags           []string       `json:"tags,omitempty"`
 }
 
 func NewProposal(providerID, serviceType string) *Proposal {
@@ -87,9 +87,8 @@ type Location struct {
 }
 
 type Price struct {
-	Currency Currency `json:"currency"`
-	PerHour  *big.Int `json:"per_hour" swaggertype:"integer"`
-	PerGiB   *big.Int `json:"per_gib" swaggertype:"integer"`
+	PerHour *big.Int `json:"per_hour" swaggertype:"integer"`
+	PerGiB  *big.Int `json:"per_gib" swaggertype:"integer"`
 }
 
 type Contact struct {

@@ -107,7 +107,7 @@ func TestPricer_isMystInSensibleLimit(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := &Pricer{
+			p := &PriceUpdater{
 				mystBound: tt.fields.mystBound,
 			}
 			if err := p.withinBounds(tt.args.price); (err != nil) != tt.wantErr {
@@ -154,22 +154,30 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 			want: &PriceHistory{
 				Current: &PriceByType{
 					Residential: &Price{
-						PricePerHour: crypto.FloatToBigMyst(0.01),
-						PricePerGiB:  crypto.FloatToBigMyst(0.02),
+						PricePerHour:              crypto.FloatToBigMyst(0.01),
+						PricePerHourHumanReadable: 0.01,
+						PricePerGiB:               crypto.FloatToBigMyst(0.02),
+						PricePerGiBHumanReadable:  0.02,
 					},
 					Other: &Price{
-						PricePerHour: crypto.FloatToBigMyst(0.03),
-						PricePerGiB:  crypto.FloatToBigMyst(0.04),
+						PricePerHour:              crypto.FloatToBigMyst(0.03),
+						PricePerHourHumanReadable: 0.03,
+						PricePerGiB:               crypto.FloatToBigMyst(0.04),
+						PricePerGiBHumanReadable:  0.04,
 					},
 				},
 				Previous: &PriceByType{
 					Residential: &Price{
-						PricePerHour: crypto.FloatToBigMyst(0.01),
-						PricePerGiB:  crypto.FloatToBigMyst(0.02),
+						PricePerHour:              crypto.FloatToBigMyst(0.01),
+						PricePerHourHumanReadable: 0.01,
+						PricePerGiB:               crypto.FloatToBigMyst(0.02),
+						PricePerGiBHumanReadable:  0.02,
 					},
 					Other: &Price{
-						PricePerHour: crypto.FloatToBigMyst(0.03),
-						PricePerGiB:  crypto.FloatToBigMyst(0.04),
+						PricePerHour:              crypto.FloatToBigMyst(0.03),
+						PricePerHourHumanReadable: 0.03,
+						PricePerGiB:               crypto.FloatToBigMyst(0.04),
+						PricePerGiBHumanReadable:  0.04,
 					},
 				},
 			},
@@ -181,12 +189,16 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 					Defaults: &PriceHistory{
 						Current: &PriceByType{
 							Residential: &Price{
-								PricePerHour: crypto.FloatToBigMyst(0.05),
-								PricePerGiB:  crypto.FloatToBigMyst(0.06),
+								PricePerHour:              crypto.FloatToBigMyst(0.05),
+								PricePerHourHumanReadable: 0.05,
+								PricePerGiB:               crypto.FloatToBigMyst(0.06),
+								PricePerGiBHumanReadable:  0.06,
 							},
 							Other: &Price{
-								PricePerHour: crypto.FloatToBigMyst(0.07),
-								PricePerGiB:  crypto.FloatToBigMyst(0.08),
+								PricePerHour:              crypto.FloatToBigMyst(0.07),
+								PricePerHourHumanReadable: 0.07,
+								PricePerGiB:               crypto.FloatToBigMyst(0.08),
+								PricePerGiBHumanReadable:  0.08,
 							},
 						},
 					},
@@ -210,22 +222,30 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 			want: &PriceHistory{
 				Current: &PriceByType{
 					Residential: &Price{
-						PricePerHour: crypto.FloatToBigMyst(0.01),
-						PricePerGiB:  crypto.FloatToBigMyst(0.02),
+						PricePerHour:              crypto.FloatToBigMyst(0.01),
+						PricePerHourHumanReadable: 0.01,
+						PricePerGiB:               crypto.FloatToBigMyst(0.02),
+						PricePerGiBHumanReadable:  0.02,
 					},
 					Other: &Price{
-						PricePerHour: crypto.FloatToBigMyst(0.03),
-						PricePerGiB:  crypto.FloatToBigMyst(0.04),
+						PricePerHour:              crypto.FloatToBigMyst(0.03),
+						PricePerHourHumanReadable: 0.03,
+						PricePerGiB:               crypto.FloatToBigMyst(0.04),
+						PricePerGiBHumanReadable:  0.04,
 					},
 				},
 				Previous: &PriceByType{
 					Residential: &Price{
-						PricePerHour: crypto.FloatToBigMyst(0.05),
-						PricePerGiB:  crypto.FloatToBigMyst(0.06),
+						PricePerHour:              crypto.FloatToBigMyst(0.05),
+						PricePerHourHumanReadable: 0.05,
+						PricePerGiB:               crypto.FloatToBigMyst(0.06),
+						PricePerGiBHumanReadable:  0.06,
 					},
 					Other: &Price{
-						PricePerHour: crypto.FloatToBigMyst(0.07),
-						PricePerGiB:  crypto.FloatToBigMyst(0.08),
+						PricePerHour:              crypto.FloatToBigMyst(0.07),
+						PricePerHourHumanReadable: 0.07,
+						PricePerGiB:               crypto.FloatToBigMyst(0.08),
+						PricePerGiBHumanReadable:  0.08,
 					},
 				},
 			},
@@ -233,7 +253,7 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := &Pricer{
+			p := &PriceUpdater{
 				lp: tt.fields.lp,
 			}
 			if got := p.generateNewDefaults(tt.args.mystInUSD, tt.fields.cfg); !reflect.DeepEqual(got, tt.want) {
@@ -287,22 +307,30 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 				"US": {
 					Current: &PriceByType{
 						Residential: &Price{
-							PricePerHour: calculatePriceMYST(1, 0.01, 2),
-							PricePerGiB:  calculatePriceMYST(1, 0.02, 2),
+							PricePerHour:              calculatePriceMYST(1, 0.01, 2),
+							PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.01, 2),
+							PricePerGiB:               calculatePriceMYST(1, 0.02, 2),
+							PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.02, 2),
 						},
 						Other: &Price{
-							PricePerHour: calculatePriceMYST(1, 0.03, 3),
-							PricePerGiB:  calculatePriceMYST(1, 0.04, 3),
+							PricePerHour:              calculatePriceMYST(1, 0.03, 3),
+							PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.03, 3),
+							PricePerGiB:               calculatePriceMYST(1, 0.04, 3),
+							PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.04, 3),
 						},
 					},
 					Previous: &PriceByType{
 						Residential: &Price{
-							PricePerHour: calculatePriceMYST(1, 0.01, 2),
-							PricePerGiB:  calculatePriceMYST(1, 0.02, 2),
+							PricePerHour:              calculatePriceMYST(1, 0.01, 2),
+							PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.01, 2),
+							PricePerGiB:               calculatePriceMYST(1, 0.02, 2),
+							PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.02, 2),
 						},
 						Other: &Price{
-							PricePerHour: calculatePriceMYST(1, 0.03, 3),
-							PricePerGiB:  calculatePriceMYST(1, 0.04, 3),
+							PricePerHour:              calculatePriceMYST(1, 0.03, 3),
+							PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.03, 3),
+							PricePerGiB:               calculatePriceMYST(1, 0.04, 3),
+							PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.04, 3),
 						},
 					},
 				},
@@ -317,12 +345,16 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 						"US": {
 							Current: &PriceByType{
 								Residential: &Price{
-									PricePerHour: crypto.FloatToBigMyst(0.05),
-									PricePerGiB:  crypto.FloatToBigMyst(0.06),
+									PricePerHour:              crypto.FloatToBigMyst(0.05),
+									PricePerHourHumanReadable: 0.05,
+									PricePerGiB:               crypto.FloatToBigMyst(0.06),
+									PricePerGiBHumanReadable:  0.06,
 								},
 								Other: &Price{
-									PricePerHour: crypto.FloatToBigMyst(0.07),
-									PricePerGiB:  crypto.FloatToBigMyst(0.08),
+									PricePerHour:              crypto.FloatToBigMyst(0.07),
+									PricePerHourHumanReadable: 0.07,
+									PricePerGiB:               crypto.FloatToBigMyst(0.08),
+									PricePerGiBHumanReadable:  0.08,
 								},
 							},
 						},
@@ -354,22 +386,30 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 				"US": {
 					Current: &PriceByType{
 						Residential: &Price{
-							PricePerHour: calculatePriceMYST(1, 0.01, 2),
-							PricePerGiB:  calculatePriceMYST(1, 0.02, 2),
+							PricePerHour:              calculatePriceMYST(1, 0.01, 2),
+							PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.01, 2),
+							PricePerGiB:               calculatePriceMYST(1, 0.02, 2),
+							PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.02, 2),
 						},
 						Other: &Price{
-							PricePerHour: calculatePriceMYST(1, 0.03, 3),
-							PricePerGiB:  calculatePriceMYST(1, 0.04, 3),
+							PricePerHour:              calculatePriceMYST(1, 0.03, 3),
+							PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.03, 3),
+							PricePerGiB:               calculatePriceMYST(1, 0.04, 3),
+							PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.04, 3),
 						},
 					},
 					Previous: &PriceByType{
 						Residential: &Price{
-							PricePerHour: crypto.FloatToBigMyst(0.05),
-							PricePerGiB:  crypto.FloatToBigMyst(0.06),
+							PricePerHour:              crypto.FloatToBigMyst(0.05),
+							PricePerHourHumanReadable: 0.05,
+							PricePerGiB:               crypto.FloatToBigMyst(0.06),
+							PricePerGiBHumanReadable:  0.06,
 						},
 						Other: &Price{
-							PricePerHour: crypto.FloatToBigMyst(0.07),
-							PricePerGiB:  crypto.FloatToBigMyst(0.08),
+							PricePerHour:              crypto.FloatToBigMyst(0.07),
+							PricePerHourHumanReadable: 0.07,
+							PricePerGiB:               crypto.FloatToBigMyst(0.08),
+							PricePerGiBHumanReadable:  0.08,
 						},
 					},
 				},
@@ -408,22 +448,30 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 				"US": {
 					Current: &PriceByType{
 						Residential: &Price{
-							PricePerHour: calculatePriceMYST(1, 0.01, 2),
-							PricePerGiB:  calculatePriceMYST(1, 0.02, 2),
+							PricePerHour:              calculatePriceMYST(1, 0.01, 2),
+							PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.01, 2),
+							PricePerGiB:               calculatePriceMYST(1, 0.02, 2),
+							PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.02, 2),
 						},
 						Other: &Price{
-							PricePerHour: calculatePriceMYST(1, 0.03, 3),
-							PricePerGiB:  calculatePriceMYST(1, 0.04, 3),
+							PricePerHour:              calculatePriceMYST(1, 0.03, 3),
+							PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.03, 3),
+							PricePerGiB:               calculatePriceMYST(1, 0.04, 3),
+							PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.04, 3),
 						},
 					},
 					Previous: &PriceByType{
 						Residential: &Price{
-							PricePerHour: calculatePriceMYST(1, 0.01, 2),
-							PricePerGiB:  calculatePriceMYST(1, 0.02, 2),
+							PricePerHour:              calculatePriceMYST(1, 0.01, 2),
+							PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.01, 2),
+							PricePerGiB:               calculatePriceMYST(1, 0.02, 2),
+							PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.02, 2),
 						},
 						Other: &Price{
-							PricePerHour: calculatePriceMYST(1, 0.03, 3),
-							PricePerGiB:  calculatePriceMYST(1, 0.04, 3),
+							PricePerHour:              calculatePriceMYST(1, 0.03, 3),
+							PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.03, 3),
+							PricePerGiB:               calculatePriceMYST(1, 0.04, 3),
+							PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.04, 3),
 						},
 					},
 				},
@@ -432,12 +480,24 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := &Pricer{
-				lp: tt.fields.lp,
+			p := &PriceUpdater{
+				loadByCountryProvider: &mockNetworkLoadByCountryProvider{},
+				lp:                    tt.fields.lp,
 			}
-			if got := p.generateNewPerCountry(tt.args.mystInUSD, tt.fields.cfg); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Pricer.generateNewPerCountry() = %v, want %v", got, tt.want)
+			generated := p.generateNewPerCountry(tt.args.mystInUSD, tt.fields.cfg)
+			got := generated["US"]
+			want := tt.want["US"]
+
+			if !reflect.DeepEqual(got, want) {
+				t.Errorf("Pricer.generateNewPerCountry() = %v, want %v", got, want)
 			}
 		})
 	}
+}
+
+type mockNetworkLoadByCountryProvider struct {
+}
+
+func (m *mockNetworkLoadByCountryProvider) GetMultiplier(isoCode ISO3166CountryCode) float64 {
+	return 1
 }

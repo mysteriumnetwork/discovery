@@ -14,12 +14,12 @@ import (
 )
 
 type API struct {
-	pricer    *pricing.Pricer
+	pricer    *pricing.PriceGetter
 	jwtSecret string
 	cfger     pricing.ConfigProvider
 }
 
-func NewAPI(pricer *pricing.Pricer, cfger pricing.ConfigProvider, jwtSecret string) *API {
+func NewAPI(pricer *pricing.PriceGetter, cfger pricing.ConfigProvider, jwtSecret string) *API {
 	return &API{
 		pricer:    pricer,
 		cfger:     cfger,

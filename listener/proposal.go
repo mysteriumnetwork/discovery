@@ -9,10 +9,9 @@ import (
 	"errors"
 	"time"
 
-	v2 "github.com/mysteriumnetwork/discovery/proposal/v2"
+	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 
 	"github.com/mysteriumnetwork/discovery/proposal"
-	v1 "github.com/mysteriumnetwork/discovery/proposal/v1"
 	"github.com/nats-io/nats.go"
 	"github.com/rs/zerolog/log"
 )
@@ -47,9 +46,8 @@ func (l *Listener) Listen() error {
 	log.Info().Msgf("Connected to broker")
 	l.conn = conn
 
-	if _, err := conn.Subscribe("*.proposal-ping.v2", func(msg *nats.Msg) {
-		//log.Info().Msgf("Received a message [%s] %s", msg.Subject, string(msg.Data))
-		pingMsg := v2.ProposalPingMessage{}
+	if _, err := conn.Subscribe("*.proposal-register.v3", func(msg *nats.Msg) {
+		pingMsg := v3.ProposalPingMessage{}
 		if err := json.Unmarshal(msg.Data, &pingMsg); err != nil {
 			log.Err(err).Msg("Failed to parse proposal")
 		} else if pingMsg.IsEmpty() {
@@ -66,9 +64,9 @@ func (l *Listener) Listen() error {
 		return err
 	}
 
-	if _, err := conn.Subscribe("*.proposal-ping", func(msg *nats.Msg) {
-		//log.Info().Msgf("Received a message [%s] %s", msg.Subject, string(msg.Data))
-		pingMsg := v1.ProposalPingMessage{}
+	if _, err := conn.Subscribe("*.proposal-ping.v3", func(msg *nats.Msg) {
+		// log.Info().Msgf("Received a message [%s] %s", msg.Subject, string(msg.Data))
+		pingMsg := v3.ProposalPingMessage{}
 		if err := json.Unmarshal(msg.Data, &pingMsg); err != nil {
 			log.Err(err).Msg("Failed to parse proposal")
 		} else if pingMsg.IsEmpty() {
@@ -76,8 +74,7 @@ func (l *Listener) Listen() error {
 				Bytes("message", msg.Data).
 				Msg("Failed to parse proposal")
 		} else {
-			p := pingMsg.Proposal.ConvertToV2()
-			err := l.repository.Store(*p)
+			err := l.repository.Store(pingMsg.Proposal)
 			if err != nil {
 				log.Err(err).Msg("Failed to store proposal")
 			}
@@ -86,26 +83,8 @@ func (l *Listener) Listen() error {
 		return err
 	}
 
-	if _, err := conn.Subscribe("*.proposal-unregister.v2", func(msg *nats.Msg) {
-		unregisterMsg := v2.ProposalUnregisterMessage{}
-		if err := json.Unmarshal(msg.Data, &unregisterMsg); err != nil {
-			log.Err(err).Msg("Failed to unregister proposal")
-		} else if unregisterMsg.IsEmpty() {
-			log.Err(errors.New("unknown format")).
-				Bytes("message", msg.Data).
-				Msg("Failed to unregister proposal")
-		} else {
-			_, err := l.repository.Remove(unregisterMsg.Key())
-			if err != nil {
-				log.Err(err).Msg("Failed to delete proposal")
-			}
-		}
-	}); err != nil {
-		return err
-	}
-
-	if _, err := conn.Subscribe("*.proposal-unregister.v1", func(msg *nats.Msg) {
-		unregisterMsg := v1.ProposalUnregisterMessage{}
+	if _, err := conn.Subscribe("*.proposal-unregister.v3", func(msg *nats.Msg) {
+		unregisterMsg := v3.ProposalUnregisterMessage{}
 		if err := json.Unmarshal(msg.Data, &unregisterMsg); err != nil {
 			log.Err(err).Msg("Failed to unregister proposal")
 		} else if unregisterMsg.IsEmpty() {

@@ -13,7 +13,7 @@ import (
 
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/mysteriumnetwork/discovery/db"
-	v2 "github.com/mysteriumnetwork/discovery/proposal/v2"
+	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 )
 
 var ctx = context.Background()
@@ -22,29 +22,35 @@ type Repository struct {
 	expirationJobDelay time.Duration
 	expirationDuration time.Duration
 	db                 *db.DB
+	enhancers          []Enhancer
 }
 
-func NewRepository(db *db.DB) *Repository {
+type Enhancer interface {
+	Enhance(proposal *v3.Proposal)
+}
+
+func NewRepository(db *db.DB, enhancers []Enhancer) *Repository {
 	return &Repository{
 		expirationDuration: 3*time.Minute + 10*time.Second,
 		expirationJobDelay: 20 * time.Second,
 		db:                 db,
+		enhancers:          enhancers,
 	}
 }
 
 type repoListOpts struct {
-	providerID                string
-	serviceType               string
-	country                   string
-	ipType                    string
-	accessPolicy              string
-	accessPolicySource        string
-	compatibilityMin          int
-	compatibilityMax          int
-	priceGiBMax, priceHourMax int64
+	providerID         string
+	serviceType        string
+	country            string
+	ipType             string
+	accessPolicy       string
+	accessPolicySource string
+	compatibilityMin   int
+	compatibilityMax   int
+	tags               string
 }
 
-func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
+func (r *Repository) List(opts repoListOpts) ([]v3.Proposal, error) {
 	q := strings.Builder{}
 	var args []interface{}
 
@@ -87,13 +93,12 @@ func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
 	if opts.accessPolicySource != "" {
 		q.WriteString(fmt.Sprintf(` AND proposal->'access_policies' @> '[{"source": "%s"}]'`, opts.accessPolicySource))
 	}
-	if opts.priceGiBMax > 0 {
-		args = append(args, opts.priceGiBMax)
-		q.WriteString(fmt.Sprintf(" AND (proposal->'price'->>'per_gib')::decimal <= $%v", len(args)))
-	}
-	if opts.priceHourMax > 0 {
-		args = append(args, opts.priceHourMax)
-		q.WriteString(fmt.Sprintf(" AND (proposal->'price'->>'per_hour')::decimal <= $%v", len(args)))
+	if opts.tags != "" {
+		splits := strings.Split(opts.tags, ",")
+		for i := range splits {
+			splits[i] = fmt.Sprintf("'%v'", splits[i])
+		}
+		q.WriteString(fmt.Sprintf(` AND proposal->'tags' ?| ARRAY[%v]`, strings.Join(splits, ",")))
 	}
 
 	conn, err := r.db.Connection()
@@ -106,9 +111,9 @@ func (r *Repository) List(opts repoListOpts) ([]v2.Proposal, error) {
 	defer rows.Close()
 	//log.Info().Msgf("select: %s", time.Since(start))
 
-	var proposals []v2.Proposal
+	var proposals []v3.Proposal
 	for rows.Next() {
-		var rp v2.Proposal
+		var rp v3.Proposal
 		if err := rows.Scan(&rp); err != nil {
 			return nil, err
 		}
@@ -125,7 +130,7 @@ type repoMetadataOpts struct {
 	providerID string
 }
 
-func (r *Repository) Metadata(opts repoMetadataOpts) ([]v2.Metadata, error) {
+func (r *Repository) Metadata(opts repoMetadataOpts) ([]v3.Metadata, error) {
 	q := strings.Builder{}
 	var args []interface{}
 
@@ -136,8 +141,6 @@ func (r *Repository) Metadata(opts repoMetadataOpts) ([]v2.Metadata, error) {
                proposal->'location'->>'isp'                                         AS isp,
                proposal->'location'->>'ip_type'                                     AS ip_type,
                COALESCE(proposal->'access_policies'@>'[{"id":"mysterium"}]', FALSE) AS whitelist,
-               proposal->'price'->'per_gib'                                         AS price_per_gib,
-               proposal->'price'->'per_hour'                                        AS price_per_hour,
                updated_at                                                           AS updated_at
         FROM proposals
         WHERE 1=1
@@ -156,9 +159,9 @@ func (r *Repository) Metadata(opts repoMetadataOpts) ([]v2.Metadata, error) {
 	rows, _ := conn.Query(context.Background(), q.String(), args...)
 	defer rows.Close()
 
-	var meta []v2.Metadata
+	var meta []v3.Metadata
 	for rows.Next() {
-		var m v2.Metadata
+		var m v3.Metadata
 		if err := pgxscan.ScanRow(&m, rows); err != nil {
 			return nil, err
 		}
@@ -167,7 +170,14 @@ func (r *Repository) Metadata(opts repoMetadataOpts) ([]v2.Metadata, error) {
 	return meta, nil
 }
 
-func (r *Repository) Store(proposal v2.Proposal) error {
+func (r *Repository) enhance(proposal *v3.Proposal) {
+	for i := range r.enhancers {
+		r.enhancers[i].Enhance(proposal)
+	}
+}
+
+func (r *Repository) Store(proposal v3.Proposal) error {
+	r.enhance(&proposal)
 	expiresAt := time.Now().Add(r.expirationDuration)
 
 	proposalJSON, err := json.Marshal(proposal)

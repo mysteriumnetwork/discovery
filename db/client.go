@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -30,6 +31,17 @@ func (d *DB) Init() error {
 	}
 	d.pool = pool
 	return migrateUp(d.dsn)
+}
+
+func (d *DB) Ping() error {
+	conn, err := d.Connection()
+	if err != nil {
+		return err
+	}
+	defer conn.Release()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	return conn.Ping(ctx)
 }
 
 func (d *DB) Connection() (*pgxpool.Conn, error) {

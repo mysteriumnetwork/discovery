@@ -25,7 +25,7 @@ func Swag() error {
 
 // Test runs the tests.
 func Test() error {
-	return commands.Test("./...")
+	return sh.RunV("go", "test", "-race", "-cover", "-short", "./...")
 }
 
 // Check checks that the source is compliant with all of the checks.
@@ -42,6 +42,12 @@ func Copyright() error {
 func Build() error {
 	mg.Deps(Swag)
 	return sh.Run("go", "build", "-o", path.Join("build", "discovery"), path.Join("cmd", "main.go"))
+}
+
+// Build builds the sidecar binary.
+//goland:noinspection GoUnusedExportedFunction
+func BuildSidecar() error {
+	return sh.Run("go", "build", "-o", path.Join("build", "sidecar"), path.Join("sidecar", "cmd", "main.go"))
 }
 
 // Run runs the app (without the DB).

@@ -6,12 +6,10 @@ package e2e
 
 import (
 	_ "embed"
-	"math/big"
 	"testing"
 	"time"
 
-	v2 "github.com/mysteriumnetwork/discovery/proposal/v2"
-
+	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -30,7 +28,7 @@ func Test_ProposalFiltering(t *testing.T) {
 
 		// then
 		assert.NoError(t, err)
-		_, ok := findProposal(proposals, func(p v2.Proposal) bool {
+		_, ok := findProposal(proposals, func(p v3.Proposal) bool {
 			return p.ProviderID == "0x11"
 		})
 		assert.False(t, ok, "0x11 should not be in the list")
@@ -40,7 +38,7 @@ func Test_ProposalFiltering(t *testing.T) {
 
 		// then
 		assert.NoError(t, err)
-		proposal, ok := findProposal(proposals, func(p v2.Proposal) bool {
+		proposal, ok := findProposal(proposals, func(p v3.Proposal) bool {
 			return p.ProviderID == "0x11"
 		})
 		assert.True(t, ok, "0x11 should not be in the list")
@@ -113,48 +111,6 @@ func Test_ProposalFiltering(t *testing.T) {
 		}
 	})
 
-	t.Run("price_hour_max", func(t *testing.T) {
-		for _, query := range []Query{
-			{PriceHourMax: 5},
-			{PriceHourMax: 15},
-		} {
-			proposals, err := api.ListFilters(query)
-			assert.NoError(t, err)
-			assert.True(t, len(proposals) > 0, "no results matching query: %+v", query)
-			for _, proposal := range proposals {
-				assert.NotNil(t, proposal.Price.PerHour)
-
-				cmp := proposal.Price.PerHour.Cmp(big.NewInt(query.PriceHourMax))
-				assert.True(t, cmp == -1 || cmp == 0)
-			}
-		}
-
-		proposals, err := api.ListFilters(Query{PriceHourMax: 4})
-		assert.NoError(t, err)
-		assert.Len(t, proposals, 0)
-	})
-
-	t.Run("price_gib_max", func(t *testing.T) {
-		for _, query := range []Query{
-			{PriceGibMax: 15},
-			{PriceGibMax: 20},
-		} {
-			proposals, err := api.ListFilters(query)
-			assert.NoError(t, err)
-			assert.True(t, len(proposals) > 0)
-			for _, proposal := range proposals {
-				assert.NotNil(t, proposal.Price.PerGiB)
-
-				cmp := proposal.Price.PerGiB.Cmp(big.NewInt(query.PriceGibMax))
-				assert.True(t, cmp == -1 || cmp == 0)
-			}
-		}
-
-		proposals, err := api.ListFilters(Query{PriceGibMax: 5})
-		assert.NoError(t, err)
-		assert.Len(t, proposals, 0)
-	})
-
 	t.Run("quality", func(t *testing.T) {
 		for _, query := range []Query{
 			{QualityMin: 0.0},
@@ -169,6 +125,20 @@ func Test_ProposalFiltering(t *testing.T) {
 				assert.GreaterOrEqual(t, proposal.Quality.Quality, query.QualityMin)
 			}
 		}
+	})
+
+	t.Run("tags", func(t *testing.T) {
+		proposals, err := api.ListFilters(Query{Tags: "test,maybe"})
+		assert.NoError(t, err)
+		assert.Len(t, proposals, 3)
+
+		proposals, err = api.ListFilters(Query{Tags: "test"})
+		assert.NoError(t, err)
+		assert.Len(t, proposals, 3)
+
+		proposals, err = api.ListFilters(Query{Tags: "nosuchtag"})
+		assert.NoError(t, err)
+		assert.Len(t, proposals, 0)
 	})
 
 	t.Run("unregister", func(t *testing.T) {
@@ -201,21 +171,21 @@ func Test_ProposalFiltering(t *testing.T) {
 	})
 }
 
-func findProposal(proposals []v2.Proposal, predicate func(proposal v2.Proposal) bool) (v2.Proposal, bool) {
+func findProposal(proposals []v3.Proposal, predicate func(proposal v3.Proposal) bool) (v3.Proposal, bool) {
 	for _, p := range proposals {
 		if predicate(p) {
 			return p, true
 		}
 	}
-	return v2.Proposal{}, false
+	return v3.Proposal{}, false
 }
 
 func publishProposals(t *testing.T) ([]*template, error) {
 	templates := []*template{
-		newTemplate().providerID("0x1").country("LT").compatibility(0).serviceType("wireguard").prices(10, 5),
-		newTemplate().providerID("0x2").country("RU").compatibility(1).prices(20, 10),
-		newTemplate().providerID("0x3").country("US").compatibility(2).prices(30, 15),
-		newTemplate().providerID("0x11").country("CN").compatibility(2).prices(30, 15),
+		newTemplate().providerID("0x1").country("LT").compatibility(0).serviceType("wireguard"),
+		newTemplate().providerID("0x2").country("RU").compatibility(1),
+		newTemplate().providerID("0x3").country("US").compatibility(2),
+		newTemplate().providerID("0x11").country("CN").compatibility(2),
 	}
 	for _, t := range templates {
 		if err := t.publishPing(); err != nil {

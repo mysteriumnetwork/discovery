@@ -5,8 +5,9 @@ import (
 	"fmt"
 
 	"github.com/dghubble/sling"
+	"github.com/mysteriumnetwork/discovery/health"
 	"github.com/mysteriumnetwork/discovery/price/pricing"
-	v2 "github.com/mysteriumnetwork/discovery/proposal/v2"
+	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 )
 
 var discoveryAPI = newAPI(DiscoveryAPIurl)
@@ -26,7 +27,7 @@ func (a *api) LatestPrices() (latestPrices pricing.LatestPrices, err error) {
 	return latestPrices, err
 }
 
-func (a *api) ListFilters(query Query) (proposals []v2.Proposal, err error) {
+func (a *api) ListFilters(query Query) (proposals []v3.Proposal, err error) {
 	_, err = sling.New().Base(a.basePath).Get("/api/v3/proposals").QueryStruct(query).Receive(&proposals, nil)
 	return proposals, err
 }
@@ -37,6 +38,11 @@ func (a *api) GetPriceConfig(token string) (config pricing.Config, err error) {
 		return config, errors.New(fmt.Sprint(resp.StatusCode))
 	}
 	return config, err
+}
+
+func (a *api) GetStatus() (status health.StatusResponse, err error) {
+	_, err = sling.New().Base(a.basePath).Get("/api/v3/status").Receive(&status, nil)
+	return status, err
 }
 
 func (a *api) UpdatePriceConfig(token string, cfg pricing.Config) (err error) {
@@ -60,5 +66,6 @@ type Query struct {
 	CompatibilityMin        int     `url:"compatibility_min"`
 	CompatibilityMax        int     `url:"compatibility_max"`
 	QualityMin              float64 `url:"quality_min"`
+	Tags                    string  `url:"tags"`
 	IncludeMonitoringFailed bool    `url:"include_monitoring_failed"`
 }
