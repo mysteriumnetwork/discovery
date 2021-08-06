@@ -9,8 +9,9 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mysteriumnetwork/discovery/gorest"
 	"github.com/rs/zerolog/log"
+
+	"github.com/mysteriumnetwork/discovery/gorest"
 )
 
 type API struct {
@@ -64,8 +65,10 @@ func (a *API) Proposals(c *gin.Context) {
 	includeMonitoringFailed, _ := strconv.ParseBool(c.Query("include_monitoring_failed"))
 	opts.includeMonitoringFailed = includeMonitoringFailed
 
-	proposals, err := a.service.List(opts)
+	natCompatibility := c.Query("nat_compatibility")
+	opts.natCompatibility = natCompatibility
 
+	proposals, err := a.service.List(opts)
 	if err != nil {
 		log.Err(err).Msg("Failed to list proposals")
 		c.JSON(http.StatusInternalServerError, gorest.Err500)

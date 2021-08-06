@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/dghubble/sling"
+
 	"github.com/mysteriumnetwork/discovery/health"
 	"github.com/mysteriumnetwork/discovery/price/pricing"
 	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
@@ -68,4 +69,5 @@ type Query struct {
 	QualityMin              float64 `url:"quality_min"`
 	Tags                    string  `url:"tags"`
 	IncludeMonitoringFailed bool    `url:"include_monitoring_failed"`
+	NATCompatibility        string  `url:"nat_compatibility"`
 }
