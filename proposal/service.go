@@ -42,7 +42,7 @@ type ListOpts struct {
 	qualityMin              float64
 	tags                    string
 	includeMonitoringFailed bool
-	filterRestrictedNodes   bool
+	natCompatibility        string
 }
 
 func (s *Service) List(opts ListOpts) ([]v3.Proposal, error) {
@@ -88,7 +88,7 @@ func (s *Service) List(opts ListOpts) ([]v3.Proposal, error) {
 		}
 	}
 
-	if opts.filterRestrictedNodes {
+	if opts.natCompatibility == "symmetric" {
 		// exclude restricted nodes
 		qualityResponse, err := s.qualityService.Quality(opts.from)
 		if err != nil {

@@ -69,5 +69,5 @@ type Query struct {
 	QualityMin              float64 `url:"quality_min"`
 	Tags                    string  `url:"tags"`
 	IncludeMonitoringFailed bool    `url:"include_monitoring_failed"`
-	FilterRestrictedNodes   bool    `url:"filter_restricted_nodes"`
+	NATCompatibility        string  `url:"nat_compatibility"`
 }

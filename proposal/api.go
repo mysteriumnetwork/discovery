@@ -65,8 +65,8 @@ func (a *API) Proposals(c *gin.Context) {
 	includeMonitoringFailed, _ := strconv.ParseBool(c.Query("include_monitoring_failed"))
 	opts.includeMonitoringFailed = includeMonitoringFailed
 
-	filterRestrictedNodes, _ := strconv.ParseBool(c.Query("filter_restricted_nodes"))
-	opts.filterRestrictedNodes = filterRestrictedNodes
+	natCompatibility := c.Query("nat_compatibility")
+	opts.natCompatibility = natCompatibility
 
 	proposals, err := a.service.List(opts)
 	if err != nil {
