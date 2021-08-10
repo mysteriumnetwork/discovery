@@ -91,7 +91,6 @@ func main() {
 
 	router := gin.New()
 	router.Use(gin.Recovery())
-	router.Use(mlog.GinLogFunc())
 	router.GET("/status", func(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
