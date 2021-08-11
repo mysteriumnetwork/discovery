@@ -1,28 +1,86 @@
 package metrics
 
 import (
+	"sync"
+
 	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 	"github.com/mysteriumnetwork/discovery/quality"
+	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
 	"github.com/rs/zerolog/log"
 )
 
-type Enhancer struct {
-	qualityService *quality.Service
+type OracleResponses struct {
+	QualityResponse   *oracleapi.ProposalQualityResponse
+	LatencyResponse   *oracleapi.LatencyResponse
+	BandwitdhResponse *oracleapi.BandwidthResponse
+	SessionResponse   *oracleapi.SessionsResponse
 }
 
-func NewEnhancer(qualityService *quality.Service) *Enhancer {
-	return &Enhancer{qualityService: qualityService}
+func (or *OracleResponses) Load(qualityService *quality.Service, fromCountry string) {
+	wg := sync.WaitGroup{}
+	wg.Add(4)
+
+	go func() {
+		defer wg.Done()
+		qRes, err := qualityService.Quality(fromCountry)
+		if err != nil {
+			log.Warn().Err(err).Msgf("Could not fetch quality for consumer (country=%s)", fromCountry)
+		}
+		or.QualityResponse = qRes
+	}()
+
+	go func() {
+		defer wg.Done()
+		latencyRes, err := qualityService.Latency(fromCountry)
+		if err != nil {
+			log.Warn().Err(err).Msgf("Could not fetch quality for latency (country=%s)", fromCountry)
+		}
+		or.LatencyResponse = latencyRes
+	}()
+
+	go func() {
+		defer wg.Done()
+		bandwidthRes, err := qualityService.Bandwidth(fromCountry)
+		if err != nil {
+			log.Warn().Err(err).Msgf("Could not fetch quality for bandwidth (country=%s)", fromCountry)
+		}
+		or.BandwitdhResponse = bandwidthRes
+	}()
+
+	go func() {
+		defer wg.Done()
+		sessionRes, err := qualityService.Sessions(fromCountry)
+		if err != nil {
+			log.Warn().Err(err).Msgf("Could not fetch quality for sessions (country=%s)", fromCountry)
+		}
+		or.SessionResponse = sessionRes
+	}()
+
+	wg.Wait()
 }
 
-func (s *Enhancer) EnhanceWithMetrics(resultMap map[string]*v3.Proposal, fromCountry string) {
-	qualityResponse, err := s.qualityService.Quality(fromCountry)
-	if err != nil {
-		log.Warn().Err(err).Msgf("Could not fetch quality for consumer (country=%s)", fromCountry)
-	} else {
-		for _, q := range qualityResponse.Entries {
+type Filters struct {
+	QualityMin              float64
+	IncludeMonitoringFailed bool
+	NatCompatibility        string
+}
+
+func EnhanceWithMetrics(resultMap map[string]*v3.Proposal, or *OracleResponses, f Filters) {
+	if or.QualityResponse != nil {
+		for _, q := range or.QualityResponse.Entries {
 			key := q.ProposalID.ServiceType + q.ProposalID.ProviderID
 			p, ok := resultMap[key]
 			if !ok {
+				continue
+			}
+
+			if q.Quality < f.QualityMin {
+				delete(resultMap, key)
+				continue
+			}
+
+			if f.NatCompatibility == "symmetric" && q.RestrictedNode {
+				delete(resultMap, key)
 				continue
 			}
 
@@ -30,11 +88,8 @@ func (s *Enhancer) EnhanceWithMetrics(resultMap map[string]*v3.Proposal, fromCou
 		}
 	}
 
-	latencyResponse, err := s.qualityService.Latency(fromCountry)
-	if err != nil {
-		log.Warn().Err(err).Msgf("Could not fetch quality for latency (country=%s)", fromCountry)
-	} else {
-		for _, latency := range latencyResponse.Entries {
+	if or.LatencyResponse != nil {
+		for _, latency := range or.LatencyResponse.Entries {
 			// latency does not have service type as it does not depend on it
 			partialKey := latency.ProposalID.Key()
 
@@ -51,11 +106,8 @@ func (s *Enhancer) EnhanceWithMetrics(resultMap map[string]*v3.Proposal, fromCou
 		}
 	}
 
-	bandwidthResponse, err := s.qualityService.Bandwidth(fromCountry)
-	if err != nil {
-		log.Warn().Err(err).Msgf("Could not fetch quality for bandwidth (country=%s)", fromCountry)
-	} else {
-		for _, bandwidth := range bandwidthResponse.Entries {
+	if or.BandwitdhResponse != nil {
+		for _, bandwidth := range or.BandwitdhResponse.Entries {
 			key := bandwidth.ProposalID.Key()
 			p, ok := resultMap[key]
 			if ok {
@@ -64,4 +116,11 @@ func (s *Enhancer) EnhanceWithMetrics(resultMap map[string]*v3.Proposal, fromCou
 		}
 	}
 
+	if or.SessionResponse != nil && !f.IncludeMonitoringFailed {
+		for k, proposal := range resultMap {
+			if or.SessionResponse.MonitoringFailed(proposal.ProviderID, proposal.ServiceType) {
+				delete(resultMap, k)
+			}
+		}
+	}
 }

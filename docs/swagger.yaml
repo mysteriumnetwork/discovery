@@ -1,5 +1,17 @@
 basePath: /api/v3
 definitions:
+  health.PingResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  health.StatusResponse:
+    properties:
+      cache_ok:
+        type: boolean
+      db_ok:
+        type: boolean
+    type: object
   pricing.Config:
     properties:
       base_prices:
@@ -67,11 +79,6 @@ definitions:
         type: number
       price_per_hour_usd:
         type: number
-    type: object
-  proposal.PingResponse:
-    properties:
-      message:
-        type: string
     type: object
   v3.AccessPolicy:
     properties:
@@ -143,6 +150,10 @@ definitions:
         $ref: '#/definitions/v3.Quality'
       service_type:
         type: string
+      tags:
+        items:
+          type: string
+        type: array
     type: object
   v3.Quality:
     properties:
@@ -173,7 +184,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/proposal.PingResponse'
+            $ref: '#/definitions/health.PingResponse'
       summary: Ping
       tags:
       - system
@@ -294,4 +305,19 @@ paths:
               $ref: '#/definitions/v3.Metadata'
             type: array
       summary: List proposals' metadata.
+  /status:
+    get:
+      consumes:
+      - application/json
+      description: Status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/health.StatusResponse'
+      summary: Status
+      tags:
+      - system
 swagger: "2.0"
