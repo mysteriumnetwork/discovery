@@ -18,14 +18,12 @@ type Service struct {
 	*Repository
 	qualityService *quality.Service
 	shutdown       chan struct{}
-	enhancer       *metrics.Enhancer
 }
 
 func NewService(repository *Repository, qualityService *quality.Service) *Service {
 	return &Service{
 		Repository:     repository,
 		qualityService: qualityService,
-		enhancer:       metrics.NewEnhancer(qualityService),
 	}
 }
 
@@ -65,42 +63,14 @@ func (s *Service) List(opts ListOpts) ([]v3.Proposal, error) {
 		resultMap[p.ServiceType+p.ProviderID] = &proposals[i]
 	}
 
-	s.enhancer.EnhanceWithMetrics(resultMap, opts.from)
-	// filter by quality
-	for key := range resultMap {
-		p := resultMap[key]
-		if p.Quality.Quality < opts.qualityMin {
-			delete(resultMap, key)
-		}
-	}
+	or := &metrics.OracleResponses{}
+	or.Load(s.qualityService, opts.from)
 
-	if !opts.includeMonitoringFailed {
-		// exclude monitoringFailed nodes
-		sessionsResponse, err := s.qualityService.Sessions(opts.from)
-		if err != nil {
-			log.Warn().Err(err).Msgf("Could not fetch session stats for consumer %v", opts.from)
-		} else {
-			for k, proposal := range resultMap {
-				if sessionsResponse.MonitoringFailed(proposal.ProviderID, proposal.ServiceType) {
-					delete(resultMap, k)
-				}
-			}
-		}
-	}
-
-	if opts.natCompatibility == "symmetric" {
-		// exclude restricted nodes
-		qualityResponse, err := s.qualityService.Quality(opts.from)
-		if err != nil {
-			log.Warn().Err(err).Msgf("Could not fetch quality stats for consumer %v", opts.from)
-		} else {
-			for _, p := range qualityResponse.Entries {
-				if p.RestrictedNode {
-					delete(resultMap, p.ProposalID.ServiceType+p.ProposalID.ProviderID)
-				}
-			}
-		}
-	}
+	metrics.EnhanceWithMetrics(resultMap, or, metrics.Filters{
+		QualityMin:              opts.qualityMin,
+		IncludeMonitoringFailed: opts.includeMonitoringFailed,
+		NatCompatibility:        opts.natCompatibility,
+	})
 
 	return values(resultMap), nil
 }

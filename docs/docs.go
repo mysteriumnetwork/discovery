@@ -41,7 +41,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/proposal.PingResponse"
+                            "$ref": "#/definitions/health.PingResponse"
                         }
                     }
                 }
@@ -222,9 +222,51 @@ var doc = `{
                     }
                 }
             }
+        },
+        "/status": {
+            "get": {
+                "description": "Status",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "system"
+                ],
+                "summary": "Status",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/health.StatusResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "health.PingResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "health.StatusResponse": {
+            "type": "object",
+            "properties": {
+                "cache_ok": {
+                    "type": "boolean"
+                },
+                "db_ok": {
+                    "type": "boolean"
+                }
+            }
+        },
         "pricing.Config": {
             "type": "object",
             "properties": {
@@ -328,14 +370,6 @@ var doc = `{
                 },
                 "price_per_hour_usd": {
                     "type": "number"
-                }
-            }
-        },
-        "proposal.PingResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
                 }
             }
         },
@@ -445,6 +479,12 @@ var doc = `{
                 },
                 "service_type": {
                     "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },

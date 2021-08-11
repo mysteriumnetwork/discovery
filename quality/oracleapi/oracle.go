@@ -20,7 +20,7 @@ func New(url string) *API {
 	return &API{
 		url: url,
 		client: &http.Client{
-			Timeout: 5 * time.Second,
+			Timeout: 4 * time.Second,
 		},
 	}
 }
