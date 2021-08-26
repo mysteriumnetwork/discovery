@@ -39,7 +39,7 @@ func NewRepository(db *db.DB, enhancers []Enhancer) *Repository {
 }
 
 type repoListOpts struct {
-	providerID         string
+	providerIDS        []string
 	serviceType        string
 	country            string
 	ipType             string
@@ -55,9 +55,9 @@ func (r *Repository) List(opts repoListOpts) ([]v3.Proposal, error) {
 	var args []interface{}
 
 	q.WriteString("SELECT proposal FROM proposals WHERE 1=1")
-	if opts.providerID != "" {
-		args = append(args, opts.providerID)
-		q.WriteString(fmt.Sprintf(" AND proposal->>'provider_id' = $%v", len(args)))
+	if len(opts.providerIDS) > 0 {
+		args = append(args, opts.providerIDS)
+		q.WriteString(fmt.Sprintf(" AND proposal->>'provider_id' = ANY ($%v)", len(args)))
 	}
 	if opts.serviceType != "" {
 		args = append(args, opts.serviceType)
@@ -109,7 +109,6 @@ func (r *Repository) List(opts repoListOpts) ([]v3.Proposal, error) {
 
 	rows, _ := conn.Query(context.Background(), q.String(), args...)
 	defer rows.Close()
-	//log.Info().Msgf("select: %s", time.Since(start))
 
 	var proposals []v3.Proposal
 	for rows.Next() {
