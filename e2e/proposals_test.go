@@ -6,6 +6,7 @@ package e2e
 
 import (
 	_ "embed"
+	"fmt"
 	"testing"
 	"time"
 
@@ -43,18 +44,35 @@ func Test_ProposalFiltering(t *testing.T) {
 		})
 		assert.True(t, ok, "0x11 should not be in the list")
 		assert.Equal(t, "0x11", proposal.ProviderID)
+		assert.True(t, *proposal.Quality.MonitoringFailed)
+
+		// 0x12 has not yet been monitored
+		proposal, ok = findProposal(proposals, func(p v3.Proposal) bool {
+			return p.ProviderID == "0x12"
+		})
+		assert.True(t, ok, "0x12 should not be in the list")
+		assert.Equal(t, "0x12", proposal.ProviderID)
+		assert.Nil(t, proposal.Quality.MonitoringFailed)
+
+		// 0x1 monitoring success
+		proposal, ok = findProposal(proposals, func(p v3.Proposal) bool {
+			return p.ProviderID == "0x1"
+		})
+		assert.True(t, ok, "0x1 should not be in the list")
+		assert.Equal(t, "0x1", proposal.ProviderID)
+		assert.False(t, *proposal.Quality.MonitoringFailed)
 	})
 
 	t.Run("provider_id", func(t *testing.T) {
 		query := Query{
-			ProviderID:  "0x1",
+			ProviderID:  []string{"0x1", "0x4"},
 			ServiceType: "wireguard",
 		}
 		proposals, err := api.ListFilters(query)
 		assert.NoError(t, err)
-		assert.Len(t, proposals, 1)
+		assert.Len(t, proposals, 2)
 		for _, p := range proposals {
-			assert.Equal(t, query.ProviderID, p.ProviderID)
+			assert.Equal(t, query.ProviderID, []string{"0x1", "0x4"})
 			assert.Equal(t, query.ServiceType, p.ServiceType)
 		}
 	})
@@ -118,23 +136,31 @@ func Test_ProposalFiltering(t *testing.T) {
 			{QualityMin: 1.4},
 			{QualityMin: 2.5},
 		} {
-			proposals, err := api.ListFilters(query)
-			assert.NoError(t, err)
-			assert.True(t, len(proposals) > 0)
-			for _, proposal := range proposals {
-				assert.GreaterOrEqual(t, proposal.Quality.Quality, query.QualityMin)
-			}
+			t.Run(fmt.Sprintf("QualityMin: %f", query.QualityMin), func(t *testing.T) {
+				proposals, err := api.ListFilters(query)
+				assert.NoError(t, err)
+				assert.True(t, len(proposals) > 0)
+				for _, proposal := range proposals {
+					assert.GreaterOrEqual(
+						t,
+						proposal.Quality.Quality,
+						query.QualityMin,
+						fmt.Sprintf("Proposal %s quality is: %f", proposal.ProviderID, proposal.Quality.Quality),
+					)
+				}
+			})
 		}
 	})
 
+	// TODO make more robust tag e2e
 	t.Run("tags", func(t *testing.T) {
 		proposals, err := api.ListFilters(Query{Tags: "test,maybe"})
 		assert.NoError(t, err)
-		assert.Len(t, proposals, 3)
+		assert.Len(t, proposals, 5)
 
 		proposals, err = api.ListFilters(Query{Tags: "test"})
 		assert.NoError(t, err)
-		assert.Len(t, proposals, 3)
+		assert.Len(t, proposals, 5)
 
 		proposals, err = api.ListFilters(Query{Tags: "nosuchtag"})
 		assert.NoError(t, err)
@@ -143,7 +169,7 @@ func Test_ProposalFiltering(t *testing.T) {
 
 	t.Run("unregister", func(t *testing.T) {
 		for _, id := range []string{"0x1", "0x2", "0x3"} {
-			proposals, err := api.ListFilters(Query{ProviderID: id})
+			proposals, err := api.ListFilters(Query{ProviderID: []string{id}})
 			assert.NoError(t, err)
 			assert.Len(t, proposals, 1)
 			assert.True(t, proposals[0].ProviderID == id, "missing ProviderID %s in response", id)
@@ -165,7 +191,7 @@ func Test_ProposalFiltering(t *testing.T) {
 		err := newTemplate().providerID(providerID).publishPing()
 		assert.NoError(t, err)
 		assert.Eventuallyf(t, func() bool {
-			proposals, err := api.ListFilters(Query{ProviderID: "notMockedInWiremock"})
+			proposals, err := api.ListFilters(Query{ProviderID: []string{"notMockedInWiremock"}})
 			return len(proposals) == 1 && proposals[0].ProviderID == providerID && err == nil
 		}, time.Second*5, time.Millisecond*200, "proposal %s was not returned", providerID)
 	})
@@ -185,7 +211,10 @@ func publishProposals(t *testing.T) ([]*template, error) {
 		newTemplate().providerID("0x1").country("LT").compatibility(0).serviceType("wireguard"),
 		newTemplate().providerID("0x2").country("RU").compatibility(1),
 		newTemplate().providerID("0x3").country("US").compatibility(2),
+		newTemplate().providerID("0x4").country("CN").compatibility(2).serviceType("wireguard"),
 		newTemplate().providerID("0x11").country("CN").compatibility(2),
+		// no session response
+		newTemplate().providerID("0x12").country("LT"),
 	}
 	for _, t := range templates {
 		if err := t.publishPing(); err != nil {
