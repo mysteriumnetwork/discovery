@@ -178,6 +178,14 @@ func (s *SessionsResponse) MonitoringFailed(providerID, serviceType string) bool
 	return session.MonitoringFailed
 }
 
+func (s *SessionsResponse) MonitoringFailedOrNil(providerID, serviceType string) *bool {
+	session, ok := s.ConnectsMap[serviceType+providerID]
+	if !ok {
+		return nil
+	}
+	return &session.MonitoringFailed
+}
+
 type Connect struct {
 	ProposalID       ProposalID   `json:"proposalId"`
 	ConnectCount     ConnectCount `json:"connectCount"`

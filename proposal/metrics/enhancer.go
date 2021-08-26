@@ -116,11 +116,15 @@ func EnhanceWithMetrics(resultMap map[string]*v3.Proposal, or *OracleResponses, 
 		}
 	}
 
-	if or.SessionResponse != nil && !f.IncludeMonitoringFailed {
+	if or.SessionResponse != nil {
 		for k, proposal := range resultMap {
-			if or.SessionResponse.MonitoringFailed(proposal.ProviderID, proposal.ServiceType) {
+
+			if !f.IncludeMonitoringFailed && or.SessionResponse.MonitoringFailed(proposal.ProviderID, proposal.ServiceType) {
 				delete(resultMap, k)
+				continue
 			}
+
+			proposal.Quality.MonitoringFailed = or.SessionResponse.MonitoringFailedOrNil(proposal.ProviderID, proposal.ServiceType)
 		}
 	}
 }
