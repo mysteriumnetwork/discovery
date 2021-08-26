@@ -71,6 +71,12 @@ func (s *Service) List(opts ListOpts) ([]v3.Proposal, error) {
 		NatCompatibility:        opts.natCompatibility,
 	})
 
+	for k, p := range resultMap {
+		if p.Quality.Quality < opts.qualityMin {
+			delete(resultMap, k)
+		}
+	}
+
 	return values(resultMap), nil
 }
 
