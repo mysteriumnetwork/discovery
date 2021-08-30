@@ -43,7 +43,6 @@ func NewAPI(service *Service, repository *Repository) *API {
 // @Tags proposals
 func (a *API) Proposals(c *gin.Context) {
 	opts := ListOpts{
-		providerID:         c.Query("provider_id"),
 		from:               c.Query("from"),
 		serviceType:        c.Query("service_type"),
 		locationCountry:    c.Query("location_country"),
@@ -52,6 +51,9 @@ func (a *API) Proposals(c *gin.Context) {
 		ipType:             c.Query("ip_type"),
 		tags:               c.Query("tags"),
 	}
+
+	pids, _ := c.GetQueryArray("provider_id")
+	opts.providerIDS = pids
 
 	compatibilityMin, _ := strconv.ParseInt(c.Query("compatibility_min"), 10, 16)
 	opts.compatibilityMin = int(compatibilityMin)

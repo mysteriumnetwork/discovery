@@ -64,3 +64,4 @@ services:
     depends_on:
       - db
       - wiremock
+      - redis

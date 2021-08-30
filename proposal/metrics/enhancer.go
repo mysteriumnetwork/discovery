@@ -60,7 +60,6 @@ func (or *OracleResponses) Load(qualityService *quality.Service, fromCountry str
 }
 
 type Filters struct {
-	QualityMin              float64
 	IncludeMonitoringFailed bool
 	NatCompatibility        string
 }
@@ -71,11 +70,6 @@ func EnhanceWithMetrics(resultMap map[string]*v3.Proposal, or *OracleResponses, 
 			key := q.ProposalID.ServiceType + q.ProposalID.ProviderID
 			p, ok := resultMap[key]
 			if !ok {
-				continue
-			}
-
-			if q.Quality < f.QualityMin {
-				delete(resultMap, key)
 				continue
 			}
 
@@ -116,11 +110,15 @@ func EnhanceWithMetrics(resultMap map[string]*v3.Proposal, or *OracleResponses, 
 		}
 	}
 
-	if or.SessionResponse != nil && !f.IncludeMonitoringFailed {
+	if or.SessionResponse != nil {
 		for k, proposal := range resultMap {
-			if or.SessionResponse.MonitoringFailed(proposal.ProviderID, proposal.ServiceType) {
+
+			if !f.IncludeMonitoringFailed && or.SessionResponse.MonitoringFailed(proposal.ProviderID, proposal.ServiceType) {
 				delete(resultMap, k)
+				continue
 			}
+
+			proposal.Quality.MonitoringFailed = or.SessionResponse.MonitoringFailedOrNil(proposal.ProviderID, proposal.ServiceType)
 		}
 	}
 }

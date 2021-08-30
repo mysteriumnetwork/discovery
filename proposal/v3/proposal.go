@@ -109,4 +109,6 @@ type Quality struct {
 	Latency float64 `json:"latency"`
 	// Bandwidth in Mbps.
 	Bandwidth float64 `json:"bandwidth"`
+	// MonitoringFailed did monitoring agent succeed to connect to the node.
+	MonitoringFailed *bool `json:"monitoring_failed,omitempty"`
 }

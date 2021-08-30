@@ -29,7 +29,7 @@ func NewService(repository *Repository, qualityService *quality.Service) *Servic
 
 type ListOpts struct {
 	from                    string
-	providerID              string
+	providerIDS             []string
 	serviceType             string
 	locationCountry         string
 	ipType                  string
@@ -45,7 +45,7 @@ type ListOpts struct {
 
 func (s *Service) List(opts ListOpts) ([]v3.Proposal, error) {
 	proposals, err := s.Repository.List(repoListOpts{
-		providerID:         opts.providerID,
+		providerIDS:        opts.providerIDS,
 		serviceType:        opts.serviceType,
 		country:            opts.locationCountry,
 		ipType:             opts.ipType,
@@ -67,10 +67,15 @@ func (s *Service) List(opts ListOpts) ([]v3.Proposal, error) {
 	or.Load(s.qualityService, opts.from)
 
 	metrics.EnhanceWithMetrics(resultMap, or, metrics.Filters{
-		QualityMin:              opts.qualityMin,
 		IncludeMonitoringFailed: opts.includeMonitoringFailed,
 		NatCompatibility:        opts.natCompatibility,
 	})
+
+	for k, p := range resultMap {
+		if p.Quality.Quality < opts.qualityMin {
+			delete(resultMap, k)
+		}
+	}
 
 	return values(resultMap), nil
 }
