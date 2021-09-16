@@ -60,13 +60,13 @@ func (pg *PriceGetter) GetPrices() LatestPrices {
 		loaded, err := loadPricing(pg.db)
 		if err != nil {
 			log.Err(err).Msg("could not load pricing from db")
-			return pg.lp
+			return pg.lp.WithCurrentTime()
 		}
 		log.Info().Msg("pricing loaded from db")
 		pg.lp = loaded
 	}
 
-	return pg.lp
+	return pg.lp.WithCurrentTime()
 }
 
 var defaultPrices = LatestPrices{
