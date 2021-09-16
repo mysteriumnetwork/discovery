@@ -41,6 +41,7 @@ func Test_LatestPrices(t *testing.T) {
 	assert.NotNil(t, prices.Defaults.Previous.Other.PricePerHour)
 	assert.Greater(t, prices.CurrentValidUntil.UnixNano(), time.Unix(0, 0).UnixNano())
 	assert.Greater(t, prices.PreviousValidUntil.UnixNano(), time.Unix(0, 0).UnixNano())
+	assert.Greater(t, prices.CurrentServerTime.UnixNano(), time.Unix(0, 0).UnixNano())
 }
 
 func Test_GetConfig(t *testing.T) {
