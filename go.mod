@@ -19,7 +19,6 @@ require (
 	github.com/go-redis/redis/v8 v8.10.0 // indirect
 	github.com/golang-migrate/migrate/v4 v4.13.1-0.20201118180611-fedbe42fc818
 	github.com/jackc/pgx/v4 v4.11.0
-	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/magefile/mage v1.11.0
 	github.com/mailru/easyjson v0.7.7 // indirect
@@ -28,6 +27,7 @@ require (
 	github.com/mysteriumnetwork/payments v0.2.0
 	github.com/nats-io/nats-server/v2 v2.2.0 // indirect
 	github.com/nats-io/nats.go v1.10.1-0.20210228004050-ed743748acac
+	github.com/prometheus/client_golang v1.11.0 // indirect
 	github.com/rs/zerolog v1.23.0
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/stretchr/testify v1.7.0

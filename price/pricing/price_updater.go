@@ -11,6 +11,7 @@ import (
 	"github.com/fln/pprotect"
 	"github.com/go-redis/redis/v8"
 
+	"github.com/mysteriumnetwork/discovery/metrics"
 	"github.com/mysteriumnetwork/payments/crypto"
 	"github.com/rs/zerolog/log"
 )
@@ -121,8 +122,26 @@ func (p *PriceUpdater) updatePrices() error {
 	if err != nil {
 		return err
 	}
+
+	p.submitMetrics()
+
 	log.Info().Msgf("price update complete")
 	return nil
+}
+
+func (p *PriceUpdater) submitMetrics() {
+	p.submitPriceMetric("DEFAULTS", p.lp.Defaults.Current)
+
+	for k, v := range p.lp.PerCountry {
+		p.submitPriceMetric(k, v.Current)
+	}
+}
+
+func (p *PriceUpdater) submitPriceMetric(country string, price *PriceByType) {
+	metrics.CurrentPriceByCountry.WithLabelValues(country, "other", "per_gib").Set(price.Other.PricePerGiBHumanReadable)
+	metrics.CurrentPriceByCountry.WithLabelValues(country, "other", "per_hour").Set(price.Other.PricePerHourHumanReadable)
+	metrics.CurrentPriceByCountry.WithLabelValues(country, "residential", "per_gib").Set(price.Residential.PricePerGiBHumanReadable)
+	metrics.CurrentPriceByCountry.WithLabelValues(country, "residential", "per_hour").Set(price.Residential.PricePerHourHumanReadable)
 }
 
 func (p *PriceUpdater) Stop() {

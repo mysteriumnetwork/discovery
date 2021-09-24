@@ -15,10 +15,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"github.com/mysteriumnetwork/discovery/config"
+	"github.com/mysteriumnetwork/discovery/metrics"
 	"github.com/mysteriumnetwork/discovery/price/pricing"
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
 	mlog "github.com/mysteriumnetwork/logger"
 	payprice "github.com/mysteriumnetwork/payments/fees/price"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog/log"
 
 	// unconfuse the number of cores go can use in k8s
@@ -74,6 +76,7 @@ func main() {
 	log.Info().Msg("calculator started")
 	defer calc.Stop()
 
+	metrics.InitialiseMonitoring()
 	pricer, err := pricing.NewPricer(
 		cfger,
 		mrkt,
@@ -91,6 +94,7 @@ func main() {
 
 	router := gin.New()
 	router.Use(gin.Recovery())
+	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	router.GET("/status", func(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
