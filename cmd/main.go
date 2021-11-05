@@ -13,11 +13,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
+	"github.com/rs/zerolog/log"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "go.uber.org/automaxprocs"
+
 	"github.com/mysteriumnetwork/discovery/config"
 	"github.com/mysteriumnetwork/discovery/db"
 	_ "github.com/mysteriumnetwork/discovery/docs"
 	"github.com/mysteriumnetwork/discovery/health"
 	"github.com/mysteriumnetwork/discovery/listener"
+	"github.com/mysteriumnetwork/discovery/location"
 	"github.com/mysteriumnetwork/discovery/price"
 	"github.com/mysteriumnetwork/discovery/price/pricing"
 	"github.com/mysteriumnetwork/discovery/proposal"
@@ -25,12 +31,6 @@ import (
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
 	"github.com/mysteriumnetwork/discovery/tags"
 	mlog "github.com/mysteriumnetwork/logger"
-	"github.com/rs/zerolog/log"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
-
-	// unconfuse the number of cores go can use in k8s
-	_ "go.uber.org/automaxprocs"
 )
 
 var Version = "<dev>"
@@ -83,8 +83,10 @@ func main() {
 	go proposalService.StartExpirationJob()
 	defer proposalService.Shutdown()
 
+	locationProvider := location.NewLocationProvider(cfg.LocationAddress.String(), cfg.LocationUser, cfg.LocationPass)
+
 	v3 := r.Group("/api/v3")
-	proposal.NewAPI(proposalService, proposalRepo).RegisterRoutes(v3)
+	proposal.NewAPI(proposalService, proposalRepo, locationProvider).RegisterRoutes(v3)
 	health.NewAPI(rdb, database).RegisterRoutes(v3)
 
 	cfger := pricing.NewConfigProviderDB(rdb)

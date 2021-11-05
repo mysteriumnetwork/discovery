@@ -17,10 +17,19 @@ import (
 type API struct {
 	service    *Service
 	repository *Repository
+	location   locationProvider
 }
 
-func NewAPI(service *Service, repository *Repository) *API {
-	return &API{service: service, repository: repository}
+type locationProvider interface {
+	Country(ip string) (countryCode string, err error)
+}
+
+func NewAPI(service *Service, repository *Repository, location locationProvider) *API {
+	return &API{
+		service:    service,
+		repository: repository,
+		location:   location,
+	}
 }
 
 // Proposals list proposals.
@@ -50,6 +59,15 @@ func (a *API) Proposals(c *gin.Context) {
 		accessPolicySource: c.Query("access_policy_source"),
 		ipType:             c.Query("ip_type"),
 		tags:               c.Query("tags"),
+	}
+
+	if len(opts.from) != 2 {
+		country, err := a.location.Country(c.ClientIP())
+		if err != nil {
+			log.Warn().Err(err).Msg("Failed to autodetect client country")
+		} else {
+			opts.from = country
+		}
 	}
 
 	pids, _ := c.GetQueryArray("provider_id")
