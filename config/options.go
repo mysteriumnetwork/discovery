@@ -20,6 +20,9 @@ type Options struct {
 	RedisPass         string
 	RedisDB           int
 	BadgerAddress     url.URL
+	LocationAddress   url.URL
+	LocationUser      string
+	LocationPass      string
 }
 
 func Read() (*Options, error) {
@@ -48,6 +51,13 @@ func Read() (*Options, error) {
 		return nil, err
 	}
 
+	locationUser := OptionalEnv("LOCATION_USER", "")
+	locationPass := OptionalEnv("LOCATION_PASS", "")
+	locationAddress, err := RequiredEnvURL("LOCATION_ADDRESS")
+	if err != nil {
+		return nil, err
+	}
+
 	redisPass := OptionalEnv("REDIS_PASS", "")
 
 	redisDBint := 0
@@ -68,6 +78,9 @@ func Read() (*Options, error) {
 		RedisPass:         redisPass,
 		RedisDB:           redisDBint,
 		BadgerAddress:     *badgerAddress,
+		LocationAddress:   *locationAddress,
+		LocationUser:      locationUser,
+		LocationPass:      locationPass,
 	}, nil
 }
 
