@@ -9,10 +9,10 @@ package main
 import (
 	"path"
 
-	"github.com/mysteriumnetwork/discovery/ci/e2e"
-
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
+
+	"github.com/mysteriumnetwork/discovery/ci/e2e"
 	"github.com/mysteriumnetwork/discovery/ci/local"
 	"github.com/mysteriumnetwork/discovery/ci/swagger"
 	"github.com/mysteriumnetwork/go-ci/commands"
@@ -55,10 +55,13 @@ func BuildSidecar() error {
 func Run() error {
 	envs := map[string]string{
 		"DB_DSN":              "postgresql://discovery:discovery@localhost:5432/discovery",
-		"QUALITY_ORACLE_URL":  "https://testnet2-quality.mysterium.network",
-		"BROKER_URL":          "nats://testnet2-broker.mysterium.network",
+		"QUALITY_ORACLE_URL":  "https://quality.mysterium.network",
+		"BROKER_URL":          "nats://broker.mysterium.network",
 		"COINRANKING_TOKEN":   "",
 		"UNIVERSE_JWT_SECRET": "",
+		"REDIS_ADDRESS":       "localhost:6379",
+		"BADGER_ADDRESS":      "https://badger.mysterium.network",
+		"LOCATION_ADDRESS":    "https://location.mysterium.network/api/v1/location",
 	}
 	return sh.RunWithV(envs, "go", "run", "./cmd/main.go")
 }
