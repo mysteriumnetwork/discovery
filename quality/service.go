@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/allegro/bigcache"
+	"github.com/allegro/bigcache/v3"
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
 	"github.com/rs/zerolog/log"
 )
@@ -24,6 +24,7 @@ var bandwidthCache *bigcache.BigCache
 func init() {
 	cfg := bigcache.DefaultConfig(cacheDuration)
 	cfg.CleanWindow = 10 * time.Second
+	cfg.HardMaxCacheSize = 128
 	cfg.Verbose = true
 	qualityCache, _ = bigcache.NewBigCache(cfg)
 	sessionCache, _ = bigcache.NewBigCache(cfg)
