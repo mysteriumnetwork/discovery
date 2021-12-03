@@ -3,8 +3,8 @@ module github.com/mysteriumnetwork/discovery
 go 1.16
 
 require (
+	github.com/ReneKroon/ttlcache/v2 v2.9.0
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
-	github.com/allegro/bigcache/v3 v3.0.1
 	github.com/dghubble/sling v1.3.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fatih/color v1.10.0
