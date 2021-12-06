@@ -88,17 +88,18 @@ func (r *Repository) List(opts repoListOpts) ([]v3.Proposal, error) {
 	} else if opts.accessPolicy == "all" {
 		// all access policies
 	} else {
-		q.WriteString(fmt.Sprintf(` AND proposal->'access_policies' @> '[{"id": "%s"}]'`, opts.accessPolicy))
+		val := fmt.Sprintf(`[{"id": "%s"}]`, opts.accessPolicy)
+		args = append(args, val)
+		q.WriteString(fmt.Sprintf(` AND proposal->'access_policies' @> $%v`, len(args)))
 	}
 	if opts.accessPolicySource != "" {
-		q.WriteString(fmt.Sprintf(` AND proposal->'access_policies' @> '[{"source": "%s"}]'`, opts.accessPolicySource))
+		val := fmt.Sprintf(`[{"source": "%s"}]`, opts.accessPolicySource)
+		args = append(args, val)
+		q.WriteString(fmt.Sprintf(` AND proposal->'access_policies' @> $%v`, len(args)))
 	}
 	if opts.tags != "" {
-		splits := strings.Split(opts.tags, ",")
-		for i := range splits {
-			splits[i] = fmt.Sprintf("'%v'", splits[i])
-		}
-		q.WriteString(fmt.Sprintf(` AND proposal->'tags' ?| ARRAY[%v]`, strings.Join(splits, ",")))
+		args = append(args, opts.tags)
+		q.WriteString(fmt.Sprintf(` AND proposal->'tags' ?| string_to_array($%v,',')`, len(args)))
 	}
 
 	conn, err := r.db.Connection()
