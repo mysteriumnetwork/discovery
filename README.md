@@ -27,6 +27,7 @@ MYSTERIUM_LOG_MODE=json
 PORT=8080
 DB_DSN=postgresql://discovery:discovery@db:5432/discovery
 QUALITY_ORACLE_URL=https://testnet3-quality.mysterium.network
+QUALITY_CACHE_TTL=20s
 BADGER_ADDRESS=https://testnet3-badger.mysterium.network
 BROKER_URL=nats://testnet3-broker.mysterium.network
 UNIVERSE_JWT_SECRET=Some_Secret
@@ -92,14 +93,14 @@ All migrations are done on Discovery service start up
 #### Code structure
 
 * `/config` - [Discovery] config parser. Env params
-* `/tags` - [Discovery] Tags proposals enhancer for SuperProxy 
+* `/tags` - [Discovery] Tags proposals enhancer for SuperProxy
 * `/docs` - [Discovery] Auto generated Swagger for REST API
 * `/e2e` - e2e tests
-* `/health` - [Discovery] health checker REST API 
+* `/health` - [Discovery] health checker REST API
 * `/listener` - [Discovery] NATS listener
 * `/price/api.go` - [Discovery] Pricing REST API
 * `/price/config.go` - [Discovery, Sidecar] Pricing config
-* `/price/market.go` - [Sidecar] Scheduled price fetcher from different APIs (Gecko, Coinmarket) 
+* `/price/market.go` - [Sidecar] Scheduled price fetcher from different APIs (Gecko, Coinmarket)
 * `/price/network_load_calculator.go` - [Sidecar] Updating countries multipliers based on load (sessions/providers)
 * `/price/price_getter.go` - [Discovery] Fetch prices from Redis
 * `/price/price_updater.go` - [Sidecar] Scheduled price updater to Redis
@@ -123,7 +124,7 @@ https://docs.mysterium.network/developers/
 
 `mage buildsidecar` - Builds Sidecar Prices Parser
 
-Or for docker 
+Or for docker
 
 `docker build -t discovery:local .`
 
@@ -145,7 +146,7 @@ And if you wish to run discovery service from your IDE, then idea is to use
 
 `mage e2edev`
 
-## API 
+## API
 
 Docs: http://localhost:8080/swagger/index.html
 

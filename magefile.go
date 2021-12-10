@@ -56,6 +56,7 @@ func Run() error {
 	envs := map[string]string{
 		"DB_DSN":              "postgresql://discovery:discovery@localhost:5432/discovery",
 		"QUALITY_ORACLE_URL":  "https://quality.mysterium.network",
+		"QUALITY_CACHE_TTL":   "20s",
 		"BROKER_URL":          "nats://broker.mysterium.network",
 		"COINRANKING_TOKEN":   "",
 		"UNIVERSE_JWT_SECRET": "",
