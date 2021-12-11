@@ -9,11 +9,13 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"time"
 )
 
 type Options struct {
 	DbDSN             string
 	QualityOracleURL  url.URL
+	QualityCacheTTL   time.Duration
 	BrokerURL         url.URL
 	UniverseJWTSecret string
 	RedisAddress      string
@@ -31,6 +33,10 @@ func Read() (*Options, error) {
 		return nil, err
 	}
 	qualityOracleURL, err := RequiredEnvURL("QUALITY_ORACLE_URL")
+	if err != nil {
+		return nil, err
+	}
+	qualityCacheTTL, err := RequiredEnvDuration("QUALITY_CACHE_TTL")
 	if err != nil {
 		return nil, err
 	}
@@ -72,6 +78,7 @@ func Read() (*Options, error) {
 	return &Options{
 		DbDSN:             dsn,
 		QualityOracleURL:  *qualityOracleURL,
+		QualityCacheTTL:   *qualityCacheTTL,
 		BrokerURL:         *brokerURL,
 		UniverseJWTSecret: universeJWTSecret,
 		RedisAddress:      redisAddress,
@@ -87,7 +94,7 @@ func Read() (*Options, error) {
 func RequiredEnv(key string) (string, error) {
 	val, ok := os.LookupEnv(key)
 	if !ok {
-		return "", fmt.Errorf("required environment variable is misssing: %s", key)
+		return "", fmt.Errorf("required environment variable is missing: %s", key)
 	}
 	return val, nil
 }
@@ -102,6 +109,20 @@ func RequiredEnvURL(key string) (*url.URL, error) {
 		return nil, fmt.Errorf("failed to parse %s from value '%s'", key, strVal)
 	}
 	return parsedURL, nil
+}
+
+func RequiredEnvDuration(key string) (*time.Duration, error) {
+	strVal, err := RequiredEnv(key)
+	if err != nil {
+		return nil, err
+	}
+
+	duration, err := time.ParseDuration(strVal)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse %s from value '%s'", key, strVal)
+	}
+
+	return &duration, nil
 }
 
 func OptionalEnvURL(key string, defaults string) (*url.URL, error) {

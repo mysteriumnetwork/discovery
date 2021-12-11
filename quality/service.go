@@ -12,10 +12,11 @@ import (
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
 )
 
-const cacheTTL = 20 * time.Second
-const cacheSizeLimit = 400000
+const (
+	cacheSizeLimit = 400000
+)
 
-func newCacheInstance() *ttlcache.Cache {
+func newCacheInstance(cacheTTL time.Duration) *ttlcache.Cache {
 	cache := ttlcache.NewCache()
 	cache.SetCacheSizeLimit(cacheSizeLimit)
 	cache.SetTTL(cacheTTL)
@@ -31,13 +32,13 @@ type Service struct {
 	bandwidthCache *ttlcache.Cache
 }
 
-func NewService(qualityAPI *oracleapi.API) *Service {
+func NewService(qualityAPI *oracleapi.API, cacheTTL time.Duration) *Service {
 	service := &Service{
 		qualityAPI:     qualityAPI,
-		qualityCache:   newCacheInstance(),
-		sessionCache:   newCacheInstance(),
-		latencyCache:   newCacheInstance(),
-		bandwidthCache: newCacheInstance(),
+		qualityCache:   newCacheInstance(cacheTTL),
+		sessionCache:   newCacheInstance(cacheTTL),
+		latencyCache:   newCacheInstance(cacheTTL),
+		bandwidthCache: newCacheInstance(cacheTTL),
 	}
 	service.qualityCache.SetLoaderFunction(func(key string) (interface{}, time.Duration, error) {
 		res, err := service.qualityAPI.Quality(key)
