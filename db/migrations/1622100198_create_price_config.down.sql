@@ -1,1 +1,0 @@
-DROP TABLE pricing_config;

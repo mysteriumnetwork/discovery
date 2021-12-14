@@ -15,5 +15,4 @@ func TestHealthcheck(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.True(t, status.CacheOK)
-	assert.True(t, status.DBOK)
 }

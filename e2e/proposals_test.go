@@ -10,8 +10,9 @@ import (
 	"testing"
 	"time"
 
-	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 	"github.com/stretchr/testify/assert"
+
+	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 )
 
 func Test_ProposalFiltering(t *testing.T) {
@@ -44,7 +45,7 @@ func Test_ProposalFiltering(t *testing.T) {
 		})
 		assert.True(t, ok, "0x11 should not be in the list")
 		assert.Equal(t, "0x11", proposal.ProviderID)
-		assert.True(t, *proposal.Quality.MonitoringFailed)
+		assert.True(t, proposal.Quality.MonitoringFailed)
 
 		// 0x12 has not yet been monitored
 		proposal, ok = findProposal(proposals, func(p v3.Proposal) bool {
@@ -60,7 +61,7 @@ func Test_ProposalFiltering(t *testing.T) {
 		})
 		assert.True(t, ok, "0x1 should not be in the list")
 		assert.Equal(t, "0x1", proposal.ProviderID)
-		assert.False(t, *proposal.Quality.MonitoringFailed)
+		assert.False(t, proposal.Quality.MonitoringFailed)
 	})
 
 	t.Run("provider_id", func(t *testing.T) {

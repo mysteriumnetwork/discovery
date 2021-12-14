@@ -13,9 +13,9 @@ import (
 type Metadata struct {
 	ProviderID  string    `json:"provider_id"`
 	ServiceType string    `json:"service_type"`
-	Country     *string   `json:"country"`
-	ISP         *string   `json:"isp"`
-	IPType      *string   `json:"ip_type"`
-	Whitelist   bool      `json:"whitelist"`
+	Country     string    `json:"country,omitempty"`
+	ISP         string    `json:"isp,omitempty"`
+	IPType      string    `json:"ip_type,omitempty"`
+	Whitelist   bool      `json:"whitelist,omitempty"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
