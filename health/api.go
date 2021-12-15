@@ -10,7 +10,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
-	"github.com/mysteriumnetwork/discovery/db"
 	"github.com/rs/zerolog/log"
 )
 
@@ -40,18 +39,13 @@ type PingResponse struct {
 // @Tags system
 func (a *API) Status(c *gin.Context) {
 	sr := StatusResponse{
-		DBOK:    true,
 		CacheOK: true,
-	}
-	err := a.db.Ping()
-	if err != nil {
-		sr.DBOK = false
-		log.Err(err).Msg("could not reach database")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
-	err = a.redis.Ping(ctx).Err()
+
+	err := a.redis.Ping(ctx).Err()
 	if err != nil {
 		sr.CacheOK = false
 		log.Err(err).Msg("could not reach redis")
@@ -62,18 +56,15 @@ func (a *API) Status(c *gin.Context) {
 
 type StatusResponse struct {
 	CacheOK bool `json:"cache_ok"`
-	DBOK    bool `json:"db_ok"`
 }
 
 type API struct {
 	redis *redis.Client
-	db    *db.DB
 }
 
-func NewAPI(redis *redis.Client, db *db.DB) *API {
+func NewAPI(redis *redis.Client) *API {
 	return &API{
 		redis: redis,
-		db:    db,
 	}
 }
 

@@ -19,7 +19,6 @@ import (
 	_ "go.uber.org/automaxprocs"
 
 	"github.com/mysteriumnetwork/discovery/config"
-	"github.com/mysteriumnetwork/discovery/db"
 	_ "github.com/mysteriumnetwork/discovery/docs"
 	"github.com/mysteriumnetwork/discovery/health"
 	"github.com/mysteriumnetwork/discovery/listener"
@@ -56,12 +55,6 @@ func main() {
 	})
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	database := db.New(cfg.DbDSN)
-	if err := database.Init(); err != nil {
-		log.Fatal().Err(err).Msg("Failed to initialize DB")
-	}
-	defer database.Close()
-
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     cfg.RedisAddress,
 		Password: cfg.RedisPass,
@@ -76,7 +69,7 @@ func main() {
 	}
 
 	tagEnhancer := tags.NewEnhancer(tags.NewApi(cfg.BadgerAddress.String()))
-	proposalRepo := proposal.NewRepository(database, []proposal.Enhancer{tagEnhancer})
+	proposalRepo := proposal.NewRepository([]proposal.Enhancer{tagEnhancer})
 	qualityOracleAPI := oracleapi.New(cfg.QualityOracleURL.String())
 	qualityService := quality.NewService(qualityOracleAPI, cfg.QualityCacheTTL)
 	proposalService := proposal.NewService(proposalRepo, qualityService)
@@ -87,7 +80,7 @@ func main() {
 
 	v3 := r.Group("/api/v3")
 	proposal.NewAPI(proposalService, proposalRepo, locationProvider).RegisterRoutes(v3)
-	health.NewAPI(rdb, database).RegisterRoutes(v3)
+	health.NewAPI(rdb).RegisterRoutes(v3)
 
 	cfger := pricing.NewConfigProviderDB(rdb)
 	_, err = cfger.Get()

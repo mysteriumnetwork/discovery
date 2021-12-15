@@ -43,8 +43,8 @@ type ListOpts struct {
 	natCompatibility        string
 }
 
-func (s *Service) List(opts ListOpts) ([]v3.Proposal, error) {
-	proposals, err := s.Repository.List(repoListOpts{
+func (s *Service) List(opts ListOpts) []v3.Proposal {
+	proposals := s.Repository.List(repoListOpts{
 		providerIDS:        opts.providerIDS,
 		serviceType:        opts.serviceType,
 		country:            opts.locationCountry,
@@ -55,54 +55,41 @@ func (s *Service) List(opts ListOpts) ([]v3.Proposal, error) {
 		compatibilityMax:   opts.compatibilityMax,
 		tags:               opts.tags,
 	})
-	if err != nil {
-		return nil, err
-	}
-	resultMap := make(map[string]*v3.Proposal, len(proposals))
-	for i, p := range proposals {
-		resultMap[p.ServiceType+p.ProviderID] = &proposals[i]
-	}
 
 	or := &metrics.OracleResponses{}
 	or.Load(s.qualityService, opts.from)
 
-	metrics.EnhanceWithMetrics(resultMap, or, metrics.Filters{
+	return metrics.EnhanceWithMetrics(proposals, or.QualityResponse, metrics.Filters{
 		IncludeMonitoringFailed: opts.includeMonitoringFailed,
-		NatCompatibility:        opts.natCompatibility,
+		NATCompatibility:        opts.natCompatibility,
+		QualityMin:              opts.qualityMin,
 	})
+}
 
-	for k, p := range resultMap {
-		if p.Quality.Quality < opts.qualityMin {
-			delete(resultMap, k)
-		}
-	}
-
-	return values(resultMap), nil
+func (s *Service) ListCountriesNumbers(opts ListOpts) map[string]int {
+	return s.Repository.ListCountriesNumbers(repoListOpts{
+		providerIDS:        opts.providerIDS,
+		serviceType:        opts.serviceType,
+		country:            opts.locationCountry,
+		ipType:             opts.ipType,
+		accessPolicy:       opts.accessPolicy,
+		accessPolicySource: opts.accessPolicySource,
+		compatibilityMin:   opts.compatibilityMin,
+		compatibilityMax:   opts.compatibilityMax,
+		tags:               opts.tags,
+	})
 }
 
 func (s *Service) StartExpirationJob() {
 	for {
 		select {
 		case <-time.After(s.expirationJobDelay):
-			log.Debug().Msg("Running expiration job")
-			count, err := s.Repository.Expire()
-			if err != nil {
-				log.Err(err).Msg("Failed to expire proposals")
-			} else {
-				log.Debug().Msgf("Expired proposals: %v", count)
-			}
+			count := s.Repository.Expire()
+			log.Debug().Msgf("Expired proposals: %v", count)
 		case <-s.shutdown:
 			return
 		}
 	}
-}
-
-func values(proposalsMap map[string]*v3.Proposal) []v3.Proposal {
-	res := make([]v3.Proposal, 0)
-	for k := range proposalsMap {
-		res = append(res, *proposalsMap[k])
-	}
-	return res
 }
 
 func (s *Service) Shutdown() {

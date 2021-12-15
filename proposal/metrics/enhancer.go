@@ -1,124 +1,59 @@
 package metrics
 
 import (
-	"sync"
+	"github.com/rs/zerolog/log"
 
 	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 	"github.com/mysteriumnetwork/discovery/quality"
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
-	"github.com/rs/zerolog/log"
 )
 
 type OracleResponses struct {
-	QualityResponse   *oracleapi.ProposalQualityResponse
-	LatencyResponse   *oracleapi.LatencyResponse
-	BandwitdhResponse *oracleapi.BandwidthResponse
-	SessionResponse   *oracleapi.SessionsResponse
+	QualityResponse map[string]*oracleapi.DetailedQuality
 }
 
 func (or *OracleResponses) Load(qualityService *quality.Service, fromCountry string) {
-	wg := sync.WaitGroup{}
-	wg.Add(4)
-
-	go func() {
-		defer wg.Done()
-		qRes, err := qualityService.Quality(fromCountry)
-		if err != nil {
-			log.Warn().Err(err).Msgf("Could not fetch quality for consumer (country=%s)", fromCountry)
-		}
-		or.QualityResponse = qRes
-	}()
-
-	go func() {
-		defer wg.Done()
-		latencyRes, err := qualityService.Latency(fromCountry)
-		if err != nil {
-			log.Warn().Err(err).Msgf("Could not fetch quality for latency (country=%s)", fromCountry)
-		}
-		or.LatencyResponse = latencyRes
-	}()
-
-	go func() {
-		defer wg.Done()
-		bandwidthRes, err := qualityService.Bandwidth(fromCountry)
-		if err != nil {
-			log.Warn().Err(err).Msgf("Could not fetch quality for bandwidth (country=%s)", fromCountry)
-		}
-		or.BandwitdhResponse = bandwidthRes
-	}()
-
-	go func() {
-		defer wg.Done()
-		sessionRes, err := qualityService.Sessions(fromCountry)
-		if err != nil {
-			log.Warn().Err(err).Msgf("Could not fetch quality for sessions (country=%s)", fromCountry)
-		}
-		or.SessionResponse = sessionRes
-	}()
-
-	wg.Wait()
+	qRes, err := qualityService.Quality(fromCountry)
+	if err != nil {
+		log.Warn().Err(err).Msgf("Could not fetch quality for consumer (country=%s)", fromCountry)
+	}
+	or.QualityResponse = qRes
 }
 
 type Filters struct {
 	IncludeMonitoringFailed bool
-	NatCompatibility        string
+	NATCompatibility        string
+	QualityMin              float64
 }
 
-func EnhanceWithMetrics(resultMap map[string]*v3.Proposal, or *OracleResponses, f Filters) {
-	if or.QualityResponse != nil {
-		for _, q := range or.QualityResponse.Entries {
-			key := q.ProposalID.ServiceType + q.ProposalID.ProviderID
-			p, ok := resultMap[key]
-			if !ok {
-				continue
-			}
+func EnhanceWithMetrics(proposals []v3.Proposal, or map[string]*oracleapi.DetailedQuality, f Filters) (res []v3.Proposal) {
+	for _, p := range proposals {
+		key := p.Key()
 
-			if f.NatCompatibility == "symmetric" && q.RestrictedNode {
-				delete(resultMap, key)
-				continue
-			}
-
-			p.Quality.Quality = q.Quality
+		q, ok := or[key]
+		if !ok {
+			continue
 		}
+
+		if f.NATCompatibility == "symmetric" && q.RestrictedNode {
+			continue
+		}
+
+		if !f.IncludeMonitoringFailed && q.MonitoringFailed {
+			continue
+		}
+
+		if p.Quality.Quality < f.QualityMin {
+			continue
+		}
+
+		p.Quality.Quality = q.Quality
+		p.Quality.Latency = q.Latency
+		p.Quality.Bandwidth = q.Bandwidth
+		p.Quality.Bandwidth = q.Bandwidth
+		p.Quality.MonitoringFailed = q.MonitoringFailed
+		res = append(res, p)
 	}
 
-	if or.LatencyResponse != nil {
-		for _, latency := range or.LatencyResponse.Entries {
-			// latency does not have service type as it does not depend on it
-			partialKey := latency.ProposalID.Key()
-
-			for _, key := range []string{
-				"noop" + partialKey,
-				"wireguard" + partialKey,
-				"openvpn" + partialKey,
-			} {
-				p, ok := resultMap[key]
-				if ok {
-					p.Quality.Latency = latency.Latency
-				}
-			}
-		}
-	}
-
-	if or.BandwitdhResponse != nil {
-		for _, bandwidth := range or.BandwitdhResponse.Entries {
-			key := bandwidth.ProposalID.Key()
-			p, ok := resultMap[key]
-			if ok {
-				p.Quality.Bandwidth = bandwidth.BandwidthMBPS
-			}
-		}
-	}
-
-	if or.SessionResponse != nil {
-		for k, proposal := range resultMap {
-
-			if !f.IncludeMonitoringFailed && or.SessionResponse.MonitoringFailed(proposal.ProviderID, proposal.ServiceType) {
-				delete(resultMap, k)
-				continue
-			}
-
-			proposal.Quality.MonitoringFailed = or.SessionResponse.MonitoringFailedOrNil(proposal.ProviderID, proposal.ServiceType)
-		}
-	}
+	return res
 }

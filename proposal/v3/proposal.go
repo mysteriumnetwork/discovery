@@ -54,7 +54,7 @@ func NewProposal(providerID, serviceType string) *Proposal {
 }
 
 func (p Proposal) Key() string {
-	return p.ServiceType + ":" + p.ProviderID
+	return p.ProviderID + "." + p.ServiceType
 }
 
 func (p Proposal) MarshalBinary() (data []byte, err error) {
@@ -110,5 +110,5 @@ type Quality struct {
 	// Bandwidth in Mbps.
 	Bandwidth float64 `json:"bandwidth"`
 	// MonitoringFailed did monitoring agent succeed to connect to the node.
-	MonitoringFailed *bool `json:"monitoring_failed,omitempty"`
+	MonitoringFailed bool `json:"monitoring_failed,omitempty"`
 }

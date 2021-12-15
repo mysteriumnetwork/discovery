@@ -9,11 +9,11 @@ import (
 	"errors"
 	"time"
 
-	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
-
-	"github.com/mysteriumnetwork/discovery/proposal"
 	"github.com/nats-io/nats.go"
 	"github.com/rs/zerolog/log"
+
+	"github.com/mysteriumnetwork/discovery/proposal"
+	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 )
 
 type Listener struct {
@@ -30,7 +30,7 @@ func New(brokerURL string, repository *proposal.Repository) *Listener {
 }
 
 func (l *Listener) Listen() error {
-	var opts = func(opts *nats.Options) error {
+	opts := func(opts *nats.Options) error {
 		opts.PingInterval = time.Second * 5
 		opts.MaxReconnect = 5
 		opts.ClosedCB = func(c *nats.Conn) {
@@ -92,10 +92,7 @@ func (l *Listener) Listen() error {
 				Bytes("message", msg.Data).
 				Msg("Failed to unregister proposal")
 		} else {
-			_, err := l.repository.Remove(unregisterMsg.Key())
-			if err != nil {
-				log.Err(err).Msg("Failed to delete proposal")
-			}
+			l.repository.Remove(unregisterMsg.Key())
 		}
 	}); err != nil {
 		return err
