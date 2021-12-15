@@ -43,7 +43,7 @@ func EnhanceWithMetrics(proposals []v3.Proposal, or map[string]*oracleapi.Detail
 			continue
 		}
 
-		if p.Quality.Quality < f.QualityMin {
+		if q.Quality < f.QualityMin {
 			continue
 		}
 
