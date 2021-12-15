@@ -12,7 +12,6 @@ services:
     environment:
       - MYSTERIUM_LOG_MODE=json
       - PORT=8080
-      - DB_DSN=postgresql://discovery:discovery@db:5432/discovery
       - QUALITY_ORACLE_URL=https://quality.mysterium.network
       - QUALITY_CACHE_TTL=20s
       - BADGER_ADDRESS=https://badger.mysterium.network
