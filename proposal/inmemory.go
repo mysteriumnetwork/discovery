@@ -15,8 +15,8 @@ import (
 
 const (
 	// TODO: lower this values once dvpn apps start using proposal numbers endpoint.
-	countryHardLimit = 1000
-	countrySoftLimit = 100
+	countryHardLimit = 10000
+	countrySoftLimit = 10000
 )
 
 type Enhancer interface {
