@@ -13,7 +13,6 @@ import (
 )
 
 type Options struct {
-	DbDSN             string
 	QualityOracleURL  url.URL
 	QualityCacheTTL   time.Duration
 	BrokerURL         url.URL
@@ -28,10 +27,6 @@ type Options struct {
 }
 
 func Read() (*Options, error) {
-	dsn, err := RequiredEnv("DB_DSN")
-	if err != nil {
-		return nil, err
-	}
 	qualityOracleURL, err := RequiredEnvURL("QUALITY_ORACLE_URL")
 	if err != nil {
 		return nil, err
@@ -76,7 +71,6 @@ func Read() (*Options, error) {
 		redisDBint = res
 	}
 	return &Options{
-		DbDSN:             dsn,
 		QualityOracleURL:  *qualityOracleURL,
 		QualityCacheTTL:   *qualityCacheTTL,
 		BrokerURL:         *brokerURL,

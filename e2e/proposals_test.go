@@ -16,8 +16,6 @@ import (
 )
 
 func Test_ProposalFiltering(t *testing.T) {
-	err := purgeProposalsDB()
-	assert.NoError(t, err)
 	templates, err := publishProposals(t)
 	assert.NoError(t, err)
 

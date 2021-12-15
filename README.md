@@ -25,7 +25,6 @@
 ```bash
 MYSTERIUM_LOG_MODE=json
 PORT=8080
-DB_DSN=postgresql://discovery:discovery@db:5432/discovery
 QUALITY_ORACLE_URL=https://testnet3-quality.mysterium.network
 QUALITY_CACHE_TTL=20s
 BADGER_ADDRESS=https://testnet3-badger.mysterium.network
@@ -49,35 +48,6 @@ GECKO_URL=http://wiremock:8080
 COINRANKING_URL=http://wiremock:8080
 COINRANKING_TOKEN=Some_Token
 ```
-
-#### DB Tables
-
-```sql
-CREATE TABLE IF NOT EXISTS country_price_multipliers(
-   id                SERIAL PRIMARY KEY,
-   country_code      varchar(2) not null UNIQUE,
-   multiplier        double precision NOT NULL,
-   updated_at        timestamp NOT NULL default now()
-);
-CREATE TABLE IF NOT EXISTS pricing_config(
-   id                SERIAL PRIMARY KEY,
-   cfg   jsonb       NOT NULL,
-   created_at        timestamp NOT NULL default now()
-);
-CREATE TABLE IF NOT EXISTS proposals
-(
-   key               text PRIMARY KEY,
-   proposal          jsonb NOT NULL,
-   expires_at        timestamp NOT NULL,
-   COLUMN updated_at timestamp NOT NULL
-);
-```
-
-#### DB Migrations
-
-Path for migration files: `db/migrations`
-
-All migrations are done on Discovery service start up
 
 #### NATS Msg Broker channels
 
@@ -140,7 +110,7 @@ Or
 
 And if you wish to run discovery service from your IDE, then idea is to use
 
-`docker-compose up dev` - This should only fire up dependencies (db, redis, etc...) for the discovery (or discosidecar).
+`docker-compose up dev` - This should only fire up dependencies (redis, etc...) for the discovery (or discosidecar).
 
 ### How to test it locally
 
