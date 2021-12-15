@@ -11,11 +11,12 @@ import (
 // Metadata provides metadata (such as last updated timestamp) about the proposal.
 // Used by the MMN.
 type Metadata struct {
-	ProviderID  string    `json:"provider_id"`
-	ServiceType string    `json:"service_type"`
-	Country     string    `json:"country,omitempty"`
-	ISP         string    `json:"isp,omitempty"`
-	IPType      string    `json:"ip_type,omitempty"`
-	Whitelist   bool      `json:"whitelist,omitempty"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ProviderID       string    `json:"provider_id"`
+	ServiceType      string    `json:"service_type"`
+	Country          string    `json:"country,omitempty"`
+	ISP              string    `json:"isp,omitempty"`
+	IPType           string    `json:"ip_type,omitempty"`
+	Whitelist        bool      `json:"whitelist,omitempty"`
+	MonitoringFailed bool      `json:"monitoring_failed,omitempty"`
+	UpdatedAt        time.Time `json:"updated_at"`
 }

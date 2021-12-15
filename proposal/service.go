@@ -66,6 +66,13 @@ func (s *Service) List(opts ListOpts) []v3.Proposal {
 	})
 }
 
+func (s *Service) Metadata(opts repoMetadataOpts) []v3.Metadata {
+	or := &metrics.OracleResponses{}
+	or.Load(s.qualityService, "US")
+
+	return s.Repository.Metadata(opts, or.QualityResponse)
+}
+
 func (s *Service) ListCountriesNumbers(opts ListOpts) map[string]int {
 	return s.Repository.ListCountriesNumbers(repoListOpts{
 		providerIDS:        opts.providerIDS,
