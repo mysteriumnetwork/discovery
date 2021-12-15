@@ -10,6 +10,7 @@ import (
 	"time"
 
 	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
+	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
 )
 
 const (
@@ -100,12 +101,18 @@ func (r *Repository) ListCountriesNumbers(opts repoListOpts) map[string]int {
 	return res
 }
 
-func (r *Repository) Metadata(opts repoMetadataOpts) (res []v3.Metadata) {
+func (r *Repository) Metadata(opts repoMetadataOpts, or map[string]*oracleapi.DetailedQuality) (res []v3.Metadata) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
 	for _, p := range r.proposals {
 		whitelisted := false
+		monitoringFailed := false
+
+		q, ok := or[p.proposal.Key()]
+		if ok {
+			monitoringFailed = q.MonitoringFailed
+		}
 
 		for _, v := range p.proposal.AccessPolicies {
 			if v.ID == "mysterium" {
@@ -114,13 +121,14 @@ func (r *Repository) Metadata(opts repoMetadataOpts) (res []v3.Metadata) {
 		}
 
 		res = append(res, v3.Metadata{
-			ProviderID:  p.proposal.ProviderID,
-			ServiceType: p.proposal.ServiceType,
-			Country:     p.proposal.Location.Country,
-			ISP:         p.proposal.Location.ISP,
-			IPType:      (string)(p.proposal.Location.IPType),
-			Whitelist:   whitelisted,
-			UpdatedAt:   p.expiresAt.Add(-r.expirationDuration),
+			ProviderID:       p.proposal.ProviderID,
+			ServiceType:      p.proposal.ServiceType,
+			Country:          p.proposal.Location.Country,
+			ISP:              p.proposal.Location.ISP,
+			IPType:           (string)(p.proposal.Location.IPType),
+			Whitelist:        whitelisted,
+			MonitoringFailed: monitoringFailed,
+			UpdatedAt:        p.expiresAt.Add(-r.expirationDuration),
 		})
 	}
 

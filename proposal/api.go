@@ -13,9 +13,8 @@ import (
 )
 
 type API struct {
-	service    *Service
-	repository *Repository
-	location   locationProvider
+	service  *Service
+	location locationProvider
 }
 
 type locationProvider interface {
@@ -24,9 +23,8 @@ type locationProvider interface {
 
 func NewAPI(service *Service, repository *Repository, location locationProvider) *API {
 	return &API{
-		service:    service,
-		repository: repository,
-		location:   location,
+		service:  service,
+		location: location,
 	}
 }
 
@@ -103,7 +101,7 @@ func (a *API) ProposalsMetadata(c *gin.Context) {
 	opts := repoMetadataOpts{
 		providerID: c.Query("provider_id"),
 	}
-	metadata := a.repository.Metadata(opts)
+	metadata := a.service.Metadata(opts)
 	c.JSON(http.StatusOK, metadata)
 }
 
