@@ -144,6 +144,8 @@ func (r *Repository) Store(proposal v3.Proposal) error {
 		expiresAt: time.Now().Add(r.expirationDuration),
 	}
 
+	proposalAdded(proposal)
+
 	return nil
 }
 
@@ -151,12 +153,18 @@ func (r *Repository) Expire() (count int64) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
+	var activeProposals []v3.Proposal
 	for k, v := range r.proposals {
 		if time.Now().After(v.expiresAt) {
+			proposalExpired(r.proposals[k].proposal)
 			delete(r.proposals, k)
 			count++
+		} else {
+			activeProposals = append(activeProposals, v.proposal)
 		}
 	}
+
+	proposalActive(activeProposals)
 
 	return count
 }
@@ -165,6 +173,7 @@ func (r *Repository) Remove(key string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
+	proposalRemoved(r.proposals[key].proposal)
 	delete(r.proposals, key)
 }
 
