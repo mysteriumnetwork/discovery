@@ -18,7 +18,7 @@ var discoveryProposalAdded = prometheus.NewCounterVec(
 		Name: "discovery_proposal_added",
 		Help: "Service proposal added to the discovery",
 	},
-	[]string{"format", "compatibility", "service_type", "country", "access_policy"},
+	[]string{"format", "compatibility", "service_type", "country", "access_policy", "node_type"},
 )
 
 var discoveryProposalExpired = prometheus.NewCounterVec(
@@ -26,7 +26,7 @@ var discoveryProposalExpired = prometheus.NewCounterVec(
 		Name: "discovery_proposal_expired",
 		Help: "Service proposal expired in the discovery",
 	},
-	[]string{"format", "compatibility", "service_type", "country", "access_policy"},
+	[]string{"format", "compatibility", "service_type", "country", "access_policy", "node_type"},
 )
 
 var discoveryProposalRemoved = prometheus.NewCounterVec(
@@ -34,7 +34,7 @@ var discoveryProposalRemoved = prometheus.NewCounterVec(
 		Name: "discovery_proposal_removed",
 		Help: "Service proposal removed from the discovery",
 	},
-	[]string{"format", "compatibility", "service_type", "country", "access_policy"},
+	[]string{"format", "compatibility", "service_type", "country", "access_policy", "node_type"},
 )
 
 var discoveryProposalActive = prometheus.NewGaugeVec(
@@ -42,7 +42,7 @@ var discoveryProposalActive = prometheus.NewGaugeVec(
 		Name: "discovery_proposal_active",
 		Help: "Service proposal active in the discovery",
 	},
-	[]string{"format", "compatibility", "service_type", "country", "access_policy"},
+	[]string{"format", "compatibility", "service_type", "country", "access_policy", "node_type"},
 )
 
 func init() {
@@ -60,22 +60,22 @@ func accessPolicies(p v3.Proposal) string {
 }
 
 func proposalAdded(p v3.Proposal) {
-	discoveryProposalAdded.WithLabelValues(p.Format, strconv.Itoa(p.Compatibility), p.ServiceType, p.Location.Country, accessPolicies(p)).Add(1)
+	discoveryProposalAdded.WithLabelValues(p.Format, strconv.Itoa(p.Compatibility), p.ServiceType, p.Location.Country, accessPolicies(p), string(p.Location.IPType)).Add(1)
 }
 
 func proposalExpired(p v3.Proposal) {
-	discoveryProposalExpired.WithLabelValues(p.Format, strconv.Itoa(p.Compatibility), p.ServiceType, p.Location.Country, accessPolicies(p)).Add(1)
+	discoveryProposalExpired.WithLabelValues(p.Format, strconv.Itoa(p.Compatibility), p.ServiceType, p.Location.Country, accessPolicies(p), string(p.Location.IPType)).Add(1)
 }
 
 func proposalRemoved(p v3.Proposal) {
-	discoveryProposalRemoved.WithLabelValues(p.Format, strconv.Itoa(p.Compatibility), p.ServiceType, p.Location.Country, accessPolicies(p)).Add(1)
+	discoveryProposalRemoved.WithLabelValues(p.Format, strconv.Itoa(p.Compatibility), p.ServiceType, p.Location.Country, accessPolicies(p), string(p.Location.IPType)).Add(1)
 }
 
 func proposalActive(proposals []v3.Proposal) {
 	m := make(map[string]int)
 
 	for _, p := range proposals {
-		key := strings.Join([]string{p.Format, strconv.Itoa(p.Compatibility), p.ServiceType, p.Location.Country, accessPolicies(p)}, "|")
+		key := strings.Join([]string{p.Format, strconv.Itoa(p.Compatibility), p.ServiceType, p.Location.Country, accessPolicies(p), string(p.Location.IPType)}, "|")
 		m[key]++
 	}
 
