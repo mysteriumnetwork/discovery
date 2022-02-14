@@ -26,16 +26,10 @@ type FiatPriceAPI interface {
 	MystUSD() float64
 }
 
-// NetworkLoadByCountryProvider calculates the price multiplier according to the load of the network for the given country.
-type NetworkLoadByCountryProvider interface {
-	GetMultiplier(isoCode ISO3166CountryCode) float64
-}
-
 type PriceUpdater struct {
 	priceAPI              FiatPriceAPI
 	priceLifetime         time.Duration
 	mystBound             Bound
-	loadByCountryProvider NetworkLoadByCountryProvider
 	db                    *redis.Client
 
 	lock        sync.Mutex
@@ -51,7 +45,6 @@ func NewPricer(
 	priceAPI FiatPriceAPI,
 	priceLifetime time.Duration,
 	sensibleMystBound Bound,
-	loadByCountryProvider NetworkLoadByCountryProvider,
 	db *redis.Client,
 ) (*PriceUpdater, error) {
 	pricer := &PriceUpdater{
@@ -59,7 +52,6 @@ func NewPricer(
 		priceAPI:              priceAPI,
 		priceLifetime:         priceLifetime,
 		mystBound:             sensibleMystBound,
-		loadByCountryProvider: loadByCountryProvider,
 		stop:                  make(chan struct{}),
 		db:                    db,
 	}
@@ -202,10 +194,6 @@ func (p *PriceUpdater) generateNewPerCountry(mystUSD float64, cfg Config) map[st
 				Other:       1,
 			}
 		}
-
-		loadModifier := p.loadByCountryProvider.GetMultiplier(countryCode)
-		mod.Other *= loadModifier
-		mod.Residential *= loadModifier
 
 		ph := &PriceHistory{
 			Current: &PriceByType{

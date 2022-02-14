@@ -17,7 +17,6 @@ import (
 	"github.com/mysteriumnetwork/discovery/config"
 	"github.com/mysteriumnetwork/discovery/metrics"
 	"github.com/mysteriumnetwork/discovery/price/pricing"
-	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
 	mlog "github.com/mysteriumnetwork/logger"
 	payprice "github.com/mysteriumnetwork/payments/fees/price"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -47,9 +46,6 @@ func main() {
 	}
 	cancel()
 
-	qualityOracleAPI := oracleapi.New(cfg.QualityOracleURL.String())
-	log.Info().Msg("qualityOracleAPI created")
-
 	mrkt := buildMarket(cfg)
 	err = mrkt.Start()
 	if err != nil {
@@ -65,24 +61,12 @@ func main() {
 	}
 	log.Info().Msg("cfger started")
 
-	calc, err := buildLoadPricingProvider(cfg, qualityOracleAPI)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to build load pricing provider")
-	}
-	err = calc.Start()
-	if err != nil {
-		log.Fatal().Err(err).Msg("Could not start calculator")
-	}
-	log.Info().Msg("calculator started")
-	defer calc.Stop()
-
 	metrics.InitialiseMonitoring()
 	pricer, err := pricing.NewPricer(
 		cfger,
 		mrkt,
 		time.Minute*5,
 		pricing.Bound{Min: 0.1, Max: 3.0},
-		calc,
 		rdb,
 	)
 	if err != nil {
@@ -136,13 +120,6 @@ func getPort() int {
 
 	port, _ := strconv.Atoi(p)
 	return port
-}
-
-func buildLoadPricingProvider(cfg *Options, oracle *oracleapi.API) (*pricing.NetworkLoadMultiplierCalculator, error) {
-	calc := pricing.NewNetworkLoadMultiplierCalculator(
-		oracle,
-	)
-	return calc, nil
 }
 
 func buildMarket(cfg *Options) *pricing.Market {
