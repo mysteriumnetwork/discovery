@@ -25,25 +25,6 @@ func New(url string) *API {
 	}
 }
 
-func (a *API) NetworkLoad() (NetworkLoadByCountry, error) {
-	resp, err := a.client.Get(fmt.Sprintf("%s/api/v2/countries/load", a.url))
-	if err != nil {
-		return nil, fmt.Errorf("request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return nil, fmt.Errorf("received response code: %v", resp.StatusCode)
-	}
-
-	var res NetworkLoadByCountry
-	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
-		return nil, fmt.Errorf("failed to decode response: %w", err)
-	}
-
-	return res, err
-}
-
 func (a *API) Quality(country string) (map[string]*DetailedQuality, error) {
 	resp, err := a.client.Get(fmt.Sprintf("%s/api/v2/providers/detailed?country=%s", a.url, country))
 	if err != nil {
