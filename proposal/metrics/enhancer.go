@@ -30,6 +30,11 @@ func EnhanceWithMetrics(proposals []v3.Proposal, or map[string]*oracleapi.Detail
 	for _, p := range proposals {
 		key := p.Key()
 
+		if len(or) == 0 {
+			res = append(res, p)
+			continue
+		}
+
 		q, ok := or[key]
 		if !ok {
 			continue
