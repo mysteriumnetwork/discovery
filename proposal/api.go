@@ -80,6 +80,16 @@ func (a *API) Proposals(c *gin.Context) {
 // @Tags countries
 func (a *API) CountriesNumbers(c *gin.Context) {
 	opts := a.proposalArgs(c)
+
+	if len(opts.from) != 2 && opts.presetID > 0 {
+		country, err := a.location.Country(c.ClientIP())
+		if err != nil {
+			log.Warn().Err(err).Msg("Failed to autodetect client country")
+		} else {
+			opts.from = country
+		}
+	}
+
 	c.JSON(http.StatusOK, a.service.ListCountriesNumbers(opts))
 }
 
