@@ -72,11 +72,11 @@ func EnhanceWithMetrics(proposals []v3.Proposal, or map[string]*oracleapi.Detail
 func matchPreset(presetID int, p v3.Proposal) bool {
 	switch presetID {
 	case 1:
-		if p.Location.IPType != "residential" || p.Quality.Quality < 1.5 || p.Quality.Bandwidth < 5 {
+		if p.Location.IPType != "residential" || p.Quality.Quality < 1 || p.Quality.Bandwidth < 5 {
 			return false
 		}
 	case 2:
-		if p.Quality.Quality < 1.5 {
+		if p.Quality.Quality < 1 {
 			return false
 		}
 	case 3:
