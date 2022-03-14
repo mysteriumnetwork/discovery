@@ -24,6 +24,7 @@ type Filters struct {
 	IncludeMonitoringFailed bool
 	NATCompatibility        string
 	QualityMin              float64
+	PresetID                int
 }
 
 func EnhanceWithMetrics(proposals []v3.Proposal, or map[string]*oracleapi.DetailedQuality, f Filters) (res []v3.Proposal) {
@@ -57,8 +58,32 @@ func EnhanceWithMetrics(proposals []v3.Proposal, or map[string]*oracleapi.Detail
 		p.Quality.Bandwidth = q.Bandwidth
 		p.Quality.Bandwidth = q.Bandwidth
 		p.Quality.MonitoringFailed = q.MonitoringFailed
+
+		if !matchPreset(f.PresetID, p) {
+			continue
+		}
+
 		res = append(res, p)
 	}
 
 	return res
+}
+
+func matchPreset(presetID int, p v3.Proposal) bool {
+	switch presetID {
+	case 1:
+		if p.Location.IPType != "residential" || p.Quality.Quality < 1.5 || p.Quality.Bandwidth < 5 {
+			return false
+		}
+	case 2:
+		if p.Quality.Quality < 1.5 {
+			return false
+		}
+	case 3:
+		if p.Location.IPType != "hosting" {
+			return false
+		}
+	}
+
+	return true
 }

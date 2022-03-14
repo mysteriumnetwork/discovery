@@ -41,6 +41,7 @@ type ListOpts struct {
 	tags                    string
 	includeMonitoringFailed bool
 	natCompatibility        string
+	presetID                int
 }
 
 func (s *Service) List(opts ListOpts) []v3.Proposal {
@@ -63,6 +64,7 @@ func (s *Service) List(opts ListOpts) []v3.Proposal {
 		IncludeMonitoringFailed: opts.includeMonitoringFailed,
 		NATCompatibility:        opts.natCompatibility,
 		QualityMin:              opts.qualityMin,
+		PresetID:                opts.presetID,
 	})
 }
 
@@ -74,7 +76,21 @@ func (s *Service) Metadata(opts repoMetadataOpts) []v3.Metadata {
 }
 
 func (s *Service) ListCountriesNumbers(opts ListOpts) map[string]int {
-	return s.Repository.ListCountriesNumbers(repoListOpts{
+	if opts.presetID == 0 {
+		return s.Repository.ListCountriesNumbers(repoListOpts{
+			providerIDS:        opts.providerIDS,
+			serviceType:        opts.serviceType,
+			country:            opts.locationCountry,
+			ipType:             opts.ipType,
+			accessPolicy:       opts.accessPolicy,
+			accessPolicySource: opts.accessPolicySource,
+			compatibilityMin:   opts.compatibilityMin,
+			compatibilityMax:   opts.compatibilityMax,
+			tags:               opts.tags,
+		})
+	}
+
+	proposals := s.Repository.List(repoListOpts{
 		providerIDS:        opts.providerIDS,
 		serviceType:        opts.serviceType,
 		country:            opts.locationCountry,
@@ -85,6 +101,24 @@ func (s *Service) ListCountriesNumbers(opts ListOpts) map[string]int {
 		compatibilityMax:   opts.compatibilityMax,
 		tags:               opts.tags,
 	})
+
+	or := &metrics.OracleResponses{}
+	or.Load(s.qualityService, opts.from)
+
+	eps := metrics.EnhanceWithMetrics(proposals, or.QualityResponse, metrics.Filters{
+		IncludeMonitoringFailed: opts.includeMonitoringFailed,
+		NATCompatibility:        opts.natCompatibility,
+		QualityMin:              opts.qualityMin,
+		PresetID:                opts.presetID,
+	})
+
+	res := make(map[string]int)
+
+	for _, p := range eps {
+		res[p.Location.Country]++
+	}
+
+	return res
 }
 
 func (s *Service) StartExpirationJob() {

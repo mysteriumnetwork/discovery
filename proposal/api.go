@@ -134,5 +134,8 @@ func (a *API) proposalArgs(c *gin.Context) ListOpts {
 	natCompatibility := c.Query("nat_compatibility")
 	opts.natCompatibility = natCompatibility
 
+	presetID, _ := strconv.ParseInt(c.Query("preset_id"), 10, 16)
+	opts.presetID = int(presetID)
+
 	return opts
 }
