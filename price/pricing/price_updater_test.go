@@ -481,7 +481,6 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &PriceUpdater{
-				loadByCountryProvider: &mockNetworkLoadByCountryProvider{},
 				lp:                    tt.fields.lp,
 			}
 			generated := p.generateNewPerCountry(tt.args.mystInUSD, tt.fields.cfg)
@@ -493,11 +492,4 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 			}
 		})
 	}
-}
-
-type mockNetworkLoadByCountryProvider struct {
-}
-
-func (m *mockNetworkLoadByCountryProvider) GetMultiplier(isoCode ISO3166CountryCode) float64 {
-	return 1
 }
