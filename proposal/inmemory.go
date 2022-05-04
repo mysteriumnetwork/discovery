@@ -201,8 +201,14 @@ func match(p v3.Proposal, opts repoListOpts) bool {
 		return false
 	}
 
-	if opts.compatibilityMin != 0 || opts.compatibilityMax != 0 {
-		if opts.compatibilityMin > p.Compatibility && p.Compatibility < opts.compatibilityMax {
+	if opts.compatibilityMin != 0 {
+		if p.Compatibility < opts.compatibilityMin {
+			return false
+		}
+	}
+
+	if opts.compatibilityMax != 0 {
+		if p.Compatibility > opts.compatibilityMax {
 			return false
 		}
 	}
