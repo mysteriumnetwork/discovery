@@ -15,7 +15,7 @@ import (
 
 // Installs the swag generation tool
 func swagInstall() error {
-	err := sh.RunV("go", "get", "-u", "github.com/swaggo/swag/cmd/swag")
+	err := sh.RunV("go", "install", "github.com/swaggo/swag/cmd/swag@v1.7.8")
 	if err != nil {
 		color.Red("Could not go get swag")
 		return err
