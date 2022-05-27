@@ -52,6 +52,7 @@ func (a *API) Proposals(c *gin.Context) {
 	if len(opts.from) != 2 {
 		country, err := a.location.Country(c.ClientIP())
 		if err != nil {
+			opts.from = "NL" // Default to Netherlands since we have monitoring agent running there.
 			log.Warn().Err(err).Msg("Failed to autodetect client country")
 		} else {
 			opts.from = country
