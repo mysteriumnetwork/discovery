@@ -24,6 +24,7 @@ type Filters struct {
 	IncludeMonitoringFailed bool
 	NATCompatibility        string
 	QualityMin              float64
+	BandwidthMin            float64
 	PresetID                int
 }
 
@@ -53,9 +54,12 @@ func EnhanceWithMetrics(proposals []v3.Proposal, or map[string]*oracleapi.Detail
 			continue
 		}
 
+		if f.BandwidthMin > 0 && q.Bandwidth < f.BandwidthMin {
+			continue
+		}
+
 		p.Quality.Quality = q.Quality
 		p.Quality.Latency = q.Latency
-		p.Quality.Bandwidth = q.Bandwidth
 		p.Quality.Bandwidth = q.Bandwidth
 		p.Quality.MonitoringFailed = q.MonitoringFailed
 
