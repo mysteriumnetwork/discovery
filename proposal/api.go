@@ -136,6 +136,9 @@ func (a *API) proposalArgs(c *gin.Context) ListOpts {
 	compatibilityMax, _ := strconv.ParseInt(c.Query("compatibility_max"), 10, 16)
 	opts.compatibilityMax = int(compatibilityMax)
 
+	bandwidthMin, _ := strconv.ParseFloat(c.Query("bandwidth_min"), 16)
+	opts.bandwidthMin = bandwidthMin
+
 	qualityMin, _ := strconv.ParseFloat(c.Query("quality_min"), 64)
 	opts.qualityMin = qualityMin
 

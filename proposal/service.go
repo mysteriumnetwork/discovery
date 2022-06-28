@@ -37,6 +37,7 @@ type ListOpts struct {
 	accessPolicySource      string
 	compatibilityMin        int
 	compatibilityMax        int
+	bandwidthMin            float64
 	qualityMin              float64
 	tags                    string
 	includeMonitoringFailed bool
@@ -63,6 +64,7 @@ func (s *Service) List(opts ListOpts) []v3.Proposal {
 	return metrics.EnhanceWithMetrics(proposals, or.QualityResponse, metrics.Filters{
 		IncludeMonitoringFailed: opts.includeMonitoringFailed,
 		NATCompatibility:        opts.natCompatibility,
+		BandwidthMin:            opts.bandwidthMin,
 		QualityMin:              opts.qualityMin,
 		PresetID:                opts.presetID,
 	})
@@ -108,6 +110,7 @@ func (s *Service) ListCountriesNumbers(opts ListOpts) map[string]int {
 	eps := metrics.EnhanceWithMetrics(proposals, or.QualityResponse, metrics.Filters{
 		IncludeMonitoringFailed: opts.includeMonitoringFailed,
 		NATCompatibility:        opts.natCompatibility,
+		BandwidthMin:            opts.bandwidthMin,
 		QualityMin:              opts.qualityMin,
 		PresetID:                opts.presetID,
 	})
