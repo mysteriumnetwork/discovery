@@ -55,6 +55,7 @@ type DetailedQuality struct {
 	MonitoringFailed bool    `json:"monitoringFailed,omitempty"`
 	RestrictedNode   bool    `json:"restrictedNode,omitempty"`
 	Latency          float64 `json:"latency" example:"75.5"`
+	Uptime           float64 `json:"uptime" example:"7.7"`
 	Bandwidth        float64 `json:"bandwidth" example:"15.5"`
 }
 
