@@ -8,6 +8,81 @@
     },
     "basePath": "/api/v3",
     "paths": {
+        "/countries": {
+            "get": {
+                "description": "List number of providers in each country",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "countries"
+                ],
+                "summary": "List number of providers in each country",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Consumer country",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider ID",
+                        "name": "provider_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Service type",
+                        "name": "service_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider country",
+                        "name": "location_country",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "IP type (residential, datacenter, etc.)",
+                        "name": "ip_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Access policy. When empty, returns only public proposals (default). Use 'all' to return all.",
+                        "name": "access_policy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Access policy source",
+                        "name": "access_policy_source",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Minimum compatibility. When empty, will not filter by it.",
+                        "name": "compatibility_min",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Maximum compatibility. When empty, will not filter by it.",
+                        "name": "compatibility_max",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Minimal quality threshold. When empty will be defaulted to 0. Quality ranges from [0.0; 3.0]",
+                        "name": "quality_min",
+                        "in": "query"
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/ping": {
             "get": {
                 "description": "Ping",
@@ -245,9 +320,6 @@
             "properties": {
                 "cache_ok": {
                     "type": "boolean"
-                },
-                "db_ok": {
-                    "type": "boolean"
                 }
             }
         },
@@ -268,6 +340,9 @@
         "pricing.LatestPrices": {
             "type": "object",
             "properties": {
+                "current_server_time": {
+                    "type": "string"
+                },
                 "current_valid_until": {
                     "type": "string"
                 },
@@ -414,6 +489,9 @@
                 "isp": {
                     "type": "string"
                 },
+                "monitoring_failed": {
+                    "type": "boolean"
+                },
                 "provider_id": {
                     "type": "string"
                 },
@@ -483,8 +561,16 @@
                     "description": "Latency in ms.",
                     "type": "number"
                 },
+                "monitoring_failed": {
+                    "description": "MonitoringFailed did monitoring agent succeed to connect to the node.",
+                    "type": "boolean"
+                },
                 "quality": {
                     "description": "Quality valuation from the oracle.",
+                    "type": "number"
+                },
+                "uptime": {
+                    "description": "Uptime in hours per day",
                     "type": "number"
                 }
             }
