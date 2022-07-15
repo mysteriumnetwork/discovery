@@ -9,8 +9,6 @@ definitions:
     properties:
       cache_ok:
         type: boolean
-      db_ok:
-        type: boolean
     type: object
   pricing.Config:
     properties:
@@ -23,6 +21,8 @@ definitions:
     type: object
   pricing.LatestPrices:
     properties:
+      current_server_time:
+        type: string
       current_valid_until:
         type: string
       defaults:
@@ -117,6 +117,8 @@ definitions:
         type: string
       isp:
         type: string
+      monitoring_failed:
+        type: boolean
       provider_id:
         type: string
       service_type:
@@ -163,8 +165,15 @@ definitions:
       latency:
         description: Latency in ms.
         type: number
+      monitoring_failed:
+        description: MonitoringFailed did monitoring agent succeed to connect to the
+          node.
+        type: boolean
       quality:
         description: Quality valuation from the oracle.
+        type: number
+      uptime:
+        description: Uptime in hours per day
         type: number
     type: object
 info:
@@ -173,6 +182,58 @@ info:
   title: Discovery API
   version: "3.0"
 paths:
+  /countries:
+    get:
+      consumes:
+      - application/json
+      description: List number of providers in each country
+      parameters:
+      - description: Consumer country
+        in: query
+        name: from
+        type: string
+      - description: Provider ID
+        in: query
+        name: provider_id
+        type: string
+      - description: Service type
+        in: query
+        name: service_type
+        type: string
+      - description: Provider country
+        in: query
+        name: location_country
+        type: string
+      - description: IP type (residential, datacenter, etc.)
+        in: query
+        name: ip_type
+        type: string
+      - description: Access policy. When empty, returns only public proposals (default).
+          Use 'all' to return all.
+        in: query
+        name: access_policy
+        type: string
+      - description: Access policy source
+        in: query
+        name: access_policy_source
+        type: string
+      - description: Minimum compatibility. When empty, will not filter by it.
+        in: query
+        name: compatibility_min
+        type: number
+      - description: Maximum compatibility. When empty, will not filter by it.
+        in: query
+        name: compatibility_max
+        type: number
+      - description: Minimal quality threshold. When empty will be defaulted to 0.
+          Quality ranges from [0.0; 3.0]
+        in: query
+        name: quality_min
+        type: number
+      responses: {}
+      summary: List number of providers in each country
+      tags:
+      - countries
   /ping:
     get:
       consumes:
