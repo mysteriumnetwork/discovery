@@ -14,12 +14,12 @@ import (
 )
 
 type PriceGetter struct {
-	db    *redis.Client
+	db    redis.UniversalClient
 	lp    LatestPrices
 	mutex sync.Mutex
 }
 
-func NewPriceGetter(db *redis.Client) (*PriceGetter, error) {
+func NewPriceGetter(db redis.UniversalClient) (*PriceGetter, error) {
 	loaded, err := loadPricing(db)
 	if err != nil {
 		return nil, fmt.Errorf("could not laod initial price %w", err)
@@ -31,7 +31,7 @@ func NewPriceGetter(db *redis.Client) (*PriceGetter, error) {
 	}, nil
 }
 
-func loadPricing(db *redis.Client) (LatestPrices, error) {
+func loadPricing(db redis.UniversalClient) (LatestPrices, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 

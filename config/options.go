@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -17,7 +18,7 @@ type Options struct {
 	QualityCacheTTL   time.Duration
 	BrokerURL         url.URL
 	UniverseJWTSecret string
-	RedisAddress      string
+	RedisAddress      []string
 	RedisPass         string
 	RedisDB           int
 	BadgerAddress     url.URL
@@ -75,7 +76,7 @@ func Read() (*Options, error) {
 		QualityCacheTTL:   *qualityCacheTTL,
 		BrokerURL:         *brokerURL,
 		UniverseJWTSecret: universeJWTSecret,
-		RedisAddress:      redisAddress,
+		RedisAddress:      strings.Split(redisAddress, ";"),
 		RedisPass:         redisPass,
 		RedisDB:           redisDBint,
 		BadgerAddress:     *badgerAddress,

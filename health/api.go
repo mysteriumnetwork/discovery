@@ -59,10 +59,10 @@ type StatusResponse struct {
 }
 
 type API struct {
-	redis *redis.Client
+	redis redis.UniversalClient
 }
 
-func NewAPI(redis *redis.Client) *API {
+func NewAPI(redis redis.UniversalClient) *API {
 	return &API{
 		redis: redis,
 	}
