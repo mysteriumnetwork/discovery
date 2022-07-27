@@ -27,10 +27,10 @@ type FiatPriceAPI interface {
 }
 
 type PriceUpdater struct {
-	priceAPI              FiatPriceAPI
-	priceLifetime         time.Duration
-	mystBound             Bound
-	db                    *redis.Client
+	priceAPI      FiatPriceAPI
+	priceLifetime time.Duration
+	mystBound     Bound
+	db            redis.UniversalClient
 
 	lock        sync.Mutex
 	lp          LatestPrices
@@ -45,15 +45,15 @@ func NewPricer(
 	priceAPI FiatPriceAPI,
 	priceLifetime time.Duration,
 	sensibleMystBound Bound,
-	db *redis.Client,
+	db redis.UniversalClient,
 ) (*PriceUpdater, error) {
 	pricer := &PriceUpdater{
-		cfgProvider:           cfgProvider,
-		priceAPI:              priceAPI,
-		priceLifetime:         priceLifetime,
-		mystBound:             sensibleMystBound,
-		stop:                  make(chan struct{}),
-		db:                    db,
+		cfgProvider:   cfgProvider,
+		priceAPI:      priceAPI,
+		priceLifetime: priceLifetime,
+		mystBound:     sensibleMystBound,
+		stop:          make(chan struct{}),
+		db:            db,
 	}
 
 	go pricer.schedulePriceUpdate(priceLifetime)

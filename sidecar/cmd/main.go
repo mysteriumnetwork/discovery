@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -33,8 +34,8 @@ func main() {
 		log.Fatal().Err(err).Msg("Failed to read config")
 	}
 
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     cfg.RedisAddress,
+	rdb := redis.NewUniversalClient(&redis.UniversalOptions{
+		Addrs:    cfg.RedisAddress,
 		Password: cfg.RedisPass,
 		DB:       cfg.RedisDB,
 	})
@@ -138,7 +139,7 @@ func configureLogger() {
 }
 
 type Options struct {
-	RedisAddress     string
+	RedisAddress     []string
 	RedisPass        string
 	RedisDB          int
 	QualityOracleURL url.URL
@@ -182,7 +183,7 @@ func ReadConfig() (*Options, error) {
 		return nil, err
 	}
 	return &Options{
-		RedisAddress:     redisAddress,
+		RedisAddress:     strings.Split(redisAddress, ";"),
 		RedisPass:        redisPass,
 		RedisDB:          redisDBint,
 		QualityOracleURL: *qualityOracleURL,
