@@ -57,8 +57,8 @@ func main() {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     cfg.RedisAddress,
+	rdb := redis.NewUniversalClient(&redis.UniversalOptions{
+		Addrs:    cfg.RedisAddress,
 		Password: cfg.RedisPass,
 		DB:       cfg.RedisDB,
 	})

@@ -20,11 +20,11 @@ type ConfigProvider interface {
 }
 
 type ConfigProviderDB struct {
-	db   *redis.Client
+	db   redis.UniversalClient
 	lock sync.Mutex
 }
 
-func NewConfigProviderDB(redis *redis.Client) *ConfigProviderDB {
+func NewConfigProviderDB(redis redis.UniversalClient) *ConfigProviderDB {
 	return &ConfigProviderDB{
 		db: redis,
 	}
