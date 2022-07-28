@@ -30,7 +30,11 @@ type PriceUpdater struct {
 	priceAPI      FiatPriceAPI
 	priceLifetime time.Duration
 	mystBound     Bound
+<<<<<<< HEAD
 	db            redis.UniversalClient
+=======
+	db            *redis.Client
+>>>>>>> add support for different pricing
 
 	lock        sync.Mutex
 	lp          LatestPrices
@@ -130,10 +134,10 @@ func (p *PriceUpdater) submitMetrics() {
 }
 
 func (p *PriceUpdater) submitPriceMetric(country string, price *PriceByType) {
-	metrics.CurrentPriceByCountry.WithLabelValues(country, "other", "per_gib").Set(price.Other.PricePerGiBHumanReadable)
-	metrics.CurrentPriceByCountry.WithLabelValues(country, "other", "per_hour").Set(price.Other.PricePerHourHumanReadable)
-	metrics.CurrentPriceByCountry.WithLabelValues(country, "residential", "per_gib").Set(price.Residential.PricePerGiBHumanReadable)
-	metrics.CurrentPriceByCountry.WithLabelValues(country, "residential", "per_hour").Set(price.Residential.PricePerHourHumanReadable)
+	metrics.CurrentPriceByCountry.WithLabelValues(country, "other", "wireguard", "per_gib").Set(price.Other.PricePerGiBHumanReadable)
+	metrics.CurrentPriceByCountry.WithLabelValues(country, "other", "wireguard", "per_hour").Set(price.Other.PricePerHourHumanReadable)
+	metrics.CurrentPriceByCountry.WithLabelValues(country, "residential", "wireguard", "per_gib").Set(price.Residential.PricePerGiBHumanReadable)
+	metrics.CurrentPriceByCountry.WithLabelValues(country, "residential", "wireguard", "per_hour").Set(price.Residential.PricePerHourHumanReadable)
 }
 
 func (p *PriceUpdater) Stop() {
