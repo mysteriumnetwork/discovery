@@ -30,11 +30,7 @@ type PriceUpdater struct {
 	priceAPI      FiatPriceAPI
 	priceLifetime time.Duration
 	mystBound     Bound
-<<<<<<< HEAD
 	db            redis.UniversalClient
-=======
-	db            *redis.Client
->>>>>>> add support for different pricing
 
 	lock        sync.Mutex
 	lp          LatestPrices
