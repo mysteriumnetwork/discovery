@@ -31,7 +31,7 @@ type PriceUpdater struct {
 	priceAPI      FiatPriceAPI
 	priceLifetime time.Duration
 	mystBound     Bound
-	db            *redis.Client
+	db            redis.UniversalClient
 
 	lock        sync.Mutex
 	lp          LatestPrices
@@ -46,7 +46,7 @@ func NewPricer(
 	priceAPI FiatPriceAPI,
 	priceLifetime time.Duration,
 	sensibleMystBound Bound,
-	db *redis.Client,
+	db redis.UniversalClient,
 ) (*PriceUpdater, error) {
 	pricer := &PriceUpdater{
 		cfgProvider:   cfgProvider,
