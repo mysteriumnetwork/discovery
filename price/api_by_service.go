@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mysteriumnetwork/discovery/gorest"
 	"github.com/mysteriumnetwork/discovery/price/pricingbyservice"
+	"github.com/mysteriumnetwork/go-rest/apierror"
 	"github.com/rs/zerolog/log"
 )
 
@@ -45,7 +45,7 @@ func (a *APIByService) GetConfig(c *gin.Context) {
 	cfg, err := a.cfger.Get()
 	if err != nil {
 		log.Err(err).Msg("Failed to get config")
-		c.JSON(http.StatusInternalServerError, gorest.NewErrResponse(err.Error()))
+		c.Error(apierror.Internal(err.Error(), errCodeNoConfig))
 		return
 	}
 	c.JSON(http.StatusOK, cfg)
@@ -62,14 +62,14 @@ func (a *APIByService) GetConfig(c *gin.Context) {
 func (a *APIByService) UpdateConfig(c *gin.Context) {
 	var cfg pricingbyservice.Config
 	if err := c.BindJSON(&cfg); err != nil {
-		c.JSON(http.StatusBadRequest, gorest.NewErrResponse(err.Error()))
+		c.Error(apierror.BadRequest(err.Error(), errCodeParsingJson))
 		return
 	}
 
 	err := a.cfger.Update(cfg)
 	if err != nil {
 		log.Err(err).Msg("Failed to update config")
-		c.JSON(http.StatusBadRequest, gorest.NewErrResponse(err.Error()))
+		c.Error(apierror.BadRequest(err.Error(), errCodeUpdateConfig))
 		return
 	}
 

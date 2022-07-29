@@ -31,6 +31,7 @@ import (
 	"github.com/mysteriumnetwork/discovery/quality"
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
 	"github.com/mysteriumnetwork/discovery/tags"
+	"github.com/mysteriumnetwork/go-rest/apierror"
 	mlog "github.com/mysteriumnetwork/logger"
 )
 
@@ -51,6 +52,7 @@ func main() {
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(mlog.GinLogFunc())
+	r.Use(apierror.ErrorHandler)
 
 	r.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
