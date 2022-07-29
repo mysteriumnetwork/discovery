@@ -18,6 +18,7 @@ import (
 	"github.com/mysteriumnetwork/discovery/config"
 	"github.com/mysteriumnetwork/discovery/metrics"
 	"github.com/mysteriumnetwork/discovery/price/pricing"
+	"github.com/mysteriumnetwork/discovery/price/pricingbyservice"
 	mlog "github.com/mysteriumnetwork/logger"
 	payprice "github.com/mysteriumnetwork/payments/fees/price"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -63,6 +64,7 @@ func main() {
 	log.Info().Msg("cfger started")
 
 	metrics.InitialiseMonitoring()
+
 	pricer, err := pricing.NewPricer(
 		cfger,
 		mrkt,
@@ -76,6 +78,27 @@ func main() {
 	}
 	log.Info().Msg("pricer started")
 	defer pricer.Stop()
+
+	cfgerByService := pricingbyservice.NewConfigProviderDB(rdb)
+	_, err = cfger.Get()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to load cfg")
+	}
+	log.Info().Msg("cfger by service started")
+
+	pricerByService, err := pricingbyservice.NewPricer(
+		cfgerByService,
+		mrkt,
+		time.Minute*5,
+		pricingbyservice.Bound{Min: 0.1, Max: 3.0},
+		rdb,
+	)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to initialize Pricer by service")
+		return
+	}
+	log.Info().Msg("pricer by service started")
+	defer pricerByService.Stop()
 
 	router := gin.New()
 	router.Use(gin.Recovery())

@@ -8,9 +8,16 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/mysteriumnetwork/discovery/gorest"
 	"github.com/mysteriumnetwork/discovery/price/pricing"
+	"github.com/mysteriumnetwork/go-rest/apierror"
 	"github.com/rs/zerolog/log"
+)
+
+const (
+	errCodeParsingJson = "err_parsing_config"
+
+	errCodeNoConfig     = "err_no_config"
+	errCodeUpdateConfig = "err_update_config"
 )
 
 type API struct {
@@ -49,7 +56,7 @@ func (a *API) GetConfig(c *gin.Context) {
 	cfg, err := a.cfger.Get()
 	if err != nil {
 		log.Err(err).Msg("Failed to get config")
-		c.JSON(http.StatusInternalServerError, gorest.NewErrResponse(err.Error()))
+		c.Error(apierror.Internal(err.Error(), errCodeNoConfig))
 		return
 	}
 	c.JSON(http.StatusOK, cfg)
@@ -66,14 +73,14 @@ func (a *API) GetConfig(c *gin.Context) {
 func (a *API) UpdateConfig(c *gin.Context) {
 	var cfg pricing.Config
 	if err := c.BindJSON(&cfg); err != nil {
-		c.JSON(http.StatusBadRequest, gorest.NewErrResponse(err.Error()))
+		c.Error(apierror.BadRequest(err.Error(), errCodeParsingJson))
 		return
 	}
 
 	err := a.cfger.Update(cfg)
 	if err != nil {
 		log.Err(err).Msg("Failed to update config")
-		c.JSON(http.StatusBadRequest, gorest.NewErrResponse(err.Error()))
+		c.Error(apierror.BadRequest(err.Error(), errCodeUpdateConfig))
 		return
 	}
 
@@ -90,10 +97,7 @@ func JWTAuthorized(secret string) func(*gin.Context) {
 	return func(c *gin.Context) {
 		authHeader := strings.Split(c.Request.Header.Get("Authorization"), "Bearer ")
 		if len(authHeader) != 2 {
-			c.AbortWithStatusJSON(
-				http.StatusUnauthorized,
-				gorest.NewErrResponse("Malformed Token"),
-			)
+			c.AbortWithError(http.StatusUnauthorized, apierror.Unauthorized())
 			return
 		}
 		jwtToken := authHeader[1]
@@ -104,19 +108,13 @@ func JWTAuthorized(secret string) func(*gin.Context) {
 			return []byte(secret), nil
 		})
 		if err != nil {
-			c.AbortWithStatusJSON(
-				http.StatusUnauthorized,
-				gorest.NewErrResponse("Unauthorized"),
-			)
+			c.AbortWithError(http.StatusUnauthorized, apierror.Unauthorized())
 			return
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			if !claims.VerifyExpiresAt(time.Now().Unix(), true) {
-				c.AbortWithStatusJSON(
-					http.StatusUnauthorized,
-					gorest.NewErrResponse("Token expired"),
-				)
+				c.AbortWithError(http.StatusUnauthorized, apierror.Unauthorized())
 				return
 			}
 
@@ -124,11 +122,6 @@ func JWTAuthorized(secret string) func(*gin.Context) {
 			return
 		}
 
-		c.AbortWithStatusJSON(
-			http.StatusUnauthorized,
-			map[string]string{
-				"error": "Unauthorized",
-			},
-		)
+		c.AbortWithError(http.StatusUnauthorized, apierror.Unauthorized())
 	}
 }

@@ -26,10 +26,12 @@ import (
 	"github.com/mysteriumnetwork/discovery/location"
 	"github.com/mysteriumnetwork/discovery/price"
 	"github.com/mysteriumnetwork/discovery/price/pricing"
+	"github.com/mysteriumnetwork/discovery/price/pricingbyservice"
 	"github.com/mysteriumnetwork/discovery/proposal"
 	"github.com/mysteriumnetwork/discovery/quality"
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
 	"github.com/mysteriumnetwork/discovery/tags"
+	"github.com/mysteriumnetwork/go-rest/apierror"
 	mlog "github.com/mysteriumnetwork/logger"
 )
 
@@ -50,6 +52,7 @@ func main() {
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(mlog.GinLogFunc())
+	r.Use(apierror.ErrorHandler)
 
 	r.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
@@ -81,21 +84,36 @@ func main() {
 	locationProvider := location.NewLocationProvider(cfg.LocationAddress.String(), cfg.LocationUser, cfg.LocationPass)
 
 	v3 := r.Group("/api/v3")
+	v4 := r.Group("/api/v4")
+
 	proposal.NewAPI(proposalService, proposalRepo, locationProvider).RegisterRoutes(v3)
+	proposal.NewAPI(proposalService, proposalRepo, locationProvider).RegisterRoutes(v4)
+
 	health.NewAPI(rdb).RegisterRoutes(v3)
+	health.NewAPI(rdb).RegisterRoutes(v4)
 
 	cfger := pricing.NewConfigProviderDB(rdb)
 	_, err = cfger.Get()
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to load cfg")
 	}
+	cfgerByService := pricingbyservice.NewConfigProviderDB(rdb)
+	_, err = cfger.Get()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to load cfg by service")
+	}
 
 	getter, err := pricing.NewPriceGetter(rdb)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to initialize price getter")
 	}
+	getterByService, err := pricingbyservice.NewPriceGetter(rdb)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to initialize price getter by service")
+	}
 
 	price.NewAPI(getter, cfger, cfg.UniverseJWTSecret).RegisterRoutes(v3)
+	price.NewAPIByService(getterByService, cfgerByService, cfg.UniverseJWTSecret).RegisterRoutes(v4)
 
 	brokerListener := listener.New(cfg.BrokerURL.String(), proposalRepo)
 
