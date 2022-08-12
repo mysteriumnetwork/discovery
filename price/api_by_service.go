@@ -10,16 +10,21 @@ import (
 )
 
 type APIByService struct {
-	pricer    *pricingbyservice.PriceGetter
-	jwtSecret string
-	cfger     pricingbyservice.ConfigProvider
+	pricer *pricingbyservice.PriceGetter
+	cfger  pricingbyservice.ConfigProvider
+
+	ac authCheck
 }
 
-func NewAPIByService(pricer *pricingbyservice.PriceGetter, cfger pricingbyservice.ConfigProvider, jwtSecret string) *APIByService {
+type authCheck interface {
+	JWTAuthorized() func(*gin.Context)
+}
+
+func NewAPIByService(pricer *pricingbyservice.PriceGetter, cfger pricingbyservice.ConfigProvider, ac authCheck) *APIByService {
 	return &APIByService{
-		pricer:    pricer,
-		cfger:     cfger,
-		jwtSecret: jwtSecret,
+		pricer: pricer,
+		cfger:  cfger,
+		ac:     ac,
 	}
 }
 
@@ -77,7 +82,7 @@ func (a *APIByService) UpdateConfig(c *gin.Context) {
 }
 
 func (a *APIByService) RegisterRoutes(r gin.IRoutes) {
-	r.GET("/prices/config", JWTAuthorized(a.jwtSecret), a.GetConfig)
-	r.POST("/prices/config", JWTAuthorized(a.jwtSecret), a.UpdateConfig)
+	r.GET("/prices/config", a.ac.JWTAuthorized(), a.GetConfig)
+	r.POST("/prices/config", a.ac.JWTAuthorized(), a.UpdateConfig)
 	r.GET("/prices", a.LatestPrices)
 }

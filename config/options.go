@@ -14,17 +14,23 @@ import (
 )
 
 type Options struct {
-	QualityOracleURL  url.URL
-	QualityCacheTTL   time.Duration
-	BrokerURL         url.URL
+	QualityOracleURL url.URL
+	QualityCacheTTL  time.Duration
+
+	BrokerURL url.URL
+
+	RedisAddress []string
+	RedisPass    string
+	RedisDB      int
+
+	BadgerAddress url.URL
+
+	LocationAddress url.URL
+	LocationUser    string
+	LocationPass    string
+
 	UniverseJWTSecret string
-	RedisAddress      []string
-	RedisPass         string
-	RedisDB           int
-	BadgerAddress     url.URL
-	LocationAddress   url.URL
-	LocationUser      string
-	LocationPass      string
+	SentinelURL       string
 }
 
 func Read() (*Options, error) {
@@ -49,6 +55,11 @@ func Read() (*Options, error) {
 		return nil, err
 	}
 	badgerAddress, err := RequiredEnvURL("BADGER_ADDRESS")
+	if err != nil {
+		return nil, err
+	}
+
+	sentinelURL, err := RequiredEnv("SENTINEL_URL")
 	if err != nil {
 		return nil, err
 	}
@@ -83,6 +94,7 @@ func Read() (*Options, error) {
 		LocationAddress:   *locationAddress,
 		LocationUser:      locationUser,
 		LocationPass:      locationPass,
+		SentinelURL:       sentinelURL,
 	}, nil
 }
 

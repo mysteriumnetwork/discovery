@@ -13,12 +13,14 @@ require (
 	github.com/go-redis/redis/v8 v8.10.0
 	github.com/magefile/mage v1.11.0
 	github.com/mysteriumnetwork/go-ci v0.0.0-20210330121512-2a81be082445
+	github.com/mysteriumnetwork/go-rest v0.3.1
 	github.com/mysteriumnetwork/logger v0.0.6
 	github.com/mysteriumnetwork/payments v0.2.0
+	github.com/mysteriumnetwork/token v0.0.0-20220811110819-1ebab97ba234
 	github.com/nats-io/nats.go v1.10.1-0.20210228004050-ed743748acac
 	github.com/prometheus/client_golang v1.11.0
 	github.com/rs/zerolog v1.23.0
-	github.com/stretchr/testify v1.7.1
+	github.com/stretchr/testify v1.8.0
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14
 	github.com/swaggo/gin-swagger v1.3.0
 	github.com/swaggo/swag v1.7.0
@@ -48,7 +50,7 @@ require (
 	github.com/goccy/go-json v0.9.7 // indirect
 	github.com/golang/protobuf v1.5.0 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
-	github.com/google/uuid v1.1.5 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
@@ -58,7 +60,6 @@ require (
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/mysteriumnetwork/go-rest v0.3.1 // indirect
 	github.com/nats-io/nats-server/v2 v2.2.0 // indirect
 	github.com/nats-io/nkeys v0.3.0 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
@@ -81,5 +82,5 @@ require (
 	golang.org/x/tools v0.1.5 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -31,6 +31,7 @@ import (
 	"github.com/mysteriumnetwork/discovery/quality"
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
 	"github.com/mysteriumnetwork/discovery/tags"
+	"github.com/mysteriumnetwork/discovery/token"
 	"github.com/mysteriumnetwork/go-rest/apierror"
 	mlog "github.com/mysteriumnetwork/logger"
 )
@@ -112,8 +113,9 @@ func main() {
 		log.Fatal().Err(err).Msg("failed to initialize price getter by service")
 	}
 
-	price.NewAPI(getter, cfger, cfg.UniverseJWTSecret).RegisterRoutes(v3)
-	price.NewAPIByService(getterByService, cfgerByService, cfg.UniverseJWTSecret).RegisterRoutes(v4)
+	ac := token.NewJWTChecker(cfg.SentinelURL, cfg.UniverseJWTSecret)
+	price.NewAPI(getter, cfger, ac).RegisterRoutes(v3)
+	price.NewAPIByService(getterByService, cfgerByService, ac).RegisterRoutes(v4)
 
 	brokerListener := listener.New(cfg.BrokerURL.String(), proposalRepo)
 
