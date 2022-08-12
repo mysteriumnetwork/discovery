@@ -1,12 +1,8 @@
 package price
 
 import (
-	"fmt"
 	"net/http"
-	"strings"
-	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/mysteriumnetwork/discovery/price/pricing"
 	"github.com/mysteriumnetwork/go-rest/apierror"
@@ -21,16 +17,17 @@ const (
 )
 
 type API struct {
-	pricer    *pricing.PriceGetter
-	jwtSecret string
-	cfger     pricing.ConfigProvider
+	pricer *pricing.PriceGetter
+	cfger  pricing.ConfigProvider
+
+	ac authCheck
 }
 
-func NewAPI(pricer *pricing.PriceGetter, cfger pricing.ConfigProvider, jwtSecret string) *API {
+func NewAPI(pricer *pricing.PriceGetter, cfger pricing.ConfigProvider, ac authCheck) *API {
 	return &API{
-		pricer:    pricer,
-		cfger:     cfger,
-		jwtSecret: jwtSecret,
+		pricer: pricer,
+		cfger:  cfger,
+		ac:     ac,
 	}
 }
 
@@ -88,40 +85,7 @@ func (a *API) UpdateConfig(c *gin.Context) {
 }
 
 func (a *API) RegisterRoutes(r gin.IRoutes) {
-	r.GET("/prices/config", JWTAuthorized(a.jwtSecret), a.GetConfig)
-	r.POST("/prices/config", JWTAuthorized(a.jwtSecret), a.UpdateConfig)
+	r.GET("/prices/config", a.ac.JWTAuthorized(), a.GetConfig)
+	r.POST("/prices/config", a.ac.JWTAuthorized(), a.UpdateConfig)
 	r.GET("/prices", a.LatestPrices)
-}
-
-func JWTAuthorized(secret string) func(*gin.Context) {
-	return func(c *gin.Context) {
-		authHeader := strings.Split(c.Request.Header.Get("Authorization"), "Bearer ")
-		if len(authHeader) != 2 {
-			c.AbortWithError(http.StatusUnauthorized, apierror.Unauthorized())
-			return
-		}
-		jwtToken := authHeader[1]
-		token, err := jwt.Parse(jwtToken, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-			}
-			return []byte(secret), nil
-		})
-		if err != nil {
-			c.AbortWithError(http.StatusUnauthorized, apierror.Unauthorized())
-			return
-		}
-
-		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			if !claims.VerifyExpiresAt(time.Now().Unix(), true) {
-				c.AbortWithError(http.StatusUnauthorized, apierror.Unauthorized())
-				return
-			}
-
-			c.Next()
-			return
-		}
-
-		c.AbortWithError(http.StatusUnauthorized, apierror.Unauthorized())
-	}
 }
