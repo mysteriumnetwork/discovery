@@ -475,6 +475,8 @@ github.com/mysteriumnetwork/payments v0.2.0 h1:3UzLNPvp4itdWHqrJIMifgbwPitIrhe8u
 github.com/mysteriumnetwork/payments v0.2.0/go.mod h1:aC+9Bez+lFp19Fs8plh51HnblVJC0CDzHnnEzyidhpQ=
 github.com/mysteriumnetwork/token v0.0.0-20220811110819-1ebab97ba234 h1:iwOe7fO1ITeagE5AXeaItVfz/8MNOPzgTMFyKGHugtY=
 github.com/mysteriumnetwork/token v0.0.0-20220811110819-1ebab97ba234/go.mod h1:YIQk2aNo6v5U/vGptEophMhUWWsTnd0/7exQOxBxQKc=
+github.com/mysteriumnetwork/token v0.0.0-20220816112855-0d56920d1dfd h1:e3Y0jzMDGh5AuRrgCgjLsPv7yoP7qDDvuLNtuDW4N3U=
+github.com/mysteriumnetwork/token v0.0.0-20220816112855-0d56920d1dfd/go.mod h1:YIQk2aNo6v5U/vGptEophMhUWWsTnd0/7exQOxBxQKc=
 github.com/naoina/go-stringutil v0.1.0/go.mod h1:XJ2SJL9jCtBh+P9q5btrd/Ylo8XwT/h1USek5+NqSA0=
 github.com/naoina/toml v0.1.2-0.20170918210437-9fafd6967416/go.mod h1:NBIhNtsFMo3G2szEBne+bO4gS192HuIYRqfvOWb4i1E=
 github.com/nats-io/jwt v0.3.2/go.mod h1:/euKqTS1ZD+zzjYrY7pseZrTtWQSjujC7xjPc8wL6eU=
