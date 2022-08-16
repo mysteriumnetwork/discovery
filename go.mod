@@ -16,7 +16,7 @@ require (
 	github.com/mysteriumnetwork/go-rest v0.3.1
 	github.com/mysteriumnetwork/logger v0.0.6
 	github.com/mysteriumnetwork/payments v0.2.0
-	github.com/mysteriumnetwork/token v0.0.0-20220811110819-1ebab97ba234
+	github.com/mysteriumnetwork/token v0.0.0-20220816112855-0d56920d1dfd
 	github.com/nats-io/nats.go v1.10.1-0.20210228004050-ed743748acac
 	github.com/prometheus/client_golang v1.11.0
 	github.com/rs/zerolog v1.23.0
