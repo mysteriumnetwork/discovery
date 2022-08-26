@@ -29,6 +29,7 @@ import (
 	"github.com/mysteriumnetwork/discovery/proposal"
 	"github.com/mysteriumnetwork/discovery/quality"
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
+	"github.com/mysteriumnetwork/discovery/static"
 	"github.com/mysteriumnetwork/discovery/tags"
 	mlog "github.com/mysteriumnetwork/logger"
 )
@@ -50,6 +51,8 @@ func main() {
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(mlog.GinLogFunc())
+
+	r.Use(static.Serve())
 
 	r.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
