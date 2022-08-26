@@ -8,7 +8,7 @@ import (
 
 func Serve() func(ctx *gin.Context) {
 	dir := pkger.Dir("/ui/build")
-	return static.Serve("/", embeddedFileSystem{dir})
+	return static.Serve("/ui/", embeddedFileSystem{dir})
 }
 
 type embeddedFileSystem struct {
