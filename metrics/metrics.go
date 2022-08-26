@@ -7,7 +7,7 @@ var CurrentPriceByCountry = prometheus.NewGaugeVec(
 		Name: "discovery_current_price",
 		Help: "Current pricing by country",
 	},
-	[]string{"country_code", "node_type", "price_type"},
+	[]string{"country_code", "node_type", "service_type", "price_type"},
 )
 
 func InitialiseMonitoring() {

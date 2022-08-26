@@ -4,27 +4,24 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mysteriumnetwork/discovery/price/pricing"
+	"github.com/mysteriumnetwork/discovery/price/pricingbyservice"
 	"github.com/mysteriumnetwork/go-rest/apierror"
 	"github.com/rs/zerolog/log"
 )
 
-const (
-	errCodeParsingJson = "err_parsing_config"
-
-	errCodeNoConfig     = "err_no_config"
-	errCodeUpdateConfig = "err_update_config"
-)
-
-type API struct {
-	pricer *pricing.PriceGetter
-	cfger  pricing.ConfigProvider
+type APIByService struct {
+	pricer *pricingbyservice.PriceGetter
+	cfger  pricingbyservice.ConfigProvider
 
 	ac authCheck
 }
 
-func NewAPI(pricer *pricing.PriceGetter, cfger pricing.ConfigProvider, ac authCheck) *API {
-	return &API{
+type authCheck interface {
+	JWTAuthorized() func(*gin.Context)
+}
+
+func NewAPIByService(pricer *pricingbyservice.PriceGetter, cfger pricingbyservice.ConfigProvider, ac authCheck) *APIByService {
+	return &APIByService{
 		pricer: pricer,
 		cfger:  cfger,
 		ac:     ac,
@@ -38,7 +35,7 @@ func NewAPI(pricer *pricing.PriceGetter, cfger pricing.ConfigProvider, ac authCh
 // @Success 200 {array} pricing.LatestPrices
 // @Router /prices [get]
 // @Tags prices
-func (a *API) LatestPrices(c *gin.Context) {
+func (a *APIByService) LatestPrices(c *gin.Context) {
 	c.JSON(200, a.pricer.GetPrices())
 }
 
@@ -49,7 +46,7 @@ func (a *API) LatestPrices(c *gin.Context) {
 // @Success 200 {array} pricing.Config
 // @Router /prices/config [get]
 // @Tags prices
-func (a *API) GetConfig(c *gin.Context) {
+func (a *APIByService) GetConfig(c *gin.Context) {
 	cfg, err := a.cfger.Get()
 	if err != nil {
 		log.Err(err).Msg("Failed to get config")
@@ -67,8 +64,8 @@ func (a *API) GetConfig(c *gin.Context) {
 // @Param config body pricing.Config true "config object"
 // @Router /prices/config [post]
 // @Tags prices
-func (a *API) UpdateConfig(c *gin.Context) {
-	var cfg pricing.Config
+func (a *APIByService) UpdateConfig(c *gin.Context) {
+	var cfg pricingbyservice.Config
 	if err := c.BindJSON(&cfg); err != nil {
 		c.Error(apierror.BadRequest(err.Error(), errCodeParsingJson))
 		return
@@ -84,7 +81,7 @@ func (a *API) UpdateConfig(c *gin.Context) {
 	c.Data(http.StatusAccepted, gin.MIMEJSON, nil)
 }
 
-func (a *API) RegisterRoutes(r gin.IRoutes) {
+func (a *APIByService) RegisterRoutes(r gin.IRoutes) {
 	r.GET("/prices/config", a.ac.JWTAuthorized(), a.GetConfig)
 	r.POST("/prices/config", a.ac.JWTAuthorized(), a.UpdateConfig)
 	r.GET("/prices", a.LatestPrices)
