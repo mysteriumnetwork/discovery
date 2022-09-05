@@ -13,7 +13,10 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/mysteriumnetwork/token"
+	"github.com/rs/zerolog/log"
 )
+
+const internal = "internal"
 
 type JWTChecker struct {
 	SentinelURL string
@@ -47,15 +50,17 @@ func (j *JWTChecker) JWTAuthorized() func(*gin.Context) {
 		}
 
 		jwtToken := authHeader[1]
-		if err := j.oldCheck(jwtToken); err != nil {
-			if err := j.newCheck(jwtToken); err != nil {
+		if err := j.newCheck(jwtToken); err != nil {
+			if err := j.oldCheck(jwtToken); err != nil {
 				c.AbortWithStatusJSON(
 					http.StatusUnauthorized,
-					map[string]string{
+					gin.H{
 						"error": err.Error(),
 					},
 				)
 				return
+			} else {
+				log.Warn().Msg("old jwt token used")
 			}
 		}
 
@@ -103,7 +108,7 @@ func (j *JWTChecker) newCheck(jtoken string) error {
 		return err
 	}
 
-	return token.NewValidatorJWT(key).Validate(jtoken)
+	return token.NewValidatorJWT(key).ValidateForAudience(jtoken, internal)
 }
 
 func (j *JWTChecker) oldCheck(jtoken string) error {
