@@ -42,7 +42,6 @@ func Copyright() error {
 //goland:noinspection GoUnusedExportedFunction
 func Build() error {
 	mg.Deps(Swag)
-	mg.Deps(UI)
 	return sh.Run("go", "build", "-o", path.Join("build", "discovery"), path.Join("cmd", "main.go"))
 }
 
@@ -66,23 +65,6 @@ func Run() error {
 		"LOCATION_ADDRESS":    "https://location.mysterium.network/api/v1/location",
 	}
 	return sh.RunWithV(envs, "go", "run", "./cmd/main.go")
-}
-
-// UI builds and packages static UI assets.
-func UI() error {
-	if err := sh.RunV("npm", "i", "--prefix", "ui", "--force"); err != nil {
-		return err
-	}
-	if err := sh.RunV("npm", "run", "build", "--prefix", "ui"); err != nil {
-		return err
-	}
-	if err := sh.RunV("go", "install", "github.com/markbates/pkger/cmd/pkger"); err != nil {
-		return err
-	}
-	if err := sh.RunV("pkger", "-o", "static"); err != nil {
-		return err
-	}
-	return nil
 }
 
 // Up runs the discovery stack (app and DB) locally.
