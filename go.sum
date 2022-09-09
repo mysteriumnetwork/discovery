@@ -250,6 +250,8 @@ github.com/gofrs/uuid v3.3.0+incompatible/go.mod h1:b2aQJv3Z4Fp6yNu3cdSllBxTCLRx
 github.com/gogo/protobuf v1.1.1/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
 github.com/gogo/protobuf v1.2.1/go.mod h1:hp+jE20tsWTFYpLwKvXlhS1hjn+gTNwPg2I6zVXpSg4=
 github.com/gogo/protobuf v1.3.1/go.mod h1:SlYgWuQ5SjCEi6WLHjHCa1yvBfUnHcTbrrZtXPKa29o=
+github.com/golang-jwt/jwt/v4 v4.4.2 h1:rcc4lwaZgFMCZ5jxF9ABolDcIHdBytAFgqFPbSJQAYs=
+github.com/golang-jwt/jwt/v4 v4.4.2/go.mod h1:m21LjoU+eqJr34lmDMbreY2eSTRJ1cv77w39/MY0Ch0=
 github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0/go.mod h1:E/TSTwGwJL78qG/PmXZO1EjYhfJinVAhrmmHX6Z8B9k=
 github.com/golang/geo v0.0.0-20190916061304-5b978397cfec/go.mod h1:QZ0nwyI2jOfgRAoBvP+ab5aRr7c9x7lhGEJrKvBwjWI=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
@@ -483,6 +485,8 @@ github.com/mysteriumnetwork/payments v0.2.0 h1:3UzLNPvp4itdWHqrJIMifgbwPitIrhe8u
 github.com/mysteriumnetwork/payments v0.2.0/go.mod h1:aC+9Bez+lFp19Fs8plh51HnblVJC0CDzHnnEzyidhpQ=
 github.com/mysteriumnetwork/token v0.0.0-20220816112855-0d56920d1dfd h1:e3Y0jzMDGh5AuRrgCgjLsPv7yoP7qDDvuLNtuDW4N3U=
 github.com/mysteriumnetwork/token v0.0.0-20220816112855-0d56920d1dfd/go.mod h1:YIQk2aNo6v5U/vGptEophMhUWWsTnd0/7exQOxBxQKc=
+github.com/mysteriumnetwork/token v0.0.0-20220908135716-cb1018afc778 h1:WXnxa4DXW170tywQbdP1o8JOx+Jb/ZIVIslzZd8R/TM=
+github.com/mysteriumnetwork/token v0.0.0-20220908135716-cb1018afc778/go.mod h1:vzr+hlS28JI9q0N3Dv5dEZJZQoExboUsCD0P6IdoCGo=
 github.com/naoina/go-stringutil v0.1.0/go.mod h1:XJ2SJL9jCtBh+P9q5btrd/Ylo8XwT/h1USek5+NqSA0=
 github.com/naoina/toml v0.1.2-0.20170918210437-9fafd6967416/go.mod h1:NBIhNtsFMo3G2szEBne+bO4gS192HuIYRqfvOWb4i1E=
 github.com/nats-io/jwt v0.3.2/go.mod h1:/euKqTS1ZD+zzjYrY7pseZrTtWQSjujC7xjPc8wL6eU=
