@@ -18,7 +18,7 @@ require (
 	github.com/mysteriumnetwork/go-rest v0.3.1
 	github.com/mysteriumnetwork/logger v0.0.6
 	github.com/mysteriumnetwork/payments v0.2.0
-	github.com/mysteriumnetwork/token v0.0.0-20220816112855-0d56920d1dfd
+	github.com/mysteriumnetwork/token v0.0.0-20220908135716-cb1018afc778
 	github.com/nats-io/nats.go v1.10.1-0.20210228004050-ed743748acac
 	github.com/prometheus/client_golang v1.11.0
 	github.com/rs/zerolog v1.23.0
@@ -51,6 +51,7 @@ require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/gobuffalo/here v0.6.0 // indirect
 	github.com/goccy/go-json v0.9.7 // indirect
+	github.com/golang-jwt/jwt/v4 v4.4.2 // indirect
 	github.com/golang/protobuf v1.5.0 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect

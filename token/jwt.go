@@ -16,7 +16,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const internal = "internal"
+const discoveryAudienceName = "discovery"
 
 type JWTChecker struct {
 	SentinelURL string
@@ -108,7 +108,7 @@ func (j *JWTChecker) newCheck(jtoken string) error {
 		return err
 	}
 
-	return token.NewValidatorJWT(key).ValidateForAudience(jtoken, internal)
+	return token.NewValidatorJWT(key).ValidateForAudience(jtoken, discoveryAudienceName)
 }
 
 func (j *JWTChecker) oldCheck(jtoken string) error {
