@@ -138,6 +138,12 @@ func (j *JWTChecker) valid(jwtToken string) (bool, error) {
 }
 
 func (j *JWTChecker) newCheck(jtoken string) error {
+	if valid, err := j.valid(jtoken); err != nil {
+		return err
+	} else if !valid {
+		return errors.New("token invalid")
+	}
+
 	key, err := j.getPublicKey()
 	if err != nil {
 		return err
