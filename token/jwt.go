@@ -14,6 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mysteriumnetwork/token"
 	"github.com/rs/zerolog/log"
+	"io"
 )
 
 const discoveryAudienceName = "discovery"
@@ -51,10 +52,11 @@ func (j *JWTChecker) JWTAuthorized() func(*gin.Context) {
 
 		jwtToken := authHeader[1]
 		if err := j.newCheck(jwtToken); err != nil {
+			log.Warn().Err(err).Msg("new jwt check failed")
 			if err := j.oldCheck(jwtToken); err != nil {
 				c.AbortWithStatusJSON(
 					http.StatusUnauthorized,
-					gin.H{
+					map[string]string{
 						"error": err.Error(),
 					},
 				)
@@ -102,7 +104,46 @@ func (j *JWTChecker) getPublicKey() ([]byte, error) {
 	return j.publicKey, nil
 }
 
+type Token struct {
+	Token string `json:"token"`
+}
+
+func (j *JWTChecker) valid(jwtToken string) (bool, error) {
+	c := http.Client{Timeout: time.Second * 30}
+
+	tokenBody, err := json.Marshal(
+		Token{Token: jwtToken},
+	)
+	if err != nil {
+		return false, err
+	}
+	resp, err := c.Post(fmt.Sprintf("%s/api/v1/token/validate", strings.TrimSuffix(j.SentinelURL, "/")), "application/json", body(string(tokenBody)))
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusOK {
+		return true, nil
+	}
+	if resp.StatusCode < 500 {
+		return false, nil
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return false, nil
+	}
+	log.Error().Str("response", string(body)).Msg("failed to validate token: error response from validation server")
+	return false, errors.New("failed to validate token: error response from validation server")
+}
+
 func (j *JWTChecker) newCheck(jtoken string) error {
+	if valid, err := j.valid(jtoken); err != nil {
+		return err
+	} else if !valid {
+		return errors.New("token invalid")
+	}
+
 	key, err := j.getPublicKey()
 	if err != nil {
 		return err
@@ -131,4 +172,8 @@ func (j *JWTChecker) oldCheck(jtoken string) error {
 	}
 
 	return errors.New("token invalid")
+}
+
+func body(in string) io.Reader {
+	return strings.NewReader(in)
 }
