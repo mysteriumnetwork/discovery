@@ -49,7 +49,9 @@ var discoveryProvidersTotal = prometheus.NewGaugeVec(
 	prometheus.GaugeOpts{
 		Name: "discovery_providers_total",
 		Help: "Total number of active providers in the discovery",
-	}, nil)
+	},
+	[]string{"format", "compatibility", "country", "node_type"},
+)
 
 func init() {
 	prometheus.MustRegister(discoveryProposalAdded, discoveryProposalExpired, discoveryProposalRemoved, discoveryProposalActive, discoveryProvidersTotal)
@@ -78,18 +80,23 @@ func proposalRemoved(p v3.Proposal) {
 }
 
 func proposalActive(proposals []v3.Proposal) {
-	m := make(map[string]int)
-	uniqueProviders := make(map[string]struct{})
+	active := make(map[string]int)
+	total := make(map[string]int)
 
 	for _, p := range proposals {
-		uniqueProviders[p.ProviderID] = struct{}{}
 		key := strings.Join([]string{p.Format, strconv.Itoa(p.Compatibility), p.ServiceType, p.Location.Country, accessPolicies(p), string(p.Location.IPType)}, "|")
-		m[key]++
+		active[key]++
+
+		keyTotal := strings.Join([]string{p.Format, strconv.Itoa(p.Compatibility), p.Location.Country, string(p.Location.IPType)}, "|")
+		total[keyTotal]++
+
 	}
 
-	for labels, value := range m {
+	for labels, value := range active {
 		discoveryProposalActive.WithLabelValues(strings.Split(labels, "|")...).Set(float64(value))
 	}
 
-	discoveryProvidersTotal.WithLabelValues().Set(float64(len(uniqueProviders)))
+	for labels, value := range total {
+		discoveryProvidersTotal.WithLabelValues(strings.Split(labels, "|")...).Set(float64(value))
+	}
 }
