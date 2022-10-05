@@ -82,13 +82,17 @@ func proposalRemoved(p v3.Proposal) {
 func proposalActive(proposals []v3.Proposal) {
 	active := make(map[string]int)
 	total := make(map[string]int)
+	providers := make(map[string]struct{})
 
 	for _, p := range proposals {
 		key := strings.Join([]string{p.Format, strconv.Itoa(p.Compatibility), p.ServiceType, p.Location.Country, accessPolicies(p), string(p.Location.IPType)}, "|")
 		active[key]++
 
-		keyTotal := strings.Join([]string{p.Format, strconv.Itoa(p.Compatibility), p.Location.Country, string(p.Location.IPType)}, "|")
-		total[keyTotal]++
+		if _, ok := providers[p.ProviderID]; !ok {
+			keyTotal := strings.Join([]string{p.Format, strconv.Itoa(p.Compatibility), p.Location.Country, string(p.Location.IPType)}, "|")
+			total[keyTotal]++
+			providers[p.ProviderID] = struct{}{}
+		}
 
 	}
 
