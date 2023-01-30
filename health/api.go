@@ -5,12 +5,9 @@
 package health
 
 import (
-	"context"
-	"time"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v8"
-	"github.com/rs/zerolog/log"
 )
 
 // Ping godoc.
@@ -22,7 +19,7 @@ import (
 // @Router /ping [get]
 // @Tags system
 func (a *API) Ping(c *gin.Context) {
-	c.JSON(200, PingResponse{"pong"})
+	c.JSON(http.StatusOK, PingResponse{"pong"})
 }
 
 type PingResponse struct {
@@ -42,30 +39,17 @@ func (a *API) Status(c *gin.Context) {
 		CacheOK: true,
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-	defer cancel()
-
-	err := a.redis.Ping(ctx).Err()
-	if err != nil {
-		sr.CacheOK = false
-		log.Err(err).Msg("could not reach redis")
-	}
-
-	c.JSON(200, sr)
+	c.JSON(http.StatusOK, sr)
 }
 
 type StatusResponse struct {
 	CacheOK bool `json:"cache_ok"`
 }
 
-type API struct {
-	redis redis.UniversalClient
-}
+type API struct{}
 
-func NewAPI(redis redis.UniversalClient) *API {
-	return &API{
-		redis: redis,
-	}
+func NewAPI() *API {
+	return &API{}
 }
 
 func (a *API) RegisterRoutes(r gin.IRoutes) {
