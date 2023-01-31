@@ -9,11 +9,9 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fatih/color v1.10.0
 	github.com/fln/pprotect v0.0.0-20160819093714-7d932ef9e7a2
-	github.com/gin-contrib/static v0.0.1
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-redis/redis/v8 v8.10.0
 	github.com/magefile/mage v1.11.0
-	github.com/markbates/pkger v0.17.1
 	github.com/mysteriumnetwork/go-ci v0.0.0-20210330121512-2a81be082445
 	github.com/mysteriumnetwork/go-rest v0.3.1
 	github.com/mysteriumnetwork/logger v0.0.6
@@ -49,7 +47,6 @@ require (
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.10.0 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
-	github.com/gobuffalo/here v0.6.0 // indirect
 	github.com/goccy/go-json v0.9.7 // indirect
 	github.com/golang-jwt/jwt/v4 v4.4.2 // indirect
 	github.com/golang/protobuf v1.5.0 // indirect

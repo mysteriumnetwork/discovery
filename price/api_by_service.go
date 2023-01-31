@@ -1,17 +1,22 @@
 package price
 
 import (
+	"context"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
+	"github.com/rs/zerolog/log"
+
 	"github.com/mysteriumnetwork/discovery/price/pricingbyservice"
 	"github.com/mysteriumnetwork/go-rest/apierror"
-	"github.com/rs/zerolog/log"
 )
 
 type APIByService struct {
 	pricer *pricingbyservice.PriceGetter
 	cfger  pricingbyservice.ConfigProvider
+	redis  redis.UniversalClient
 
 	ac authCheck
 }
@@ -20,10 +25,11 @@ type authCheck interface {
 	JWTAuthorized() func(*gin.Context)
 }
 
-func NewAPIByService(pricer *pricingbyservice.PriceGetter, cfger pricingbyservice.ConfigProvider, ac authCheck) *APIByService {
+func NewAPIByService(redis redis.UniversalClient, pricer *pricingbyservice.PriceGetter, cfger pricingbyservice.ConfigProvider, ac authCheck) *APIByService {
 	return &APIByService{
 		pricer: pricer,
 		cfger:  cfger,
+		redis:  redis,
 		ac:     ac,
 	}
 }
@@ -81,8 +87,57 @@ func (a *APIByService) UpdateConfig(c *gin.Context) {
 	c.Data(http.StatusAccepted, gin.MIMEJSON, nil)
 }
 
+// Status godoc.
+// @Summary Status
+// @Description Status
+// @Accept json
+// @Produce json
+// @Success 200 {object} StatusResponse
+// @Router /status [get]
+// @Tags system
+func (a *APIByService) Status(c *gin.Context) {
+	sr := StatusResponse{
+		CacheOK: true,
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+
+	err := a.redis.Ping(ctx).Err()
+	if err != nil {
+		sr.CacheOK = false
+		log.Err(err).Msg("could not reach redis")
+		c.Error(apierror.Internal(err.Error(), errRedisPingFailed))
+		return
+	}
+
+	c.JSON(200, sr)
+}
+
+type StatusResponse struct {
+	CacheOK bool `json:"cache_ok"`
+}
+
+// Ping godoc.
+// @Summary Ping
+// @Description Ping
+// @Accept json
+// @Produce json
+// @Success 200 {object} PingResponse
+// @Router /ping [get]
+// @Tags system
+func (a *APIByService) Ping(c *gin.Context) {
+	c.JSON(200, PingResponse{"pong"})
+}
+
+type PingResponse struct {
+	Message string `json:"message"`
+}
+
 func (a *APIByService) RegisterRoutes(r gin.IRoutes) {
 	r.GET("/prices/config", a.ac.JWTAuthorized(), a.GetConfig)
 	r.POST("/prices/config", a.ac.JWTAuthorized(), a.UpdateConfig)
 	r.GET("/prices", a.LatestPrices)
+	r.GET("/ping", a.Ping)
+	r.GET("/status", a.Status)
 }

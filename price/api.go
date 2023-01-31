@@ -4,9 +4,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
+
 	"github.com/mysteriumnetwork/discovery/price/pricing"
 	"github.com/mysteriumnetwork/go-rest/apierror"
-	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -14,6 +15,8 @@ const (
 
 	errCodeNoConfig     = "err_no_config"
 	errCodeUpdateConfig = "err_update_config"
+
+	errRedisPingFailed = "failed_redis_ping"
 )
 
 type API struct {

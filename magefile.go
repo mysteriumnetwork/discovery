@@ -39,19 +39,30 @@ func Copyright() error {
 }
 
 // Build builds the app binary.
+//
 //goland:noinspection GoUnusedExportedFunction
 func Build() error {
 	mg.Deps(Swag)
 	return sh.Run("go", "build", "-o", path.Join("build", "discovery"), path.Join("cmd", "main.go"))
 }
 
+// BuildPricer builds the pricer binary.
+//
+//goland:noinspection GoUnusedExportedFunction
+func BuildPricer() error {
+	mg.Deps(Swag)
+	return sh.Run("go", "build", "-o", path.Join("build", "pricer"), path.Join("cmd", "pricer", "main.go"))
+}
+
 // Build builds the sidecar binary.
+//
 //goland:noinspection GoUnusedExportedFunction
 func BuildSidecar() error {
 	return sh.Run("go", "build", "-o", path.Join("build", "sidecar"), path.Join("sidecar", "cmd", "main.go"))
 }
 
 // Run runs the app (without the DB).
+//
 //goland:noinspection GoUnusedExportedFunction
 func Run() error {
 	envs := map[string]string{
@@ -63,11 +74,13 @@ func Run() error {
 		"REDIS_ADDRESS":       "localhost:6379",
 		"BADGER_ADDRESS":      "https://badger.mysterium.network",
 		"LOCATION_ADDRESS":    "https://location.mysterium.network/api/v1/location",
+		"SENTINEL_URL":        "https://sentinel.mysterium.network",
 	}
 	return sh.RunWithV(envs, "go", "run", "./cmd/main.go")
 }
 
 // Up runs the discovery stack (app and DB) locally.
+//
 //goland:noinspection GoUnusedExportedFunction
 func Up() {
 	mg.Deps(Swag)
@@ -75,12 +88,14 @@ func Up() {
 }
 
 // E2EDev spins up local NATS and seeded DB for e2e test development.
+//
 //goland:noinspection GoUnusedExportedFunction
 func E2EDev() {
 	e2e.UpDevDependencies()
 }
 
 // E2E runs e2e tests on locally running instance
+//
 //goland:noinspection GoUnusedExportedFunction
 func E2E() {
 	e2e.Run()

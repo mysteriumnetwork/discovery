@@ -33,7 +33,7 @@ type Options struct {
 	SentinelURL       string
 }
 
-func Read() (*Options, error) {
+func ReadDiscovery() (*Options, error) {
 	qualityOracleURL, err := RequiredEnvURL("QUALITY_ORACLE_URL")
 	if err != nil {
 		return nil, err
@@ -46,6 +46,30 @@ func Read() (*Options, error) {
 	if err != nil {
 		return nil, err
 	}
+	badgerAddress, err := RequiredEnvURL("BADGER_ADDRESS")
+	if err != nil {
+		return nil, err
+	}
+
+	locationUser := OptionalEnv("LOCATION_USER", "")
+	locationPass := OptionalEnv("LOCATION_PASS", "")
+	locationAddress, err := RequiredEnvURL("LOCATION_ADDRESS")
+	if err != nil {
+		return nil, err
+	}
+
+	return &Options{
+		QualityOracleURL: *qualityOracleURL,
+		QualityCacheTTL:  *qualityCacheTTL,
+		BrokerURL:        *brokerURL,
+		BadgerAddress:    *badgerAddress,
+		LocationAddress:  *locationAddress,
+		LocationUser:     locationUser,
+		LocationPass:     locationPass,
+	}, nil
+}
+
+func ReadPricer() (*Options, error) {
 	universeJWTSecret, err := RequiredEnv("UNIVERSE_JWT_SECRET")
 	if err != nil {
 		return nil, err
@@ -54,19 +78,8 @@ func Read() (*Options, error) {
 	if err != nil {
 		return nil, err
 	}
-	badgerAddress, err := RequiredEnvURL("BADGER_ADDRESS")
-	if err != nil {
-		return nil, err
-	}
 
 	sentinelURL, err := RequiredEnv("SENTINEL_URL")
-	if err != nil {
-		return nil, err
-	}
-
-	locationUser := OptionalEnv("LOCATION_USER", "")
-	locationPass := OptionalEnv("LOCATION_PASS", "")
-	locationAddress, err := RequiredEnvURL("LOCATION_ADDRESS")
 	if err != nil {
 		return nil, err
 	}
@@ -82,18 +95,12 @@ func Read() (*Options, error) {
 		}
 		redisDBint = res
 	}
+
 	return &Options{
-		QualityOracleURL:  *qualityOracleURL,
-		QualityCacheTTL:   *qualityCacheTTL,
-		BrokerURL:         *brokerURL,
 		UniverseJWTSecret: universeJWTSecret,
 		RedisAddress:      strings.Split(redisAddress, ";"),
 		RedisPass:         redisPass,
 		RedisDB:           redisDBint,
-		BadgerAddress:     *badgerAddress,
-		LocationAddress:   *locationAddress,
-		LocationUser:      locationUser,
-		LocationPass:      locationPass,
 		SentinelURL:       sentinelURL,
 	}, nil
 }
