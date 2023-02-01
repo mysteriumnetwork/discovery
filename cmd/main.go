@@ -48,6 +48,8 @@ func main() {
 	r.Use(mlog.GinLogFunc())
 	r.Use(apierror.ErrorHandler)
 
+	r.Use(LimitMiddleware(cfg.MaxRequestsLimit))
+
 	r.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
 	})
@@ -99,4 +101,17 @@ func printBanner() {
 	log.Info().Msg(" She has carried us into the future")
 	log.Info().Msg(" and it will be our privilege to make that future bright.")
 	log.Info().Msg(strings.Repeat("▱", 60))
+}
+
+func LimitMiddleware(size int) gin.HandlerFunc {
+	limit := make(chan struct{}, size)
+	return func(c *gin.Context) {
+		select {
+		case limit <- struct{}{}:
+			c.Next()
+			<-limit
+		default:
+			c.AbortWithStatus(http.StatusTooManyRequests)
+		}
+	}
 }
