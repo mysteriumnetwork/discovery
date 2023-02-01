@@ -31,6 +31,8 @@ type Options struct {
 
 	UniverseJWTSecret string
 	SentinelURL       string
+
+	MaxRequestsLimit int
 }
 
 func ReadDiscovery() (*Options, error) {
@@ -58,6 +60,12 @@ func ReadDiscovery() (*Options, error) {
 		return nil, err
 	}
 
+	maxRequestsLimit := OptionalEnv("MAX_REQUESTS_LIMIT", "1000")
+	limit, err := strconv.Atoi(maxRequestsLimit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse max requests limit: %w", err)
+	}
+
 	return &Options{
 		QualityOracleURL: *qualityOracleURL,
 		QualityCacheTTL:  *qualityCacheTTL,
@@ -66,6 +74,7 @@ func ReadDiscovery() (*Options, error) {
 		LocationAddress:  *locationAddress,
 		LocationUser:     locationUser,
 		LocationPass:     locationPass,
+		MaxRequestsLimit: limit,
 	}, nil
 }
 
