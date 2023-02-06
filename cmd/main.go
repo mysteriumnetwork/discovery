@@ -49,8 +49,6 @@ func main() {
 	r.Use(mlog.GinLogFunc())
 	r.Use(apierror.ErrorHandler)
 
-	r.Use(LimitMiddleware(cfg.MaxRequestsLimit))
-
 	r.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "/swagger/index.html")
 	})
@@ -73,11 +71,22 @@ func main() {
 
 	locationProvider := location.NewLocationProvider(cfg.LocationAddress.String(), cfg.LocationUser, cfg.LocationPass)
 
+	limitMW := LimitMiddleware(cfg.MaxRequestsLimit)
 	v3 := r.Group("/api/v3")
+	v3.Use(limitMW)
 	v4 := r.Group("/api/v4")
+	v4.Use(limitMW)
 
-	proposal.NewAPI(proposalService, proposalRepo, locationProvider).RegisterRoutes(v3)
-	proposal.NewAPI(proposalService, proposalRepo, locationProvider).RegisterRoutes(v4)
+	proposalsAPI := proposal.NewAPI(
+		proposalService,
+		proposalRepo,
+		locationProvider,
+		cfg.ProposalsCacheTTL,
+		cfg.ProposalsCacheLimit,
+		cfg.CountriesCacheLimit,
+	)
+	proposalsAPI.RegisterRoutes(v3)
+	proposalsAPI.RegisterRoutes(v4)
 
 	health.NewAPI().RegisterRoutes(v3)
 	health.NewAPI().RegisterRoutes(v4)
