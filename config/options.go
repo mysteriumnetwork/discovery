@@ -32,6 +32,8 @@ type Options struct {
 	UniverseJWTSecret string
 	SentinelURL       string
 
+	DevPass string
+
 	MaxRequestsLimit int
 }
 
@@ -60,6 +62,8 @@ func ReadDiscovery() (*Options, error) {
 		return nil, err
 	}
 
+	devPass := OptionalEnv("DEV_PASS", "")
+
 	maxRequestsLimit := OptionalEnv("MAX_REQUESTS_LIMIT", "1000")
 	limit, err := strconv.Atoi(maxRequestsLimit)
 	if err != nil {
@@ -75,6 +79,7 @@ func ReadDiscovery() (*Options, error) {
 		LocationUser:     locationUser,
 		LocationPass:     locationPass,
 		MaxRequestsLimit: limit,
+		DevPass:          devPass,
 	}, nil
 }
 

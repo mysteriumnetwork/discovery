@@ -16,6 +16,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	_ "go.uber.org/automaxprocs"
 
+	"github.com/gin-contrib/pprof"
 	"github.com/mysteriumnetwork/discovery/config"
 	_ "github.com/mysteriumnetwork/discovery/docs"
 	"github.com/mysteriumnetwork/discovery/health"
@@ -55,6 +56,12 @@ func main() {
 	})
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
+	if cfg.DevPass != "" {
+		devGroup := r.Group("/dev", gin.BasicAuth(gin.Accounts{
+			"dev": cfg.DevPass,
+		}))
+		pprof.RouteRegister(devGroup, "pprof")
+	}
 
 	tagEnhancer := tags.NewEnhancer(tags.NewApi(cfg.BadgerAddress.String()))
 	proposalRepo := proposal.NewRepository([]proposal.Enhancer{tagEnhancer})
