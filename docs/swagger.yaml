@@ -10,76 +10,6 @@ definitions:
       cache_ok:
         type: boolean
     type: object
-  pricing.Config:
-    properties:
-      base_prices:
-        $ref: '#/definitions/pricing.PriceByTypeUSD'
-      country_modifiers:
-        additionalProperties:
-          $ref: '#/definitions/pricing.Modifier'
-        type: object
-    type: object
-  pricing.LatestPrices:
-    properties:
-      current_server_time:
-        type: string
-      current_valid_until:
-        type: string
-      defaults:
-        $ref: '#/definitions/pricing.PriceHistory'
-      per_country:
-        additionalProperties:
-          $ref: '#/definitions/pricing.PriceHistory'
-        type: object
-      previous_valid_until:
-        type: string
-    type: object
-  pricing.Modifier:
-    properties:
-      other:
-        type: number
-      residential:
-        type: number
-    type: object
-  pricing.Price:
-    properties:
-      price_per_gib:
-        type: integer
-      price_per_gib_human_readable:
-        type: number
-      price_per_hour:
-        type: integer
-      price_per_hour_human_readable:
-        type: number
-    type: object
-  pricing.PriceByType:
-    properties:
-      other:
-        $ref: '#/definitions/pricing.Price'
-      residential:
-        $ref: '#/definitions/pricing.Price'
-    type: object
-  pricing.PriceByTypeUSD:
-    properties:
-      other:
-        $ref: '#/definitions/pricing.PriceUSD'
-      residential:
-        $ref: '#/definitions/pricing.PriceUSD'
-    type: object
-  pricing.PriceHistory:
-    properties:
-      current:
-        $ref: '#/definitions/pricing.PriceByType'
-      previous:
-        $ref: '#/definitions/pricing.PriceByType'
-    type: object
-  pricing.PriceUSD:
-    properties:
-      price_per_gib_usd:
-        type: number
-      price_per_hour_usd:
-        type: number
-    type: object
   v3.AccessPolicy:
     properties:
       id:
@@ -107,6 +37,8 @@ definitions:
       ip_type:
         type: string
       isp:
+        type: string
+      region:
         type: string
     type: object
   v3.Metadata:
@@ -249,47 +181,6 @@ paths:
       summary: Ping
       tags:
       - system
-  /prices:
-    get:
-      description: Latest Prices
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/pricing.LatestPrices'
-            type: array
-      summary: Latest Prices
-      tags:
-      - prices
-  /prices/config:
-    get:
-      description: price config
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/pricing.Config'
-            type: array
-      summary: Price config
-      tags:
-      - prices
-    post:
-      description: update price config
-      parameters:
-      - description: config object
-        in: body
-        name: config
-        required: true
-        schema:
-          $ref: '#/definitions/pricing.Config'
-      responses:
-        "202":
-          description: ""
-      summary: update price config
-      tags:
-      - prices
   /proposals:
     get:
       consumes:
