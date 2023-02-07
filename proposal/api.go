@@ -5,27 +5,51 @@
 package proposal
 
 import (
+	"context"
 	"net/http"
+	"net/url"
 	"strconv"
+	"time"
 
+	cache "github.com/chenyahui/gin-cache"
+	"github.com/chenyahui/gin-cache/persist"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 )
 
 type API struct {
-	service  *Service
-	location locationProvider
+	service           *Service
+	location          locationProvider
+	proposalsCache    *persist.MemoryStore
+	countriesCache    *persist.MemoryStore
+	proposalsCacheTTL time.Duration
 }
+
+type ctxCountryKey struct{}
 
 type locationProvider interface {
 	Country(ip string) (countryCode string, err error)
 }
 
-func NewAPI(service *Service, repository *Repository, location locationProvider) *API {
-	return &API{
-		service:  service,
-		location: location,
+func NewAPI(service *Service,
+	repository *Repository,
+	location locationProvider,
+	proposalsCacheTTL time.Duration,
+	proposalsCacheLimit int,
+	countriesCacheLimit int,
+) *API {
+	a := &API{
+		service:           service,
+		location:          location,
+		proposalsCacheTTL: proposalsCacheTTL,
 	}
+	if proposalsCacheTTL > 0 {
+		a.proposalsCache = persist.NewMemoryStore(proposalsCacheTTL)
+		a.proposalsCache.Cache.SetCacheSizeLimit(proposalsCacheLimit)
+		a.countriesCache = persist.NewMemoryStore(proposalsCacheTTL)
+		a.countriesCache.Cache.SetCacheSizeLimit(countriesCacheLimit)
+	}
+	return a
 }
 
 // Proposals list proposals.
@@ -48,15 +72,8 @@ func NewAPI(service *Service, repository *Repository, location locationProvider)
 // @Tags proposals
 func (a *API) Proposals(c *gin.Context) {
 	opts := a.proposalArgs(c)
-
-	if len(opts.from) != 2 {
-		country, err := a.location.Country(c.ClientIP())
-		if err != nil || len(country) != 2 {
-			opts.from = "NL" // Default to Netherlands since we have monitoring agent running there.
-			log.Warn().Err(err).Msg("Failed to autodetect client country")
-		} else {
-			opts.from = country
-		}
+	if from, ok := c.Request.Context().Value(ctxCountryKey{}).(string); ok {
+		opts.from = from
 	}
 
 	c.JSON(http.StatusOK, a.service.List(opts))
@@ -81,22 +98,41 @@ func (a *API) Proposals(c *gin.Context) {
 // @Tags countries
 func (a *API) CountriesNumbers(c *gin.Context) {
 	opts := a.proposalArgs(c)
-
-	if len(opts.from) != 2 && opts.presetID > 0 {
-		country, err := a.location.Country(c.ClientIP())
-		if err != nil {
-			log.Warn().Err(err).Msg("Failed to autodetect client country")
-		} else {
-			opts.from = country
-		}
+	if from, ok := c.Request.Context().Value(ctxCountryKey{}).(string); ok {
+		opts.from = from
 	}
 
 	c.JSON(http.StatusOK, a.service.ListCountriesNumbers(opts))
 }
 
 func (a *API) RegisterRoutes(r gin.IRoutes) {
-	r.GET("/countries", a.CountriesNumbers)
-	r.GET("/proposals", a.Proposals)
+	countryMW := a.populateCountryMiddleware()
+	cacheStrategy := a.newCacheStrategy()
+	if a.proposalsCacheTTL > 0 {
+		r.GET(
+			"/countries",
+			countryMW,
+			cache.Cache(
+				a.countriesCache,
+				a.proposalsCacheTTL,
+				cache.WithCacheStrategyByRequest(cacheStrategy),
+			),
+			a.CountriesNumbers,
+		)
+		r.GET(
+			"/proposals",
+			countryMW,
+			cache.Cache(
+				a.proposalsCache,
+				a.proposalsCacheTTL,
+				cache.WithCacheStrategyByRequest(cacheStrategy),
+			),
+			a.Proposals,
+		)
+	} else {
+		r.GET("/countries", countryMW, a.CountriesNumbers)
+		r.GET("/proposals", countryMW, a.Proposals)
+	}
 	r.GET("/proposals-metadata", a.ProposalsMetadata)
 }
 
@@ -152,4 +188,55 @@ func (a *API) proposalArgs(c *gin.Context) ListOpts {
 	opts.presetID = int(presetID)
 
 	return opts
+}
+
+func (a *API) populateCountryMiddleware() func(c *gin.Context) {
+	return func(c *gin.Context) {
+		from := c.Query("from")
+		var err error
+		if len(from) != 2 {
+			from, err = a.location.Country(c.ClientIP())
+		}
+		if err != nil {
+			from = "NL"
+			log.Warn().Err(err).Msg("Failed to autodetect client country")
+		}
+		c.Request = c.Request.WithContext(
+			context.WithValue(c.Request.Context(), ctxCountryKey{}, from))
+	}
+}
+
+func (a *API) newCacheStrategy() cache.GetCacheStrategyByRequest {
+	return func(c *gin.Context) (bool, cache.Strategy) {
+		from, _ := c.Request.Context().Value(ctxCountryKey{}).(string)
+		newUri, err := getRequestUriIgnoreQueryOrder(
+			c.Request.RequestURI,
+			url.Values{
+				"from": []string{from},
+			},
+		)
+		if err != nil {
+			newUri = c.Request.RequestURI
+		}
+
+		return true, cache.Strategy{
+			CacheKey: newUri,
+		}
+	}
+}
+
+// from https://github.com/chenyahui/gin-cache/blob/cd1fa6cf7b54971a017034277c7e553f9f00ad02/cache.go#L166
+func getRequestUriIgnoreQueryOrder(requestURI string, merge url.Values) (string, error) {
+	parsedUrl, err := url.ParseRequestURI(requestURI)
+	if err != nil {
+		return "", err
+	}
+
+	values := parsedUrl.Query()
+	for k, v := range merge {
+		values[k] = v
+	}
+
+	// values.Encode will sort keys
+	return parsedUrl.Path + "?" + values.Encode(), nil
 }

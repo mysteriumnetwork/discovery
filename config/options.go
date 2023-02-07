@@ -35,6 +35,10 @@ type Options struct {
 	DevPass string
 
 	MaxRequestsLimit int
+
+	ProposalsCacheTTL   time.Duration
+	ProposalsCacheLimit int
+	CountriesCacheLimit int
 }
 
 func ReadDiscovery() (*Options, error) {
@@ -43,6 +47,18 @@ func ReadDiscovery() (*Options, error) {
 		return nil, err
 	}
 	qualityCacheTTL, err := RequiredEnvDuration("QUALITY_CACHE_TTL")
+	if err != nil {
+		return nil, err
+	}
+	proposalsCacheTTL, err := OptionalEnvDuration("PROPOSALS_CACHE_TTL", "1m")
+	if err != nil {
+		return nil, err
+	}
+	proposalsCacheLimit, err := OptionalEnvInt("PROPOSALS_CACHE_LIMIT", "100")
+	if err != nil {
+		return nil, err
+	}
+	countriesCacheLimit, err := OptionalEnvInt("COUNTRIES_CACHE_LIMIT", "1000")
 	if err != nil {
 		return nil, err
 	}
@@ -71,15 +87,18 @@ func ReadDiscovery() (*Options, error) {
 	}
 
 	return &Options{
-		QualityOracleURL: *qualityOracleURL,
-		QualityCacheTTL:  *qualityCacheTTL,
-		BrokerURL:        *brokerURL,
-		BadgerAddress:    *badgerAddress,
-		LocationAddress:  *locationAddress,
-		LocationUser:     locationUser,
-		LocationPass:     locationPass,
-		MaxRequestsLimit: limit,
-		DevPass:          devPass,
+		QualityOracleURL:    *qualityOracleURL,
+		QualityCacheTTL:     *qualityCacheTTL,
+		BrokerURL:           *brokerURL,
+		BadgerAddress:       *badgerAddress,
+		LocationAddress:     *locationAddress,
+		LocationUser:        locationUser,
+		LocationPass:        locationPass,
+		MaxRequestsLimit:    limit,
+		DevPass:             devPass,
+		ProposalsCacheTTL:   *proposalsCacheTTL,
+		ProposalsCacheLimit: proposalsCacheLimit,
+		CountriesCacheLimit: countriesCacheLimit,
 	}, nil
 }
 
@@ -151,6 +170,26 @@ func RequiredEnvDuration(key string) (*time.Duration, error) {
 	}
 
 	return &duration, nil
+}
+
+func OptionalEnvDuration(key string, defaults string) (*time.Duration, error) {
+	strVal := OptionalEnv(key, defaults)
+	duration, err := time.ParseDuration(strVal)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse %s from value '%s'", key, strVal)
+	}
+
+	return &duration, nil
+}
+
+func OptionalEnvInt(key string, defaults string) (int, error) {
+	strVal := OptionalEnv(key, defaults)
+	intVal, err := strconv.ParseInt(strVal, 10, 0)
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse %s from value '%s'", key, strVal)
+	}
+
+	return int(intVal), nil
 }
 
 func OptionalEnvURL(key string, defaults string) (*url.URL, error) {
