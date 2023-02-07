@@ -65,9 +65,26 @@ func (r *Repository) List(opts repoListOpts) (res []v3.Proposal) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
+	proposals := r.proposals
 	countryLimit := make(map[string]int)
 
-	for _, p := range r.proposals {
+	if len(opts.providerIDS) > 0 && opts.serviceType != "" {
+		// short path: skip iteration over collection,
+		// lookup specific entries in reduced collection
+		// instead
+		proposals = make(map[string]record)
+		for _, reqProviderID := range opts.providerIDS {
+			key := v3.Proposal{
+				ProviderID:  reqProviderID,
+				ServiceType: opts.serviceType,
+			}.Key()
+			if proposalFound, ok := r.proposals[key]; ok {
+				proposals[key] = proposalFound
+			}
+		}
+	}
+
+	for _, p := range proposals {
 		if !match(p.proposal, opts) {
 			continue
 		}
