@@ -6,9 +6,12 @@ package v3
 
 import (
 	"encoding/json"
-	"math/big"
 	"reflect"
+	"strconv"
+	"strings"
 )
+
+const minProposalLength = 900
 
 type ProposalPingMessage struct {
 	Proposal Proposal `json:"proposal"`
@@ -32,6 +35,8 @@ func (p ProposalUnregisterMessage) Key() string {
 
 const Format = "service-proposal/v2"
 
+type Proposals []*Proposal
+
 type Proposal struct {
 	ID             int            `json:"id"`
 	Format         string         `json:"format"`
@@ -53,17 +58,149 @@ func NewProposal(providerID, serviceType string) *Proposal {
 	}
 }
 
-func (p Proposal) Key() string {
+func (p *Proposal) Key() string {
 	return p.ProviderID + "." + p.ServiceType
 }
 
-func (p Proposal) MarshalBinary() (data []byte, err error) {
+func (p *Proposal) MarshalBinary() (data []byte, err error) {
 	marshal, err := json.Marshal(p)
 	return marshal, err
 }
 
-func (p Proposal) UnmarshalBinary(data []byte) error {
-	return json.Unmarshal(data, &p)
+func (p *Proposal) UnmarshalBinary(data []byte) error {
+	return json.Unmarshal(data, p)
+}
+
+func (p *Proposal) MarshalJ() ([]byte, error) {
+	res := strings.Builder{}
+	res.Grow(minProposalLength)
+	res.WriteString(`{"format":"`)
+	res.WriteString(p.Format)
+	res.WriteString(`",`)
+
+	res.WriteString(`"compatibility":`)
+	res.WriteString(strconv.Itoa(p.Compatibility))
+	res.WriteString(`,`)
+
+	res.WriteString(`"provider_id":"`)
+	res.WriteString(p.ProviderID)
+	res.WriteString(`",`)
+
+	res.WriteString(`"service_type":"`)
+	res.WriteString(p.ServiceType)
+	res.WriteString(`",`)
+
+	res.WriteString(`"location":`)
+	res.WriteString(`{`)
+	res.WriteString(`"continent":"`)
+	res.WriteString(p.Location.Continent)
+	res.WriteString(`",`)
+	res.WriteString(`"country":"`)
+	res.WriteString(p.Location.Country)
+	res.WriteString(`",`)
+	res.WriteString(`"region":"`)
+	res.WriteString(p.Location.Region)
+	res.WriteString(`",`)
+	res.WriteString(`"city":"`)
+	res.WriteString(p.Location.City)
+	res.WriteString(`",`)
+	res.WriteString(`"asn":`)
+	res.WriteString(strconv.Itoa(p.Location.ASN))
+	res.WriteString(`,`)
+	res.WriteString(`"isp":"`)
+	res.WriteString(p.Location.ISP)
+	res.WriteString(`",`)
+	res.WriteString(`"ip_type":"`)
+	res.WriteString(string(p.Location.IPType))
+	res.WriteString(`"`)
+	res.WriteString(`}`)
+
+	res.WriteString(`,"quality":`)
+	res.WriteString(`{`)
+	res.WriteString(`"quality":`)
+	res.WriteString("0")
+	//res.WriteString(fmt.Sprintf("%f", p.Quality.Quality))
+	res.WriteString(strconv.FormatFloat(p.Quality.Quality, 'f', -1, 64))
+	res.WriteString(`,`)
+	res.WriteString(`"latency":`)
+	res.WriteString(strconv.FormatFloat(p.Quality.Latency, 'f', -1, 64))
+	res.WriteString(`,`)
+	res.WriteString(`"bandwidth":`)
+	res.WriteString(strconv.FormatFloat(p.Quality.Bandwidth, 'f', -1, 64))
+	res.WriteString(`,`)
+	res.WriteString(`"uptime":`)
+	res.WriteString(strconv.FormatFloat(p.Quality.Uptime, 'f', -1, 64))
+	if p.Quality.MonitoringFailed {
+		res.WriteString(`,`)
+		res.WriteString(`"monitoring_failed":true`)
+	}
+
+	if p.Contacts != nil {
+		res.WriteString(`,"contacts":[`)
+		for i, c := range p.Contacts {
+			res.WriteString(`{`)
+			res.WriteString(`"type":"`)
+			res.WriteString(c.Type)
+			res.WriteString(`",`)
+			res.WriteString(`"definition":`)
+			res.Write(*c.Definition)
+			res.WriteString(`}`)
+			if i < len(p.Contacts)-1 {
+				res.WriteString(`,`)
+			}
+		}
+		res.WriteString(`]`)
+	}
+	if p.Tags != nil {
+		res.WriteString(`,"tags":[`)
+		for i, t := range p.Tags {
+			res.WriteString(`"`)
+			res.WriteString(t)
+			res.WriteString(`"`)
+			if i < len(p.Tags)-1 {
+				res.WriteString(`,`)
+			}
+		}
+		res.WriteString(`]`)
+	}
+	if p.AccessPolicies != nil {
+		res.WriteString(`,"access_policies":[`)
+		for i, ap := range p.AccessPolicies {
+			res.WriteString(`{`)
+			res.WriteString(`"id":"`)
+			res.WriteString(ap.ID)
+			res.WriteString(`",`)
+			res.WriteString(`"source":"`)
+			res.WriteString(ap.Source)
+			res.WriteString(`"}`)
+			if i < len(p.AccessPolicies)-1 {
+				res.WriteString(`,`)
+			}
+		}
+		res.WriteString(`]`)
+	}
+
+	res.WriteString(`}`)
+
+	return []byte(res.String()), nil
+}
+
+func (ps Proposals) MarshalJ() ([]byte, error) {
+	res := strings.Builder{}
+	res.Grow(minProposalLength * len(ps))
+	res.WriteString("[")
+	for i, p := range ps {
+		pb, err := p.MarshalJ()
+		if err != nil {
+			return nil, err
+		}
+		res.Write(pb)
+		if i < len(ps)-1 {
+			res.WriteString(",")
+		}
+	}
+	res.WriteString("]")
+	return []byte(res.String()), nil
 }
 
 type IPType string
@@ -85,11 +222,6 @@ type Location struct {
 	ASN       int    `json:"asn,omitempty"`
 	ISP       string `json:"isp,omitempty"`
 	IPType    IPType `json:"ip_type,omitempty"`
-}
-
-type Price struct {
-	PerHour *big.Int `json:"per_hour" swaggertype:"integer"`
-	PerGiB  *big.Int `json:"per_gib" swaggertype:"integer"`
 }
 
 type Contact struct {
