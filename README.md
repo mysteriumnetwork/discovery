@@ -116,6 +116,11 @@ And if you wish to run discovery service from your IDE, then idea is to use
 
 `mage e2edev`
 
+### Generate custom marshaller
+
+`easyjson -all -output_filename proposal/v3/proposal_json.go proposal/v3/proposal.go`
+`easyjson -all -output_filename proposal/v3/metadata_json.go proposal/v3/metadata.go`
+
 ## API
 
 Docs: http://localhost:8080/swagger/index.html
