@@ -111,6 +111,6 @@ func E2EDev() {
 // E2E runs e2e tests on locally running instance
 //
 //goland:noinspection GoUnusedExportedFunction
-func E2E() {
+func E2E() error {
 	return e2e.Run()
 }
