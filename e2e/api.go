@@ -11,47 +11,27 @@ import (
 	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 )
 
-var discoveryAPI = newAPI(DiscoveryAPIurl)
+var DiscoveryAPI = newDiscoveryAPI(DiscoveryAPIurl)
+var PricerAPI = newPricingAPI(PricerAPIUrl)
 
-func newAPI(basePath string) *api {
-	return &api{
+func newDiscoveryAPI(basePath string) *discoveryAPI {
+	return &discoveryAPI{
 		basePath: basePath,
 	}
 }
 
-type api struct {
+type discoveryAPI struct {
 	basePath string
 }
 
-func (a *api) LatestPrices() (latestPrices pricing.LatestPrices, err error) {
-	_, err = sling.New().Base(a.basePath).Get("/api/v3/prices").Receive(&latestPrices, nil)
-	return latestPrices, err
-}
-
-func (a *api) ListFilters(query Query) (proposals []v3.Proposal, err error) {
+func (a *discoveryAPI) ListFilters(query Query) (proposals []v3.Proposal, err error) {
 	_, err = sling.New().Base(a.basePath).Get("/api/v3/proposals").QueryStruct(query).Receive(&proposals, nil)
 	return proposals, err
 }
 
-func (a *api) GetPriceConfig(token string) (config pricing.Config, err error) {
-	resp, err := sling.New().Base(a.basePath).Add("Authorization", "Bearer "+token).Get("/api/v3/prices/config").Receive(&config, nil)
-	if resp.StatusCode == 401 {
-		return config, errors.New(fmt.Sprint(resp.StatusCode))
-	}
-	return config, err
-}
-
-func (a *api) GetStatus() (status health.StatusResponse, err error) {
+func (a *discoveryAPI) GetStatus() (status health.StatusResponse, err error) {
 	_, err = sling.New().Base(a.basePath).Get("/api/v3/status").Receive(&status, nil)
 	return status, err
-}
-
-func (a *api) UpdatePriceConfig(token string, cfg pricing.Config) (err error) {
-	resp, err := sling.New().Base(a.basePath).Add("Authorization", "Bearer "+token).BodyJSON(&cfg).Post("/api/v3/prices/config").Receive(nil, nil)
-	if resp.StatusCode == 401 || resp.StatusCode == 400 {
-		return errors.New(fmt.Sprint(resp.StatusCode))
-	}
-	return err
 }
 
 type Query struct {
@@ -70,4 +50,35 @@ type Query struct {
 	Tags                    string   `url:"tags"`
 	IncludeMonitoringFailed bool     `url:"include_monitoring_failed"`
 	NATCompatibility        string   `url:"nat_compatibility"`
+}
+
+func newPricingAPI(basePath string) *pricerAPI {
+	return &pricerAPI{
+		basePath: basePath,
+	}
+}
+
+type pricerAPI struct {
+	basePath string
+}
+
+func (a *pricerAPI) LatestPrices() (latestPrices pricing.LatestPrices, err error) {
+	_, err = sling.New().Base(a.basePath).Get("/api/v3/prices").Receive(&latestPrices, nil)
+	return latestPrices, err
+}
+
+func (a *pricerAPI) GetPriceConfig(token string) (config pricing.Config, err error) {
+	resp, err := sling.New().Base(a.basePath).Add("Authorization", "Bearer "+token).Get("/api/v3/prices/config").Receive(&config, nil)
+	if resp.StatusCode == 401 {
+		return config, errors.New(fmt.Sprint(resp.StatusCode))
+	}
+	return config, err
+}
+
+func (a *pricerAPI) UpdatePriceConfig(token string, cfg pricing.Config) (err error) {
+	resp, err := sling.New().Base(a.basePath).Add("Authorization", "Bearer "+token).BodyJSON(&cfg).Post("/api/v3/prices/config").Receive(nil, nil)
+	if resp.StatusCode == 401 || resp.StatusCode == 400 {
+		return errors.New(fmt.Sprint(resp.StatusCode))
+	}
+	return err
 }
