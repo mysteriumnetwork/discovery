@@ -112,5 +112,5 @@ func E2EDev() {
 //
 //goland:noinspection GoUnusedExportedFunction
 func E2E() {
-	e2e.Run()
+	return e2e.Run()
 }
