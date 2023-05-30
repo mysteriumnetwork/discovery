@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
+	"github.com/prometheus/common/log"
 )
 
 type template struct {
@@ -37,6 +38,7 @@ func (t *template) compatibility(c int) *template {
 }
 
 func (t *template) publishPing() error {
+	log.Infof("Publishing ping: %v", t.proposalMessage)
 	err := defaultBroker.PublishPingOneV2(*t.proposalMessage)
 	if err != nil {
 		return err

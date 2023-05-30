@@ -47,5 +47,5 @@ func upApp() error {
 	if err != nil {
 		return err
 	}
-	return sh.RunV("docker-compose", "-f", e2e.DockerFile, "up", "-d", "discopricer")
+	return sh.RunV("docker-compose", "-f", e2e.DockerFile, "up", "--build", "-d", "discopricer")
 }

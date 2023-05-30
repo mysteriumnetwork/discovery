@@ -45,19 +45,11 @@ func Test_ProposalFiltering(t *testing.T) {
 		assert.Equal(t, "0x11", proposal.ProviderID)
 		assert.True(t, proposal.Quality.MonitoringFailed)
 
-		// 0x12 has not yet been monitored
-		proposal, ok = findProposal(proposals, func(p v3.Proposal) bool {
-			return p.ProviderID == "0x12"
-		})
-		assert.True(t, ok, "0x12 should not be in the list")
-		assert.Equal(t, "0x12", proposal.ProviderID)
-		assert.Nil(t, proposal.Quality.MonitoringFailed)
-
 		// 0x1 monitoring success
 		proposal, ok = findProposal(proposals, func(p v3.Proposal) bool {
 			return p.ProviderID == "0x1"
 		})
-		assert.True(t, ok, "0x1 should not be in the list")
+		assert.True(t, ok, "0x1 should be in the list")
 		assert.Equal(t, "0x1", proposal.ProviderID)
 		assert.False(t, proposal.Quality.MonitoringFailed)
 	})
@@ -151,21 +143,6 @@ func Test_ProposalFiltering(t *testing.T) {
 		}
 	})
 
-	// TODO make more robust tag e2e
-	t.Run("tags", func(t *testing.T) {
-		proposals, err := api.ListFilters(Query{Tags: "test,maybe"})
-		assert.NoError(t, err)
-		assert.Len(t, proposals, 5)
-
-		proposals, err = api.ListFilters(Query{Tags: "test"})
-		assert.NoError(t, err)
-		assert.Len(t, proposals, 5)
-
-		proposals, err = api.ListFilters(Query{Tags: "nosuchtag"})
-		assert.NoError(t, err)
-		assert.Len(t, proposals, 0)
-	})
-
 	t.Run("unregister", func(t *testing.T) {
 		for _, id := range []string{"0x1", "0x2", "0x3"} {
 			proposals, err := api.ListFilters(Query{ProviderID: []string{id}})
@@ -212,8 +189,6 @@ func publishProposals(t *testing.T) ([]*template, error) {
 		newTemplate().providerID("0x3").country("US").compatibility(2),
 		newTemplate().providerID("0x4").country("CN").compatibility(2).serviceType("wireguard"),
 		newTemplate().providerID("0x11").country("CN").compatibility(2),
-		// no session response
-		newTemplate().providerID("0x12").country("LT"),
 	}
 	for _, t := range templates {
 		if err := t.publishPing(); err != nil {

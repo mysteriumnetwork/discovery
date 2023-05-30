@@ -1,0 +1,192 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/api/v2/providers/detailed.*"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "jsonBody": {
+      "0x1.openvpn": {
+        "quality": 3.0,
+        "restrictedNode": true,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24
+      },
+      "0x1.wireguard": {
+        "quality": 3.0,
+        "restrictedNode": true,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24
+      },
+      "0x2.openvpn": {
+        "quality": 2.7,
+        "restrictedNode": false,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24
+      },
+      "0x2.wireguard": {
+        "quality": 2.7,
+        "restrictedNode": false,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24
+      },
+      "0x3.openvpn": {
+        "quality": 2.4,
+        "restrictedNode": false,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24
+      },
+      "0x3.wireguard": {
+        "quality": 2.4,
+        "restrictedNode": false,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24
+      },
+      "0x4.openvpn": {
+        "quality": 2.1,
+        "restrictedNode": false,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24
+      },
+      "0x4.wireguard": {
+        "quality": 2.1,
+        "restrictedNode": false,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24
+      },
+      "0x5.openvpn": {
+        "quality": 1.8,
+        "restrictedNode": false,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24
+      },
+      "0x5.wireguard": {
+        "quality": 1.8,
+        "restrictedNode": false,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24
+      },
+      "0x6.openvpn": {
+        "quality": 1.5,
+        "restrictedNode": false,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24
+      },
+      "0x6.wireguard": {
+        "quality": 1.5,
+        "restrictedNode": false,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24
+      },
+      "0x7.openvpn": {
+        "quality": 1.2,
+        "restrictedNode": false,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24
+      },
+      "0x7.wireguard": {
+        "quality": 1.2,
+        "restrictedNode": false,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24
+      },
+      "0x8.openvpn": {
+        "quality": 0.9,
+        "restrictedNode": false,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24
+      },
+      "0x8.wireguard": {
+        "quality": 0.9,
+        "restrictedNode": false,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24
+      },
+      "0x9.openvpn": {
+        "quality": 0.6,
+        "restrictedNode": false,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24
+      },
+      "0x9.wireguard": {
+        "quality": 0.6,
+        "restrictedNode": false,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24
+      },
+      "0x10.openvpn": {
+        "quality": 0.3,
+        "restrictedNode": false,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24
+      },
+      "0x10.wireguard": {
+        "quality": 0.3,
+        "restrictedNode": false,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24
+      },
+      "0x11.openvpn": {
+        "quality": 0.0,
+        "restrictedNode": false,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24,
+        "monitoringFailed": true
+      },
+      "0x11.wireguard": {
+        "quality": 0.0,
+        "restrictedNode": false,
+        "connectionRate": 1,
+        "latency": 2581.775025,
+        "bandwidth": 50.094572,
+        "uptime": 24,
+        "monitoringFailed": true
+      }
+    }
+  }
+}
