@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mysteriumnetwork/payments/fees/price"
+	"github.com/mysteriumnetwork/payments/exchange"
 	"github.com/rs/zerolog/log"
 )
 
@@ -27,7 +27,7 @@ func NewMarket(apis []ExternalPriceAPI, updateInterval time.Duration) *Market {
 }
 
 type ExternalPriceAPI interface {
-	GetCoinPrice(coins []string, vsCurrencies []string) (price.PriceResponse, error)
+	GetRateCacheWithFallback(coins []exchange.Coin, vsCurrencies []exchange.Currency) (exchange.PriceResponse, error)
 }
 
 func (m *Market) MystUSD() float64 {
@@ -63,13 +63,13 @@ func (m *Market) setPrice(in float64) {
 
 func (m *Market) fetchPricing() (float64, error) {
 	for _, v := range m.apis {
-		resp, err := v.GetCoinPrice([]string{string(price.MYST)}, []string{string(price.USD)})
+		resp, err := v.GetRateCacheWithFallback([]exchange.Coin{exchange.CoinMYST}, []exchange.Currency{exchange.CurrencyUSD})
 		if err != nil {
 			log.Warn().Err(err).Msg("could not load pricing info")
 			continue
 		}
 
-		price, ok := resp.GetPriceInUSD(price.MYST)
+		price, ok := resp.GetRateInUSD(exchange.CoinMYST)
 		if !ok {
 			log.Warn().Msg("no price info for MYST found in response")
 			continue
