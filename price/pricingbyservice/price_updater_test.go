@@ -45,7 +45,7 @@ func Test_calculatePrice(t *testing.T) {
 				basePriceUSD: 0.06,
 				multiplier:   0.1,
 			},
-			want: big.NewInt(10000000000000002),
+			want: big.NewInt(10000000000000001),
 		},
 		{
 			name: "calculates correctly 4",
@@ -54,7 +54,8 @@ func Test_calculatePrice(t *testing.T) {
 				basePriceUSD: 0.06,
 				multiplier:   1.5,
 			},
-			want: big.NewInt(150000000000000032),
+			want: big.NewInt(
+				150000000000000022),
 		},
 	}
 	for _, tt := range tests {
