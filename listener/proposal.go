@@ -65,7 +65,6 @@ func (l *Listener) Listen() error {
 	}
 
 	if _, err := conn.Subscribe("*.proposal-ping.v3", func(msg *nats.Msg) {
-		// log.Info().Msgf("Received a message [%s] %s", msg.Subject, string(msg.Data))
 		pingMsg := v3.ProposalPingMessage{}
 		if err := json.Unmarshal(msg.Data, &pingMsg); err != nil {
 			log.Err(err).Msg("Failed to parse proposal")

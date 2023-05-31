@@ -27,7 +27,7 @@ func (p ProposalUnregisterMessage) IsEmpty() bool {
 }
 
 func (p ProposalUnregisterMessage) Key() string {
-	return p.Proposal.ServiceType + ":" + p.Proposal.ProviderID
+	return p.Proposal.ProviderID + "." + p.Proposal.ServiceType
 }
 
 const Format = "service-proposal/v2"

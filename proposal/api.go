@@ -32,7 +32,6 @@ type locationProvider interface {
 }
 
 func NewAPI(service *Service,
-	repository *Repository,
 	location locationProvider,
 	proposalsCacheTTL time.Duration,
 	proposalsCacheLimit int,

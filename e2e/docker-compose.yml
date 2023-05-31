@@ -9,7 +9,8 @@ services:
     environment:
       - PORT=8080
       - QUALITY_ORACLE_URL=http://wiremock:8080
-      - QUALITY_CACHE_TTL=20s
+      - QUALITY_CACHE_TTL=1s
+      - PROPOSALS_CACHE_TTL=0s
       - BADGER_ADDRESS=http://wiremock:8080
       - BROKER_URL=nats://broker
       - LOCATION_ADDRESS=http://wiremock:8080

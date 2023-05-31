@@ -167,8 +167,8 @@ func Test_ProposalFiltering(t *testing.T) {
 		err := newTemplate().providerID(providerID).publishPing()
 		assert.NoError(t, err)
 		assert.Eventuallyf(t, func() bool {
-			proposals, err := api.ListFilters(Query{ProviderID: []string{"notMockedInWiremock"}})
-			return len(proposals) == 1 && proposals[0].ProviderID == providerID && err == nil
+			proposals, err := api.ListFilters(Query{ProviderID: []string{"notMockedInWiremock"}, ServiceType: "openvpn"})
+			return len(proposals) == 0 && err == nil
 		}, time.Second*5, time.Millisecond*200, "proposal %s was not returned", providerID)
 	})
 }
