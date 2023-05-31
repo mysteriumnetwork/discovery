@@ -7,7 +7,6 @@ package oracleapi
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"net/http"
 	"time"
 )
@@ -41,8 +40,6 @@ func (a *API) Quality(country string) (map[string]*DetailedQuality, error) {
 	if err := json.NewDecoder(resp.Body).Decode(&entries); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
-	log.Info().Msgf("Received %d entries", len(entries))
-	log.Info().Msgf("Received %v", entries)
 
 	return entries, nil
 }
