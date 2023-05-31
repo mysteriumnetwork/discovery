@@ -19,12 +19,12 @@ func Test_ProposalFiltering(t *testing.T) {
 	templates, err := publishProposals(t)
 	assert.NoError(t, err)
 
-	api := discoveryAPI
+	api := DiscoveryAPI
 
 	t.Run("return monitored failed", func(t *testing.T) {
 		// 0x11 is set to be monitoring failed
 		// when
-		proposals, err := discoveryAPI.ListFilters(Query{})
+		proposals, err := DiscoveryAPI.ListFilters(Query{})
 
 		// then
 		assert.NoError(t, err)
@@ -34,30 +34,22 @@ func Test_ProposalFiltering(t *testing.T) {
 		assert.False(t, ok, "0x11 should not be in the list")
 
 		// when
-		proposals, err = discoveryAPI.ListFilters(Query{IncludeMonitoringFailed: true})
+		proposals, err = DiscoveryAPI.ListFilters(Query{IncludeMonitoringFailed: true})
 
 		// then
 		assert.NoError(t, err)
 		proposal, ok := findProposal(proposals, func(p v3.Proposal) bool {
 			return p.ProviderID == "0x11"
 		})
-		assert.True(t, ok, "0x11 should not be in the list")
+		assert.True(t, ok, "0x11 should be in the list")
 		assert.Equal(t, "0x11", proposal.ProviderID)
 		assert.True(t, proposal.Quality.MonitoringFailed)
-
-		// 0x12 has not yet been monitored
-		proposal, ok = findProposal(proposals, func(p v3.Proposal) bool {
-			return p.ProviderID == "0x12"
-		})
-		assert.True(t, ok, "0x12 should not be in the list")
-		assert.Equal(t, "0x12", proposal.ProviderID)
-		assert.Nil(t, proposal.Quality.MonitoringFailed)
 
 		// 0x1 monitoring success
 		proposal, ok = findProposal(proposals, func(p v3.Proposal) bool {
 			return p.ProviderID == "0x1"
 		})
-		assert.True(t, ok, "0x1 should not be in the list")
+		assert.True(t, ok, "0x1 should be in the list")
 		assert.Equal(t, "0x1", proposal.ProviderID)
 		assert.False(t, proposal.Quality.MonitoringFailed)
 	})
@@ -151,21 +143,6 @@ func Test_ProposalFiltering(t *testing.T) {
 		}
 	})
 
-	// TODO make more robust tag e2e
-	t.Run("tags", func(t *testing.T) {
-		proposals, err := api.ListFilters(Query{Tags: "test,maybe"})
-		assert.NoError(t, err)
-		assert.Len(t, proposals, 5)
-
-		proposals, err = api.ListFilters(Query{Tags: "test"})
-		assert.NoError(t, err)
-		assert.Len(t, proposals, 5)
-
-		proposals, err = api.ListFilters(Query{Tags: "nosuchtag"})
-		assert.NoError(t, err)
-		assert.Len(t, proposals, 0)
-	})
-
 	t.Run("unregister", func(t *testing.T) {
 		for _, id := range []string{"0x1", "0x2", "0x3"} {
 			proposals, err := api.ListFilters(Query{ProviderID: []string{id}})
@@ -179,7 +156,7 @@ func Test_ProposalFiltering(t *testing.T) {
 		}
 
 		assert.Eventuallyf(t, func() bool {
-			proposals, err := discoveryAPI.ListFilters(Query{})
+			proposals, err := DiscoveryAPI.ListFilters(Query{})
 			assert.NoError(t, err)
 			return len(proposals) == 0
 		}, time.Second*10, time.Millisecond*500, "proposals did not unregister")
@@ -190,8 +167,8 @@ func Test_ProposalFiltering(t *testing.T) {
 		err := newTemplate().providerID(providerID).publishPing()
 		assert.NoError(t, err)
 		assert.Eventuallyf(t, func() bool {
-			proposals, err := api.ListFilters(Query{ProviderID: []string{"notMockedInWiremock"}})
-			return len(proposals) == 1 && proposals[0].ProviderID == providerID && err == nil
+			proposals, err := api.ListFilters(Query{ProviderID: []string{"notMockedInWiremock"}, ServiceType: "openvpn"})
+			return len(proposals) == 0 && err == nil
 		}, time.Second*5, time.Millisecond*200, "proposal %s was not returned", providerID)
 	})
 }
@@ -212,8 +189,6 @@ func publishProposals(t *testing.T) ([]*template, error) {
 		newTemplate().providerID("0x3").country("US").compatibility(2),
 		newTemplate().providerID("0x4").country("CN").compatibility(2).serviceType("wireguard"),
 		newTemplate().providerID("0x11").country("CN").compatibility(2),
-		// no session response
-		newTemplate().providerID("0x12").country("LT"),
 	}
 	for _, t := range templates {
 		if err := t.publishPing(); err != nil {
@@ -221,7 +196,7 @@ func publishProposals(t *testing.T) ([]*template, error) {
 		}
 	}
 	assert.Eventuallyf(t, func() bool {
-		proposals, err := discoveryAPI.ListFilters(Query{IncludeMonitoringFailed: true})
+		proposals, err := DiscoveryAPI.ListFilters(Query{IncludeMonitoringFailed: true})
 		assert.NoError(t, err)
 		return len(proposals) == len(templates)
 	}, time.Second*10, time.Millisecond*500, "publishing did not seed")

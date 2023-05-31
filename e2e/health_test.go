@@ -11,7 +11,7 @@ import (
 )
 
 func TestHealthcheck(t *testing.T) {
-	status, err := discoveryAPI.GetStatus()
+	status, err := DiscoveryAPI.GetStatus()
 	assert.NoError(t, err)
 
 	assert.True(t, status.CacheOK)

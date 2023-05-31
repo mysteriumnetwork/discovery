@@ -46,11 +46,25 @@ func Build() error {
 	return sh.Run("go", "build", "-o", path.Join("build", "discovery"), path.Join("cmd", "main.go"))
 }
 
+// Build builds the app binary for e2e.
+//
+//goland:noinspection GoUnusedExportedFunction
+func BuildE2e() error {
+	return sh.Run("go", "build", "-o", path.Join("build", "discovery"), path.Join("cmd", "main.go"))
+}
+
 // BuildPricer builds the pricer binary.
 //
 //goland:noinspection GoUnusedExportedFunction
 func BuildPricer() error {
 	mg.Deps(Swag)
+	return sh.Run("go", "build", "-o", path.Join("build", "pricer"), path.Join("cmd", "pricer", "main.go"))
+}
+
+// BuildPricer builds the pricer binary.
+//
+//goland:noinspection GoUnusedExportedFunction
+func BuildPricerE2e() error {
 	return sh.Run("go", "build", "-o", path.Join("build", "pricer"), path.Join("cmd", "pricer", "main.go"))
 }
 
@@ -97,6 +111,6 @@ func E2EDev() {
 // E2E runs e2e tests on locally running instance
 //
 //goland:noinspection GoUnusedExportedFunction
-func E2E() {
-	e2e.Run()
+func E2E() error {
+	return e2e.Run()
 }

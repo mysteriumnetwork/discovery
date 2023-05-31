@@ -29,7 +29,7 @@ func TestMain(m *testing.M) {
 }
 
 func Test_LatestPrices(t *testing.T) {
-	prices, err := discoveryAPI.LatestPrices()
+	prices, err := PricerAPI.LatestPrices()
 	assert.NoError(t, err)
 	assert.NotNil(t, prices.Defaults.Current.Residential.PricePerGiB)
 	assert.NotNil(t, prices.Defaults.Current.Residential.PricePerHour)
@@ -46,13 +46,13 @@ func Test_LatestPrices(t *testing.T) {
 
 func Test_GetConfig(t *testing.T) {
 	t.Run("rejected with bad token", func(t *testing.T) {
-		_, err := discoveryAPI.GetPriceConfig("tkn")
+		_, err := PricerAPI.GetPriceConfig("tkn")
 		assert.Error(t, err)
 		assert.Equal(t, "401", err.Error())
 	})
 
 	t.Run("fetches with correct token", func(t *testing.T) {
-		cfg, err := discoveryAPI.GetPriceConfig(validToken)
+		cfg, err := PricerAPI.GetPriceConfig(validToken)
 		assert.NoError(t, err)
 
 		bts, err := json.Marshal(cfg)
@@ -64,13 +64,13 @@ func Test_GetConfig(t *testing.T) {
 
 func Test_PostConfig(t *testing.T) {
 	t.Run("rejected with bad token", func(t *testing.T) {
-		err := discoveryAPI.UpdatePriceConfig("tkn", pricing.Config{})
+		err := PricerAPI.UpdatePriceConfig("tkn", pricing.Config{})
 		assert.Error(t, err)
 		assert.Equal(t, "401", err.Error())
 	})
 
 	t.Run("rejected with invalid config", func(t *testing.T) {
-		err := discoveryAPI.UpdatePriceConfig(validToken, pricing.Config{})
+		err := PricerAPI.UpdatePriceConfig(validToken, pricing.Config{})
 		assert.Error(t, err)
 		assert.Equal(t, "400", err.Error())
 	})
@@ -81,10 +81,10 @@ func Test_PostConfig(t *testing.T) {
 		assert.NoError(t, err)
 		toSend.BasePrices.Other.PricePerGiB = 11
 
-		err = discoveryAPI.UpdatePriceConfig(validToken, toSend)
+		err = PricerAPI.UpdatePriceConfig(validToken, toSend)
 		assert.NoError(t, err)
 
-		cfg, err := discoveryAPI.GetPriceConfig(validToken)
+		cfg, err := PricerAPI.GetPriceConfig(validToken)
 		assert.NoError(t, err)
 		assert.EqualValues(t, toSend, cfg)
 	})

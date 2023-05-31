@@ -2,17 +2,18 @@ package e2e
 
 import (
 	"encoding/json"
-	"fmt"
-
 	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 	"github.com/nats-io/nats.go"
+	"github.com/rs/zerolog/log"
 )
 
 var defaultBroker = initBroker()
 
 func initBroker() *Broker {
 	broker, err := NewBroker(BrokerURL)
-	fmt.Println(err)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to initialize broker")
+	}
 	return broker
 }
 

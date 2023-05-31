@@ -79,7 +79,6 @@ func main() {
 
 	proposalsAPI := proposal.NewAPI(
 		proposalService,
-		proposalRepo,
 		locationProvider,
 		cfg.ProposalsCacheTTL,
 		cfg.ProposalsCacheLimit,
