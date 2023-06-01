@@ -20,11 +20,12 @@ import (
 	"github.com/mysteriumnetwork/discovery/price/pricing"
 	"github.com/mysteriumnetwork/discovery/price/pricingbyservice"
 	mlog "github.com/mysteriumnetwork/logger"
-	payprice "github.com/mysteriumnetwork/payments/fees/price"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog/log"
 
 	// unconfuse the number of cores go can use in k8s
+	"github.com/mysteriumnetwork/payments/exchange/coingecko"
+	"github.com/mysteriumnetwork/payments/exchange/coinranking"
 	_ "go.uber.org/automaxprocs"
 )
 
@@ -148,8 +149,8 @@ func getPort() int {
 
 func buildMarket(cfg *Options) *pricing.Market {
 	apis := []pricing.ExternalPriceAPI{
-		payprice.NewGecko(cfg.GeckoURL.String()),
-		payprice.NewCoinRanking(cfg.CoinRankingURL.String(), &cfg.CoinRankingToken),
+		coingecko.NewAPI(cfg.GeckoURL.String(), cfg.TokenRateCacheTTL),
+		coinranking.NewAPI(cfg.CoinRankingURL.String(), cfg.CoinRankingToken, cfg.TokenRateCacheTTL),
 	}
 	mrkt := pricing.NewMarket(apis, time.Minute*15)
 	return mrkt
@@ -162,13 +163,14 @@ func configureLogger() {
 }
 
 type Options struct {
-	RedisAddress     []string
-	RedisPass        string
-	RedisDB          int
-	QualityOracleURL url.URL
-	GeckoURL         url.URL
-	CoinRankingURL   url.URL
-	CoinRankingToken string
+	RedisAddress      []string
+	RedisPass         string
+	RedisDB           int
+	QualityOracleURL  url.URL
+	GeckoURL          url.URL
+	CoinRankingURL    url.URL
+	TokenRateCacheTTL time.Duration
+	CoinRankingToken  string
 }
 
 func ReadConfig() (*Options, error) {
@@ -193,11 +195,15 @@ func ReadConfig() (*Options, error) {
 	if err != nil {
 		return nil, err
 	}
-	geckoURL, err := config.OptionalEnvURL("GECKO_URL", payprice.DefaultGeckoURI)
+	geckoURL, err := config.OptionalEnvURL("GECKO_URL", coingecko.DefaultGeckoURI)
 	if err != nil {
 		return nil, err
 	}
-	coinRankingURL, err := config.OptionalEnvURL("COINRANKING_URL", payprice.DefaultCoinRankingURI)
+	coinRankingURL, err := config.OptionalEnvURL("COINRANKING_URL", coinranking.DefaultCoinRankingURI)
+	if err != nil {
+		return nil, err
+	}
+	tokenRateCacheTTL, err := config.OptionalEnvDuration("TOKEN_RATE_CACHE_TTL", "1m")
 	if err != nil {
 		return nil, err
 	}
@@ -206,12 +212,13 @@ func ReadConfig() (*Options, error) {
 		return nil, err
 	}
 	return &Options{
-		RedisAddress:     strings.Split(redisAddress, ";"),
-		RedisPass:        redisPass,
-		RedisDB:          redisDBint,
-		QualityOracleURL: *qualityOracleURL,
-		GeckoURL:         *geckoURL,
-		CoinRankingURL:   *coinRankingURL,
-		CoinRankingToken: coinRankingToken,
+		RedisAddress:      strings.Split(redisAddress, ";"),
+		RedisPass:         redisPass,
+		RedisDB:           redisDBint,
+		QualityOracleURL:  *qualityOracleURL,
+		GeckoURL:          *geckoURL,
+		CoinRankingURL:    *coinRankingURL,
+		TokenRateCacheTTL: *tokenRateCacheTTL,
+		CoinRankingToken:  coinRankingToken,
 	}, nil
 }

@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/mysteriumnetwork/discovery/price/pricing"
-	"github.com/mysteriumnetwork/payments/crypto"
+	"github.com/mysteriumnetwork/payments/units"
 )
 
 func Test_calculatePrice(t *testing.T) {
@@ -27,7 +27,7 @@ func Test_calculatePrice(t *testing.T) {
 				basePriceUSD: 0.06,
 				multiplier:   1,
 			},
-			want: crypto.FloatToBigMyst(0.1),
+			want: units.FloatEthToBigIntWei(0.1),
 		},
 		{
 			name: "calculates correctly 2",
@@ -36,7 +36,7 @@ func Test_calculatePrice(t *testing.T) {
 				basePriceUSD: 0.06,
 				multiplier:   1,
 			},
-			want: crypto.FloatToBigMyst(1),
+			want: units.FloatEthToBigIntWei(1),
 		},
 		{
 			name: "calculates correctly 3",
@@ -45,7 +45,7 @@ func Test_calculatePrice(t *testing.T) {
 				basePriceUSD: 0.06,
 				multiplier:   0.1,
 			},
-			want: big.NewInt(10000000000000002),
+			want: big.NewInt(10000000000000001),
 		},
 		{
 			name: "calculates correctly 4",
@@ -54,7 +54,8 @@ func Test_calculatePrice(t *testing.T) {
 				basePriceUSD: 0.06,
 				multiplier:   1.5,
 			},
-			want: big.NewInt(150000000000000032),
+			want: big.NewInt(
+				150000000000000022),
 		},
 	}
 	for _, tt := range tests {
@@ -176,41 +177,41 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 				Current: &PriceByType{
 					Residential: &PriceByServiceType{
 						Wireguard: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.01),
+							PricePerHour:              units.FloatEthToBigIntWei(0.01),
 							PricePerHourHumanReadable: 0.01,
-							PricePerGiB:               crypto.FloatToBigMyst(0.02),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.02),
 							PricePerGiBHumanReadable:  0.02,
 						},
 						Scraping: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.01),
+							PricePerHour:              units.FloatEthToBigIntWei(0.01),
 							PricePerHourHumanReadable: 0.01,
-							PricePerGiB:               crypto.FloatToBigMyst(0.02),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.02),
 							PricePerGiBHumanReadable:  0.02,
 						},
 						DataTransfer: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.01),
+							PricePerHour:              units.FloatEthToBigIntWei(0.01),
 							PricePerHourHumanReadable: 0.01,
-							PricePerGiB:               crypto.FloatToBigMyst(0.02),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.02),
 							PricePerGiBHumanReadable:  0.02,
 						},
 					},
 					Other: &PriceByServiceType{
 						Wireguard: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.03),
+							PricePerHour:              units.FloatEthToBigIntWei(0.03),
 							PricePerHourHumanReadable: 0.03,
-							PricePerGiB:               crypto.FloatToBigMyst(0.04),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.04),
 							PricePerGiBHumanReadable:  0.04,
 						},
 						Scraping: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.03),
+							PricePerHour:              units.FloatEthToBigIntWei(0.03),
 							PricePerHourHumanReadable: 0.03,
-							PricePerGiB:               crypto.FloatToBigMyst(0.04),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.04),
 							PricePerGiBHumanReadable:  0.04,
 						},
 						DataTransfer: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.03),
+							PricePerHour:              units.FloatEthToBigIntWei(0.03),
 							PricePerHourHumanReadable: 0.03,
-							PricePerGiB:               crypto.FloatToBigMyst(0.04),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.04),
 							PricePerGiBHumanReadable:  0.04,
 						},
 					},
@@ -218,41 +219,41 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 				Previous: &PriceByType{
 					Residential: &PriceByServiceType{
 						Wireguard: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.01),
+							PricePerHour:              units.FloatEthToBigIntWei(0.01),
 							PricePerHourHumanReadable: 0.01,
-							PricePerGiB:               crypto.FloatToBigMyst(0.02),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.02),
 							PricePerGiBHumanReadable:  0.02,
 						},
 						Scraping: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.01),
+							PricePerHour:              units.FloatEthToBigIntWei(0.01),
 							PricePerHourHumanReadable: 0.01,
-							PricePerGiB:               crypto.FloatToBigMyst(0.02),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.02),
 							PricePerGiBHumanReadable:  0.02,
 						},
 						DataTransfer: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.01),
+							PricePerHour:              units.FloatEthToBigIntWei(0.01),
 							PricePerHourHumanReadable: 0.01,
-							PricePerGiB:               crypto.FloatToBigMyst(0.02),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.02),
 							PricePerGiBHumanReadable:  0.02,
 						},
 					},
 					Other: &PriceByServiceType{
 						Wireguard: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.03),
+							PricePerHour:              units.FloatEthToBigIntWei(0.03),
 							PricePerHourHumanReadable: 0.03,
-							PricePerGiB:               crypto.FloatToBigMyst(0.04),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.04),
 							PricePerGiBHumanReadable:  0.04,
 						},
 						Scraping: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.03),
+							PricePerHour:              units.FloatEthToBigIntWei(0.03),
 							PricePerHourHumanReadable: 0.03,
-							PricePerGiB:               crypto.FloatToBigMyst(0.04),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.04),
 							PricePerGiBHumanReadable:  0.04,
 						},
 						DataTransfer: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.03),
+							PricePerHour:              units.FloatEthToBigIntWei(0.03),
 							PricePerHourHumanReadable: 0.03,
-							PricePerGiB:               crypto.FloatToBigMyst(0.04),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.04),
 							PricePerGiBHumanReadable:  0.04,
 						},
 					},
@@ -267,41 +268,41 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 						Current: &PriceByType{
 							Residential: &PriceByServiceType{
 								Wireguard: &Price{
-									PricePerHour:              crypto.FloatToBigMyst(0.05),
+									PricePerHour:              units.FloatEthToBigIntWei(0.05),
 									PricePerHourHumanReadable: 0.05,
-									PricePerGiB:               crypto.FloatToBigMyst(0.06),
+									PricePerGiB:               units.FloatEthToBigIntWei(0.06),
 									PricePerGiBHumanReadable:  0.06,
 								},
 								Scraping: &Price{
-									PricePerHour:              crypto.FloatToBigMyst(0.05),
+									PricePerHour:              units.FloatEthToBigIntWei(0.05),
 									PricePerHourHumanReadable: 0.05,
-									PricePerGiB:               crypto.FloatToBigMyst(0.06),
+									PricePerGiB:               units.FloatEthToBigIntWei(0.06),
 									PricePerGiBHumanReadable:  0.06,
 								},
 								DataTransfer: &Price{
-									PricePerHour:              crypto.FloatToBigMyst(0.05),
+									PricePerHour:              units.FloatEthToBigIntWei(0.05),
 									PricePerHourHumanReadable: 0.05,
-									PricePerGiB:               crypto.FloatToBigMyst(0.06),
+									PricePerGiB:               units.FloatEthToBigIntWei(0.06),
 									PricePerGiBHumanReadable:  0.06,
 								},
 							},
 							Other: &PriceByServiceType{
 								Wireguard: &Price{
-									PricePerHour:              crypto.FloatToBigMyst(0.07),
+									PricePerHour:              units.FloatEthToBigIntWei(0.07),
 									PricePerHourHumanReadable: 0.07,
-									PricePerGiB:               crypto.FloatToBigMyst(0.08),
+									PricePerGiB:               units.FloatEthToBigIntWei(0.08),
 									PricePerGiBHumanReadable:  0.08,
 								},
 								Scraping: &Price{
-									PricePerHour:              crypto.FloatToBigMyst(0.07),
+									PricePerHour:              units.FloatEthToBigIntWei(0.07),
 									PricePerHourHumanReadable: 0.07,
-									PricePerGiB:               crypto.FloatToBigMyst(0.08),
+									PricePerGiB:               units.FloatEthToBigIntWei(0.08),
 									PricePerGiBHumanReadable:  0.08,
 								},
 								DataTransfer: &Price{
-									PricePerHour:              crypto.FloatToBigMyst(0.07),
+									PricePerHour:              units.FloatEthToBigIntWei(0.07),
 									PricePerHourHumanReadable: 0.07,
-									PricePerGiB:               crypto.FloatToBigMyst(0.08),
+									PricePerGiB:               units.FloatEthToBigIntWei(0.08),
 									PricePerGiBHumanReadable:  0.08,
 								},
 							},
@@ -348,41 +349,41 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 				Current: &PriceByType{
 					Residential: &PriceByServiceType{
 						Wireguard: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.01),
+							PricePerHour:              units.FloatEthToBigIntWei(0.01),
 							PricePerHourHumanReadable: 0.01,
-							PricePerGiB:               crypto.FloatToBigMyst(0.02),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.02),
 							PricePerGiBHumanReadable:  0.02,
 						},
 						Scraping: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.01),
+							PricePerHour:              units.FloatEthToBigIntWei(0.01),
 							PricePerHourHumanReadable: 0.01,
-							PricePerGiB:               crypto.FloatToBigMyst(0.02),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.02),
 							PricePerGiBHumanReadable:  0.02,
 						},
 						DataTransfer: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.01),
+							PricePerHour:              units.FloatEthToBigIntWei(0.01),
 							PricePerHourHumanReadable: 0.01,
-							PricePerGiB:               crypto.FloatToBigMyst(0.02),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.02),
 							PricePerGiBHumanReadable:  0.02,
 						},
 					},
 					Other: &PriceByServiceType{
 						Wireguard: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.03),
+							PricePerHour:              units.FloatEthToBigIntWei(0.03),
 							PricePerHourHumanReadable: 0.03,
-							PricePerGiB:               crypto.FloatToBigMyst(0.04),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.04),
 							PricePerGiBHumanReadable:  0.04,
 						},
 						Scraping: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.03),
+							PricePerHour:              units.FloatEthToBigIntWei(0.03),
 							PricePerHourHumanReadable: 0.03,
-							PricePerGiB:               crypto.FloatToBigMyst(0.04),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.04),
 							PricePerGiBHumanReadable:  0.04,
 						},
 						DataTransfer: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.03),
+							PricePerHour:              units.FloatEthToBigIntWei(0.03),
 							PricePerHourHumanReadable: 0.03,
-							PricePerGiB:               crypto.FloatToBigMyst(0.04),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.04),
 							PricePerGiBHumanReadable:  0.04,
 						},
 					},
@@ -390,41 +391,41 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 				Previous: &PriceByType{
 					Residential: &PriceByServiceType{
 						Wireguard: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.05),
+							PricePerHour:              units.FloatEthToBigIntWei(0.05),
 							PricePerHourHumanReadable: 0.05,
-							PricePerGiB:               crypto.FloatToBigMyst(0.06),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.06),
 							PricePerGiBHumanReadable:  0.06,
 						},
 						Scraping: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.05),
+							PricePerHour:              units.FloatEthToBigIntWei(0.05),
 							PricePerHourHumanReadable: 0.05,
-							PricePerGiB:               crypto.FloatToBigMyst(0.06),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.06),
 							PricePerGiBHumanReadable:  0.06,
 						},
 						DataTransfer: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.05),
+							PricePerHour:              units.FloatEthToBigIntWei(0.05),
 							PricePerHourHumanReadable: 0.05,
-							PricePerGiB:               crypto.FloatToBigMyst(0.06),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.06),
 							PricePerGiBHumanReadable:  0.06,
 						},
 					},
 					Other: &PriceByServiceType{
 						Wireguard: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.07),
+							PricePerHour:              units.FloatEthToBigIntWei(0.07),
 							PricePerHourHumanReadable: 0.07,
-							PricePerGiB:               crypto.FloatToBigMyst(0.08),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.08),
 							PricePerGiBHumanReadable:  0.08,
 						},
 						Scraping: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.07),
+							PricePerHour:              units.FloatEthToBigIntWei(0.07),
 							PricePerHourHumanReadable: 0.07,
-							PricePerGiB:               crypto.FloatToBigMyst(0.08),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.08),
 							PricePerGiBHumanReadable:  0.08,
 						},
 						DataTransfer: &Price{
-							PricePerHour:              crypto.FloatToBigMyst(0.07),
+							PricePerHour:              units.FloatEthToBigIntWei(0.07),
 							PricePerHourHumanReadable: 0.07,
-							PricePerGiB:               crypto.FloatToBigMyst(0.08),
+							PricePerGiB:               units.FloatEthToBigIntWei(0.08),
 							PricePerGiBHumanReadable:  0.08,
 						},
 					},
@@ -603,41 +604,41 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 							Current: &PriceByType{
 								Residential: &PriceByServiceType{
 									Wireguard: &Price{
-										PricePerHour:              crypto.FloatToBigMyst(0.05),
+										PricePerHour:              units.FloatEthToBigIntWei(0.05),
 										PricePerHourHumanReadable: 0.05,
-										PricePerGiB:               crypto.FloatToBigMyst(0.06),
+										PricePerGiB:               units.FloatEthToBigIntWei(0.06),
 										PricePerGiBHumanReadable:  0.06,
 									},
 									Scraping: &Price{
-										PricePerHour:              crypto.FloatToBigMyst(0.05),
+										PricePerHour:              units.FloatEthToBigIntWei(0.05),
 										PricePerHourHumanReadable: 0.05,
-										PricePerGiB:               crypto.FloatToBigMyst(0.06),
+										PricePerGiB:               units.FloatEthToBigIntWei(0.06),
 										PricePerGiBHumanReadable:  0.06,
 									},
 									DataTransfer: &Price{
-										PricePerHour:              crypto.FloatToBigMyst(0.05),
+										PricePerHour:              units.FloatEthToBigIntWei(0.05),
 										PricePerHourHumanReadable: 0.05,
-										PricePerGiB:               crypto.FloatToBigMyst(0.06),
+										PricePerGiB:               units.FloatEthToBigIntWei(0.06),
 										PricePerGiBHumanReadable:  0.06,
 									},
 								},
 								Other: &PriceByServiceType{
 									Wireguard: &Price{
-										PricePerHour:              crypto.FloatToBigMyst(0.07),
+										PricePerHour:              units.FloatEthToBigIntWei(0.07),
 										PricePerHourHumanReadable: 0.07,
-										PricePerGiB:               crypto.FloatToBigMyst(0.08),
+										PricePerGiB:               units.FloatEthToBigIntWei(0.08),
 										PricePerGiBHumanReadable:  0.08,
 									},
 									Scraping: &Price{
-										PricePerHour:              crypto.FloatToBigMyst(0.07),
+										PricePerHour:              units.FloatEthToBigIntWei(0.07),
 										PricePerHourHumanReadable: 0.07,
-										PricePerGiB:               crypto.FloatToBigMyst(0.08),
+										PricePerGiB:               units.FloatEthToBigIntWei(0.08),
 										PricePerGiBHumanReadable:  0.08,
 									},
 									DataTransfer: &Price{
-										PricePerHour:              crypto.FloatToBigMyst(0.07),
+										PricePerHour:              units.FloatEthToBigIntWei(0.07),
 										PricePerHourHumanReadable: 0.07,
-										PricePerGiB:               crypto.FloatToBigMyst(0.08),
+										PricePerGiB:               units.FloatEthToBigIntWei(0.08),
 										PricePerGiBHumanReadable:  0.08,
 									},
 								},
@@ -734,41 +735,41 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 					Previous: &PriceByType{
 						Residential: &PriceByServiceType{
 							Wireguard: &Price{
-								PricePerHour:              crypto.FloatToBigMyst(0.05),
+								PricePerHour:              units.FloatEthToBigIntWei(0.05),
 								PricePerHourHumanReadable: 0.05,
-								PricePerGiB:               crypto.FloatToBigMyst(0.06),
+								PricePerGiB:               units.FloatEthToBigIntWei(0.06),
 								PricePerGiBHumanReadable:  0.06,
 							},
 							Scraping: &Price{
-								PricePerHour:              crypto.FloatToBigMyst(0.05),
+								PricePerHour:              units.FloatEthToBigIntWei(0.05),
 								PricePerHourHumanReadable: 0.05,
-								PricePerGiB:               crypto.FloatToBigMyst(0.06),
+								PricePerGiB:               units.FloatEthToBigIntWei(0.06),
 								PricePerGiBHumanReadable:  0.06,
 							},
 							DataTransfer: &Price{
-								PricePerHour:              crypto.FloatToBigMyst(0.05),
+								PricePerHour:              units.FloatEthToBigIntWei(0.05),
 								PricePerHourHumanReadable: 0.05,
-								PricePerGiB:               crypto.FloatToBigMyst(0.06),
+								PricePerGiB:               units.FloatEthToBigIntWei(0.06),
 								PricePerGiBHumanReadable:  0.06,
 							},
 						},
 						Other: &PriceByServiceType{
 							Wireguard: &Price{
-								PricePerHour:              crypto.FloatToBigMyst(0.07),
+								PricePerHour:              units.FloatEthToBigIntWei(0.07),
 								PricePerHourHumanReadable: 0.07,
-								PricePerGiB:               crypto.FloatToBigMyst(0.08),
+								PricePerGiB:               units.FloatEthToBigIntWei(0.08),
 								PricePerGiBHumanReadable:  0.08,
 							},
 							Scraping: &Price{
-								PricePerHour:              crypto.FloatToBigMyst(0.07),
+								PricePerHour:              units.FloatEthToBigIntWei(0.07),
 								PricePerHourHumanReadable: 0.07,
-								PricePerGiB:               crypto.FloatToBigMyst(0.08),
+								PricePerGiB:               units.FloatEthToBigIntWei(0.08),
 								PricePerGiBHumanReadable:  0.08,
 							},
 							DataTransfer: &Price{
-								PricePerHour:              crypto.FloatToBigMyst(0.07),
+								PricePerHour:              units.FloatEthToBigIntWei(0.07),
 								PricePerHourHumanReadable: 0.07,
-								PricePerGiB:               crypto.FloatToBigMyst(0.08),
+								PricePerGiB:               units.FloatEthToBigIntWei(0.08),
 								PricePerGiBHumanReadable:  0.08,
 							},
 						},

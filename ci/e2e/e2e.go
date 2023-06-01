@@ -43,9 +43,5 @@ func upDependencies() error {
 }
 
 func upApp() error {
-	err := sh.RunV("docker-compose", "-f", e2e.DockerFile, "up", "--build", "-d", "discovery")
-	if err != nil {
-		return err
-	}
-	return sh.RunV("docker-compose", "-f", e2e.DockerFile, "up", "--build", "-d", "discopricer")
+	return sh.RunV("docker-compose", "-f", e2e.DockerFile, "up", "--build", "-d", "discovery", "discopricer")
 }

@@ -12,7 +12,7 @@ import (
 	"github.com/go-redis/redis/v8"
 
 	"github.com/mysteriumnetwork/discovery/metrics"
-	"github.com/mysteriumnetwork/payments/crypto"
+	"github.com/mysteriumnetwork/payments/units"
 	"github.com/rs/zerolog/log"
 )
 
@@ -232,11 +232,11 @@ func (p *PriceUpdater) generateNewPerCountry(mystUSD float64, cfg Config) map[st
 // Take note that this is not 100% correct as we're rounding a bit due to accuracy issues with floats.
 // This, however, is not important here as the accuracy will be more than good enough to a few zeroes after the dot.
 func calculatePriceMYST(mystUSD, priceUSD, multiplier float64) *big.Int {
-	return crypto.FloatToBigMyst((priceUSD / mystUSD) * multiplier)
+	return units.FloatEthToBigIntWei((priceUSD / mystUSD) * multiplier)
 }
 
 func calculatePriceMystFloat(mystUSD, priceUSD, multiplier float64) float64 {
-	return crypto.BigMystToFloat(calculatePriceMYST(mystUSD, priceUSD, multiplier))
+	return units.BigIntWeiToFloatEth(calculatePriceMYST(mystUSD, priceUSD, multiplier))
 }
 
 func (p *PriceUpdater) fetchMystPrice() (float64, error) {
