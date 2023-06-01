@@ -28,8 +28,6 @@ func Logger(c *gin.Context) {
 
 	msg := "API Request"
 	switch {
-	case statusCode >= 400 && statusCode < 500:
-		log.Debug().Fields(f).Msg(msg)
 	case statusCode >= 500:
 		log.Error().Fields(f).Msg(msg)
 	default:
