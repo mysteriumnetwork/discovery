@@ -22,7 +22,7 @@ func NewEnhancer(tagAPI tagAPI) *Enhancer {
 func (e *Enhancer) Enhance(proposal *v3.Proposal) {
 	tags, err := e.tagAPI.GetTags(proposal.ProviderID)
 	if err != nil {
-		log.Warn().Err(err).Str("providerID", proposal.ProviderID).Msg("could not get tags")
+		log.Error().Err(err).Str("providerID", proposal.ProviderID).Msg("could not get tags")
 		return
 	}
 

@@ -17,10 +17,10 @@ import (
 
 	"github.com/mysteriumnetwork/discovery/config"
 	_ "github.com/mysteriumnetwork/discovery/docs"
+	"github.com/mysteriumnetwork/discovery/middleware"
 	"github.com/mysteriumnetwork/discovery/price"
 	"github.com/mysteriumnetwork/discovery/price/pricing"
 	"github.com/mysteriumnetwork/discovery/price/pricingbyservice"
-	"github.com/mysteriumnetwork/discovery/token"
 	"github.com/mysteriumnetwork/go-rest/apierror"
 	mlog "github.com/mysteriumnetwork/logger"
 )
@@ -41,7 +41,7 @@ func main() {
 
 	r := gin.New()
 	r.Use(gin.Recovery())
-	r.Use(mlog.GinLogFunc())
+	r.Use(middleware.Logger)
 	r.Use(apierror.ErrorHandler)
 
 	rdb := redis.NewUniversalClient(&redis.UniversalOptions{
@@ -82,7 +82,7 @@ func main() {
 		log.Fatal().Err(err).Msg("failed to initialize price getter by service")
 	}
 
-	ac := token.NewJWTChecker(cfg.SentinelURL, cfg.UniverseJWTSecret)
+	ac := middleware.NewJWTChecker(cfg.SentinelURL, cfg.UniverseJWTSecret)
 	price.NewAPI(getter, cfger, ac).RegisterRoutes(v3)
 	price.NewAPIByService(rdb, getterByService, cfgerByService, ac).RegisterRoutes(v4)
 

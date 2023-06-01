@@ -22,6 +22,7 @@ import (
 	"github.com/mysteriumnetwork/discovery/health"
 	"github.com/mysteriumnetwork/discovery/listener"
 	"github.com/mysteriumnetwork/discovery/location"
+	"github.com/mysteriumnetwork/discovery/middleware"
 	"github.com/mysteriumnetwork/discovery/proposal"
 	"github.com/mysteriumnetwork/discovery/quality"
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
@@ -46,7 +47,7 @@ func main() {
 
 	r := gin.New()
 	r.Use(gin.Recovery())
-	r.Use(mlog.GinLogFunc())
+	r.Use(middleware.Logger)
 	r.Use(apierror.ErrorHandler)
 
 	r.GET("/", func(c *gin.Context) {

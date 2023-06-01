@@ -1,4 +1,4 @@
-package token
+package middleware
 
 import (
 	"encoding/base64"
