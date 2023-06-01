@@ -15,7 +15,7 @@ type OracleResponses struct {
 func (or *OracleResponses) Load(qualityService *quality.Service, fromCountry string) {
 	qRes, err := qualityService.Quality(fromCountry)
 	if err != nil {
-		log.Warn().Err(err).Msgf("Could not fetch quality for consumer (country=%s)", fromCountry)
+		log.Error().Err(err).Msgf("Could not fetch quality for consumer (country=%s)", fromCountry)
 	}
 	or.QualityResponse = qRes
 }

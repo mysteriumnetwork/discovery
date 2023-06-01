@@ -198,7 +198,7 @@ func (a *API) populateCountryMiddleware() func(c *gin.Context) {
 		}
 		if err != nil {
 			from = "NL"
-			log.Warn().Err(err).Msg("Failed to autodetect client country")
+			log.Error().Err(err).Msg("Failed to autodetect client country")
 		}
 		c.Request = c.Request.WithContext(
 			context.WithValue(c.Request.Context(), ctxCountryKey{}, from))

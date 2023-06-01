@@ -65,7 +65,7 @@ func (m *Market) fetchPricing() (float64, error) {
 	for _, v := range m.apis {
 		resp, err := v.GetRateCacheWithFallback([]exchange.Coin{exchange.CoinMYST}, []exchange.Currency{exchange.CurrencyUSD})
 		if err != nil {
-			log.Warn().Err(err).Msg("could not load pricing info")
+			log.Error().Err(err).Msg("could not load pricing info")
 			continue
 		}
 
