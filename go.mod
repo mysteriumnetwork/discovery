@@ -11,13 +11,13 @@ require (
 	github.com/fatih/color v1.15.0
 	github.com/fln/pprotect v0.0.0-20160819093714-7d932ef9e7a2
 	github.com/gin-contrib/pprof v1.4.0
-	github.com/gin-gonic/gin v1.9.0
+	github.com/gin-gonic/gin v1.9.1
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/magefile/mage v1.15.0
 	github.com/mysteriumnetwork/go-ci v0.0.0-20220711082519-1245471bae0d
 	github.com/mysteriumnetwork/go-rest v0.3.1
-	github.com/mysteriumnetwork/logger v0.0.6
+	github.com/mysteriumnetwork/logger v0.0.8
 	github.com/mysteriumnetwork/payments v1.0.1-0.20230504074308-b9ebd048323b
 	github.com/mysteriumnetwork/token v0.0.0-20230103110440-8c69bf40ce61
 	github.com/nats-io/nats.go v1.26.0
@@ -47,7 +47,7 @@ require (
 	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.14.0 // indirect
+	github.com/go-playground/validator/v10 v10.14.1 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
@@ -56,7 +56,7 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.16.5 // indirect
-	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
+	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

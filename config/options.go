@@ -14,6 +14,8 @@ import (
 )
 
 type Options struct {
+	LogLevel string
+
 	QualityOracleURL url.URL
 	QualityCacheTTL  time.Duration
 
@@ -79,6 +81,7 @@ func ReadDiscovery() (*Options, error) {
 	}
 
 	devPass := OptionalEnv("DEV_PASS", "")
+	logLevel := OptionalEnv("LOG_LEVEL", "debug")
 
 	maxRequestsLimit := OptionalEnv("MAX_REQUESTS_LIMIT", "1000")
 	limit, err := strconv.Atoi(maxRequestsLimit)
@@ -99,6 +102,7 @@ func ReadDiscovery() (*Options, error) {
 		ProposalsCacheTTL:   *proposalsCacheTTL,
 		ProposalsCacheLimit: proposalsCacheLimit,
 		CountriesCacheLimit: countriesCacheLimit,
+		LogLevel:            logLevel,
 	}, nil
 }
 
@@ -129,12 +133,15 @@ func ReadPricer() (*Options, error) {
 		redisDBint = res
 	}
 
+	logLevel := OptionalEnv("LOG_LEVEL", "debug")
+
 	return &Options{
 		UniverseJWTSecret: universeJWTSecret,
 		RedisAddress:      strings.Split(redisAddress, ";"),
 		RedisPass:         redisPass,
 		RedisDB:           redisDBint,
 		SentinelURL:       sentinelURL,
+		LogLevel:          logLevel,
 	}, nil
 }
 
