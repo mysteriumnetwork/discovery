@@ -7,7 +7,6 @@ require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/chenyahui/gin-cache v1.8.0
 	github.com/dghubble/sling v1.4.1
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fatih/color v1.15.0
 	github.com/fln/pprotect v0.0.0-20160819093714-7d932ef9e7a2
 	github.com/gin-contrib/pprof v1.4.0
@@ -15,6 +14,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/magefile/mage v1.15.0
+	github.com/mailru/easyjson v0.7.7
 	github.com/mysteriumnetwork/go-ci v0.0.0-20220711082519-1245471bae0d
 	github.com/mysteriumnetwork/go-rest v0.3.1
 	github.com/mysteriumnetwork/logger v0.0.8
@@ -58,7 +58,6 @@ require (
 	github.com/klauspost/compress v1.16.5 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
-	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
@@ -84,7 +83,7 @@ require (
 	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/time v0.0.0-20220922220347-f3bd1da661af // indirect
-	golang.org/x/tools v0.9.1 // indirect
+	golang.org/x/tools v0.9.3 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
