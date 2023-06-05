@@ -6,7 +6,6 @@ package main
 
 import (
 	"context"
-	stdlog "log"
 	"strings"
 	"time"
 
@@ -32,12 +31,14 @@ var Version = "<dev>"
 // @BasePath /api/v3
 // @description Discovery API for Mysterium Network
 func main() {
-	configureLogger()
+	logger := mlog.BootstrapDefaultLogger()
 	printBanner()
 	cfg, err := config.ReadPricer()
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to read config")
 	}
+
+	mlog.SetLevel(logger, cfg.LogLevel)
 
 	r := gin.New()
 	r.Use(gin.Recovery())
@@ -90,12 +91,6 @@ func main() {
 		log.Err(err).Send()
 		return
 	}
-}
-
-func configureLogger() {
-	mlog.BootstrapDefaultLogger()
-	stdlog.SetFlags(0)
-	stdlog.SetOutput(log.Logger)
 }
 
 func printBanner() {
