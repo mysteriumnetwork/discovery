@@ -29,11 +29,13 @@ func TestConfig_Validate(t *testing.T) {
 						Wireguard:    mprice,
 						Scraping:     mprice,
 						DataTransfer: mprice,
+						DVPN:         mprice,
 					},
 					Other: &PriceByServiceTypeUSD{
 						Wireguard:    mprice,
 						Scraping:     mprice,
 						DataTransfer: mprice,
+						DVPN:         mprice,
 					},
 				},
 				CountryModifiers: map[pricing.ISO3166CountryCode]Modifier{
@@ -53,11 +55,13 @@ func TestConfig_Validate(t *testing.T) {
 						Wireguard:    mprice,
 						Scraping:     mprice,
 						DataTransfer: mprice,
+						DVPN:         mprice,
 					},
 					Other: &PriceByServiceTypeUSD{
 						Wireguard:    mprice,
 						Scraping:     mprice,
 						DataTransfer: mprice,
+						DVPN:         mprice,
 					},
 				},
 				CountryModifiers: map[pricing.ISO3166CountryCode]Modifier{
@@ -77,11 +81,13 @@ func TestConfig_Validate(t *testing.T) {
 						Wireguard:    mprice,
 						Scraping:     mprice,
 						DataTransfer: mprice,
+						DVPN:         mprice,
 					},
 					Other: &PriceByServiceTypeUSD{
 						Wireguard:    mprice,
 						Scraping:     mprice,
 						DataTransfer: mprice,
+						DVPN:         mprice,
 					},
 				},
 				CountryModifiers: map[pricing.ISO3166CountryCode]Modifier{
@@ -100,6 +106,7 @@ func TestConfig_Validate(t *testing.T) {
 						Wireguard:    mprice,
 						Scraping:     mprice,
 						DataTransfer: mprice,
+						DVPN:         mprice,
 					},
 					Other: &PriceByServiceTypeUSD{
 						Wireguard: mprice,
@@ -108,6 +115,7 @@ func TestConfig_Validate(t *testing.T) {
 							PricePerHour: -1,
 							PricePerGiB:  2,
 						},
+						DVPN: mprice,
 					},
 				},
 				CountryModifiers: map[pricing.ISO3166CountryCode]Modifier{
@@ -127,11 +135,13 @@ func TestConfig_Validate(t *testing.T) {
 						Wireguard:    mprice,
 						Scraping:     mprice,
 						DataTransfer: mprice,
+						DVPN:         mprice,
 					},
 					Other: &PriceByServiceTypeUSD{
 						Wireguard:    nil,
 						Scraping:     mprice,
 						DataTransfer: mprice,
+						DVPN:         mprice,
 					},
 				},
 				CountryModifiers: map[pricing.ISO3166CountryCode]Modifier{

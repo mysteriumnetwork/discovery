@@ -145,6 +145,11 @@ func (p *PriceUpdater) submitPriceMetric(country string, price *PriceByType) {
 	metrics.CurrentPriceByCountry.WithLabelValues(country, "other", "data_transfer", "per_hour").Set(price.Other.DataTransfer.PricePerHourHumanReadable)
 	metrics.CurrentPriceByCountry.WithLabelValues(country, "residential", "data_transfer", "per_gib").Set(price.Residential.DataTransfer.PricePerGiBHumanReadable)
 	metrics.CurrentPriceByCountry.WithLabelValues(country, "residential", "data_transfer", "per_hour").Set(price.Residential.DataTransfer.PricePerHourHumanReadable)
+
+	metrics.CurrentPriceByCountry.WithLabelValues(country, "other", "dvpn", "per_gib").Set(price.Other.DVPN.PricePerGiBHumanReadable)
+	metrics.CurrentPriceByCountry.WithLabelValues(country, "other", "dvpn", "per_hour").Set(price.Other.DVPN.PricePerHourHumanReadable)
+	metrics.CurrentPriceByCountry.WithLabelValues(country, "residential", "dvpn", "per_gib").Set(price.Residential.DVPN.PricePerGiBHumanReadable)
+	metrics.CurrentPriceByCountry.WithLabelValues(country, "residential", "dvpn", "per_hour").Set(price.Residential.DVPN.PricePerHourHumanReadable)
 }
 
 func (p *PriceUpdater) Stop() {
@@ -192,6 +197,12 @@ func (p *PriceUpdater) generateNewDefaults(mystUSD float64, cfg Config) *PriceHi
 					PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.DataTransfer.PricePerGiB, 1),
 					PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.DataTransfer.PricePerGiB, 1),
 				},
+				DVPN: &Price{
+					PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.DVPN.PricePerHour, 1),
+					PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.DVPN.PricePerHour, 1),
+					PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.DVPN.PricePerGiB, 1),
+					PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.DVPN.PricePerGiB, 1),
+				},
 			},
 			Other: &PriceByServiceType{
 				Wireguard: &Price{
@@ -211,6 +222,12 @@ func (p *PriceUpdater) generateNewDefaults(mystUSD float64, cfg Config) *PriceHi
 					PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerHour, 1),
 					PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerGiB, 1),
 					PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerGiB, 1),
+				},
+				DVPN: &Price{
+					PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.DVPN.PricePerHour, 1),
+					PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.DVPN.PricePerHour, 1),
+					PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.DVPN.PricePerGiB, 1),
+					PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.DVPN.PricePerGiB, 1),
 				},
 			},
 		},
@@ -255,6 +272,12 @@ func (p *PriceUpdater) generateNewPerCountry(mystUSD float64, cfg Config) map[st
 						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.DataTransfer.PricePerGiB, mod.Residential),
 						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.DataTransfer.PricePerGiB, mod.Residential),
 					},
+					DVPN: &Price{
+						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.DVPN.PricePerHour, mod.Residential),
+						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.DVPN.PricePerHour, mod.Residential),
+						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.DVPN.PricePerGiB, mod.Residential),
+						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.DVPN.PricePerGiB, mod.Residential),
+					},
 				},
 				Other: &PriceByServiceType{
 					Wireguard: &Price{
@@ -274,6 +297,12 @@ func (p *PriceUpdater) generateNewPerCountry(mystUSD float64, cfg Config) map[st
 						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerHour, mod.Other),
 						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerGiB, mod.Other),
 						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerGiB, mod.Other),
+					},
+					DVPN: &Price{
+						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.DVPN.PricePerHour, mod.Other),
+						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.DVPN.PricePerHour, mod.Other),
+						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.DVPN.PricePerGiB, mod.Other),
+						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.DVPN.PricePerGiB, mod.Other),
 					},
 				},
 			},
@@ -361,6 +390,7 @@ type PriceByServiceType struct {
 	Wireguard    *Price `json:"wireguard"`
 	Scraping     *Price `json:"scraping"`
 	DataTransfer *Price `json:"data_transfer"`
+	DVPN         *Price `json:"dvpn"`
 }
 
 type Price struct {
