@@ -28,6 +28,11 @@ type Filters struct {
 	PresetID                int
 }
 
+var emptyQuality = oracleapi.DetailedQuality{
+	MonitoringFailed: true,
+	RestrictedNode:   true,
+}
+
 func EnhanceWithMetrics(proposals []v3.Proposal, or map[string]*oracleapi.DetailedQuality, f Filters) (res []v3.Proposal) {
 	for _, p := range proposals {
 		key := p.Key()
@@ -39,7 +44,7 @@ func EnhanceWithMetrics(proposals []v3.Proposal, or map[string]*oracleapi.Detail
 
 		q, ok := or[key]
 		if !ok {
-			continue
+			q = &emptyQuality
 		}
 
 		if f.NATCompatibility == "symmetric" && q.RestrictedNode {
