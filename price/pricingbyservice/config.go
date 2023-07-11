@@ -133,17 +133,21 @@ type PriceByServiceTypeUSD struct {
 	Wireguard    *PriceUSD `json:"wireguard"`
 	Scraping     *PriceUSD `json:"scraping"`
 	DataTransfer *PriceUSD `json:"data_transfer"`
+	DVPN         *PriceUSD `json:"dvpn"`
 }
 
 func (p PriceByServiceTypeUSD) Validate() error {
-	if p.Wireguard == nil || p.Scraping == nil || p.DataTransfer == nil {
-		return errors.New("wireguard, scraping and data_transfer pricing should not be nil")
+	if p.Wireguard == nil || p.Scraping == nil || p.DataTransfer == nil || p.DVPN == nil {
+		return errors.New("wireguard, scraping, data_transfer and dvpn pricing should not be nil")
 	}
 
 	if err := p.Wireguard.Validate(); err != nil {
 		return err
 	}
 	if err := p.Scraping.Validate(); err != nil {
+		return err
+	}
+	if err := p.DVPN.Validate(); err != nil {
 		return err
 	}
 	return p.DataTransfer.Validate()
@@ -188,6 +192,10 @@ var defaultPriceConfig = `{
 		"data_transfer": {
 			"price_per_hour_usd": 0.00036,
 			"price_per_gib_usd": 0.06
+		},
+		"dvpn": {
+			"price_per_hour_usd": 0.00036,
+			"price_per_gib_usd": 0.06
 		}
 	  },
 	  "other": {
@@ -200,6 +208,10 @@ var defaultPriceConfig = `{
 			"price_per_gib_usd": 0.06
 		},
 		"data_transfer": {
+			"price_per_hour_usd": 0.00036,
+			"price_per_gib_usd": 0.06
+		},
+		"dvpn": {
 			"price_per_hour_usd": 0.00036,
 			"price_per_gib_usd": 0.06
 		}

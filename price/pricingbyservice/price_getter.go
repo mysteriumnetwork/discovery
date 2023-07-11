@@ -91,6 +91,12 @@ var defaultPrices = LatestPrices{
 					PricePerGiB:               big.NewInt(150000000000000000),
 					PricePerGiBHumanReadable:  0.15,
 				},
+				DVPN: &Price{
+					PricePerHour:              big.NewInt(900000000000000),
+					PricePerHourHumanReadable: 0.0009,
+					PricePerGiB:               big.NewInt(150000000000000000),
+					PricePerGiBHumanReadable:  0.15,
+				},
 			},
 			Other: &PriceByServiceType{
 				Wireguard: &Price{
@@ -106,6 +112,12 @@ var defaultPrices = LatestPrices{
 					PricePerGiBHumanReadable:  0.15,
 				},
 				DataTransfer: &Price{
+					PricePerHour:              big.NewInt(900000000000000),
+					PricePerHourHumanReadable: 0.0009,
+					PricePerGiB:               big.NewInt(150000000000000000),
+					PricePerGiBHumanReadable:  0.15,
+				},
+				DVPN: &Price{
 					PricePerHour:              big.NewInt(900000000000000),
 					PricePerHourHumanReadable: 0.0009,
 					PricePerGiB:               big.NewInt(150000000000000000),
@@ -133,6 +145,12 @@ var defaultPrices = LatestPrices{
 					PricePerGiB:               big.NewInt(150000000000000000),
 					PricePerGiBHumanReadable:  0.15,
 				},
+				DVPN: &Price{
+					PricePerHour:              big.NewInt(900000000000000),
+					PricePerHourHumanReadable: 0.0009,
+					PricePerGiB:               big.NewInt(150000000000000000),
+					PricePerGiBHumanReadable:  0.15,
+				},
 			},
 			Other: &PriceByServiceType{
 				Wireguard: &Price{
@@ -148,6 +166,12 @@ var defaultPrices = LatestPrices{
 					PricePerGiBHumanReadable:  0.15,
 				},
 				DataTransfer: &Price{
+					PricePerHour:              big.NewInt(900000000000000),
+					PricePerHourHumanReadable: 0.0009,
+					PricePerGiB:               big.NewInt(150000000000000000),
+					PricePerGiBHumanReadable:  0.15,
+				},
+				DVPN: &Price{
 					PricePerHour:              big.NewInt(900000000000000),
 					PricePerHourHumanReadable: 0.0009,
 					PricePerGiB:               big.NewInt(150000000000000000),
