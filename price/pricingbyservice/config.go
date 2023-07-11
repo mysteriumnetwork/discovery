@@ -13,7 +13,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const PricingConfigRedisKey = "DISCOVERY_PRICE_BASE_CONFIG_BY_SERVICE"
+const PricingConfigRedisKey = "DISCOVERY_PRICE_BASE_CONFIG_BY_SERVICES"
 
 type ConfigProvider interface {
 	Get() (Config, error)
