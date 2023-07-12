@@ -8,7 +8,7 @@ import (
 )
 
 func TestConfig_Validate(t *testing.T) {
-	mprice := &PriceUSD{
+	mprice := PriceUSD{
 		PricePerHour: 1,
 		PricePerGiB:  2,
 	}
@@ -111,7 +111,7 @@ func TestConfig_Validate(t *testing.T) {
 					Other: &PriceByServiceTypeUSD{
 						Wireguard: mprice,
 						Scraping:  mprice,
-						DataTransfer: &PriceUSD{
+						DataTransfer: PriceUSD{
 							PricePerHour: -1,
 							PricePerGiB:  2,
 						},
@@ -138,7 +138,6 @@ func TestConfig_Validate(t *testing.T) {
 						DVPN:         mprice,
 					},
 					Other: &PriceByServiceTypeUSD{
-						Wireguard:    nil,
 						Scraping:     mprice,
 						DataTransfer: mprice,
 						DVPN:         mprice,

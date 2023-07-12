@@ -13,7 +13,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const PricingConfigRedisKey = "DISCOVERY_PRICE_BASE_CONFIG_BY_SERVICES"
+const PricingConfigRedisKey = "DISCOVERY_PRICE_BASE_CONFIG_BY_SERVICE"
 
 type ConfigProvider interface {
 	Get() (Config, error)
@@ -130,17 +130,13 @@ func (p PriceByTypeUSD) Validate() error {
 }
 
 type PriceByServiceTypeUSD struct {
-	Wireguard    *PriceUSD `json:"wireguard"`
-	Scraping     *PriceUSD `json:"scraping"`
-	DataTransfer *PriceUSD `json:"data_transfer"`
-	DVPN         *PriceUSD `json:"dvpn"`
+	Wireguard    PriceUSD `json:"wireguard"`
+	Scraping     PriceUSD `json:"scraping"`
+	DataTransfer PriceUSD `json:"data_transfer"`
+	DVPN         PriceUSD `json:"dvpn"`
 }
 
 func (p PriceByServiceTypeUSD) Validate() error {
-	if p.Wireguard == nil || p.Scraping == nil || p.DataTransfer == nil || p.DVPN == nil {
-		return errors.New("wireguard, scraping, data_transfer and dvpn pricing should not be nil")
-	}
-
 	if err := p.Wireguard.Validate(); err != nil {
 		return err
 	}
@@ -159,8 +155,8 @@ type PriceUSD struct {
 }
 
 func (p PriceUSD) Validate() error {
-	if p.PricePerGiB < 0 || p.PricePerHour < 0 {
-		return errors.New("prices should be non negative")
+	if p.PricePerGiB <= 0 || p.PricePerHour <= 0 {
+		return errors.New("prices should be zero or non negative")
 	}
 
 	return nil
