@@ -140,37 +140,37 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 				cfg: Config{
 					BasePrices: PriceByTypeUSD{
 						Residential: &PriceByServiceTypeUSD{
-							Wireguard: &PriceUSD{
+							Wireguard: PriceUSD{
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
-							Scraping: &PriceUSD{
+							Scraping: PriceUSD{
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
-							DataTransfer: &PriceUSD{
+							DataTransfer: PriceUSD{
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
-							DVPN: &PriceUSD{
+							DVPN: PriceUSD{
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
 						},
 						Other: &PriceByServiceTypeUSD{
-							Wireguard: &PriceUSD{
+							Wireguard: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
-							Scraping: &PriceUSD{
+							Scraping: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
-							DataTransfer: &PriceUSD{
+							DataTransfer: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
-							DVPN: &PriceUSD{
+							DVPN: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
@@ -356,37 +356,37 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 				cfg: Config{
 					BasePrices: PriceByTypeUSD{
 						Residential: &PriceByServiceTypeUSD{
-							Wireguard: &PriceUSD{
+							Wireguard: PriceUSD{
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
-							Scraping: &PriceUSD{
+							Scraping: PriceUSD{
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
-							DataTransfer: &PriceUSD{
+							DataTransfer: PriceUSD{
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
-							DVPN: &PriceUSD{
+							DVPN: PriceUSD{
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
 						},
 						Other: &PriceByServiceTypeUSD{
-							Wireguard: &PriceUSD{
+							Wireguard: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
-							Scraping: &PriceUSD{
+							Scraping: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
-							DataTransfer: &PriceUSD{
+							DataTransfer: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
-							DVPN: &PriceUSD{
+							DVPN: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
@@ -542,37 +542,37 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 				cfg: Config{
 					BasePrices: PriceByTypeUSD{
 						Residential: &PriceByServiceTypeUSD{
-							Wireguard: &PriceUSD{
+							Wireguard: PriceUSD{
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
-							Scraping: &PriceUSD{
+							Scraping: PriceUSD{
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
-							DataTransfer: &PriceUSD{
+							DataTransfer: PriceUSD{
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
-							DVPN: &PriceUSD{
+							DVPN: PriceUSD{
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
 						},
 						Other: &PriceByServiceTypeUSD{
-							Wireguard: &PriceUSD{
+							Wireguard: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
-							Scraping: &PriceUSD{
+							Scraping: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
-							DataTransfer: &PriceUSD{
+							DataTransfer: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
-							DVPN: &PriceUSD{
+							DVPN: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
@@ -769,37 +769,37 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 				cfg: Config{
 					BasePrices: PriceByTypeUSD{
 						Residential: &PriceByServiceTypeUSD{
-							Wireguard: &PriceUSD{
+							Wireguard: PriceUSD{
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
-							Scraping: &PriceUSD{
+							Scraping: PriceUSD{
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
-							DataTransfer: &PriceUSD{
+							DataTransfer: PriceUSD{
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
-							DVPN: &PriceUSD{
+							DVPN: PriceUSD{
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
 						},
 						Other: &PriceByServiceTypeUSD{
-							Wireguard: &PriceUSD{
+							Wireguard: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
-							Scraping: &PriceUSD{
+							Scraping: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
-							DataTransfer: &PriceUSD{
+							DataTransfer: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
-							DVPN: &PriceUSD{
+							DVPN: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
@@ -939,37 +939,37 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 				cfg: Config{
 					BasePrices: PriceByTypeUSD{
 						Residential: &PriceByServiceTypeUSD{
-							Wireguard: &PriceUSD{
+							Wireguard: PriceUSD{
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
-							Scraping: &PriceUSD{
+							Scraping: PriceUSD{
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
-							DataTransfer: &PriceUSD{
+							DataTransfer: PriceUSD{
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
-							DVPN: &PriceUSD{
+							DVPN: PriceUSD{
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
 						},
 						Other: &PriceByServiceTypeUSD{
-							Wireguard: &PriceUSD{
+							Wireguard: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
-							Scraping: &PriceUSD{
+							Scraping: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
-							DataTransfer: &PriceUSD{
+							DataTransfer: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
-							DVPN: &PriceUSD{
+							DVPN: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
