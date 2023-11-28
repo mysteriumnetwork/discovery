@@ -75,7 +75,34 @@ func (a *API) Proposals(c *gin.Context) {
 		opts.from = from
 	}
 
-	c.JSON(http.StatusOK, a.service.List(opts))
+	c.JSON(http.StatusOK, a.service.List(opts, true))
+}
+
+// AllProposals list all proposals for internal use.
+// @Summary List all proposals for internal use
+// @Description List all proposals for internal use
+// @Param from query string false "Consumer country"
+// @Param provider_id query string false "Provider ID"
+// @Param service_type query string false "Service type"
+// @Param location_country query string false "Provider country"
+// @Param ip_type query string false "IP type (residential, datacenter, etc.)"
+// @Param access_policy query string false "Access policy. When empty, returns only public proposals (default). Use 'all' to return all."
+// @Param access_policy_source query string false "Access policy source"
+// @Param compatibility_min query number false "Minimum compatibility. When empty, will not filter by it."
+// @Param compatibility_max query number false "Maximum compatibility. When empty, will not filter by it."
+// @Param quality_min query number false "Minimal quality threshold. When empty will be defaulted to 0. Quality ranges from [0.0; 3.0]"
+// @Accept json
+// @Product json
+// @Success 200 {array} v3.Proposal
+// @Router /proposals [get]
+// @Tags proposals
+func (a *API) AllProposals(c *gin.Context) {
+	opts := a.proposalArgs(c)
+	if from, ok := c.Request.Context().Value(ctxCountryKey{}).(string); ok {
+		opts.from = from
+	}
+
+	c.JSON(http.StatusOK, a.service.List(opts, false))
 }
 
 // CountriesNumbers list number of providers in each country.
@@ -101,7 +128,7 @@ func (a *API) CountriesNumbers(c *gin.Context) {
 		opts.from = from
 	}
 
-	c.JSON(http.StatusOK, a.service.ListCountriesNumbers(opts))
+	c.JSON(http.StatusOK, a.service.ListCountriesNumbers(opts, false))
 }
 
 func (a *API) RegisterRoutes(r gin.IRoutes) {
@@ -131,6 +158,26 @@ func (a *API) RegisterRoutes(r gin.IRoutes) {
 	} else {
 		r.GET("/countries", countryMW, a.CountriesNumbers)
 		r.GET("/proposals", countryMW, a.Proposals)
+	}
+	r.GET("/proposals-metadata", a.ProposalsMetadata) // TODO move this into internal routes only once we migrate existing services to use it.
+}
+
+func (a *API) RegisterInternalRoutes(r gin.IRoutes) {
+	countryMW := a.populateCountryMiddleware()
+	cacheStrategy := a.newCacheStrategy()
+	if a.proposalsCacheTTL > 0 {
+		r.GET(
+			"/proposals",
+			countryMW,
+			cache.Cache(
+				a.proposalsCache,
+				a.proposalsCacheTTL,
+				cache.WithCacheStrategyByRequest(cacheStrategy),
+			),
+			a.AllProposals,
+		)
+	} else {
+		r.GET("/proposals", countryMW, a.AllProposals)
 	}
 	r.GET("/proposals-metadata", a.ProposalsMetadata)
 }

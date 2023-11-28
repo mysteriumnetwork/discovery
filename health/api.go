@@ -52,7 +52,9 @@ func NewAPI() *API {
 	return &API{}
 }
 
-func (a *API) RegisterRoutes(r gin.IRoutes) {
-	r.GET("/ping", a.Ping)
-	r.GET("/status", a.Status)
+func (a *API) RegisterRoutes(routers ...gin.IRoutes) {
+	for _, r := range routers {
+		r.GET("/ping", a.Ping)
+		r.GET("/status", a.Status)
+	}
 }
