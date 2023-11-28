@@ -61,7 +61,7 @@ func NewRepository(enhancers []Enhancer) *Repository {
 	}
 }
 
-func (r *Repository) List(opts repoListOpts) (res []v3.Proposal) {
+func (r *Repository) List(opts repoListOpts, limited bool) (res []v3.Proposal) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -91,8 +91,8 @@ func (r *Repository) List(opts repoListOpts) (res []v3.Proposal) {
 
 		countryLimit[p.proposal.Location.Country]++
 
-		if countryLimit[p.proposal.Location.Country] <= countryHardLimit {
-			if countryLimit[p.proposal.Location.Country] <= countrySoftLimit || countryLimit[p.proposal.Location.Country]%10 == 0 {
+		if !limited || countryLimit[p.proposal.Location.Country] <= countryHardLimit {
+			if !limited || countryLimit[p.proposal.Location.Country] <= countrySoftLimit || countryLimit[p.proposal.Location.Country]%10 == 0 {
 				res = append(res, p.proposal)
 			}
 		}

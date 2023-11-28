@@ -34,7 +34,8 @@ type Options struct {
 	UniverseJWTSecret string
 	SentinelURL       string
 
-	DevPass string
+	DevPass      string
+	InternalPass string
 
 	MaxRequestsLimit int
 
@@ -81,6 +82,7 @@ func ReadDiscovery() (*Options, error) {
 	}
 
 	devPass := OptionalEnv("DEV_PASS", "")
+	internalPass := OptionalEnv("INTERNAL_PASS", "")
 	logLevel := OptionalEnv("LOG_LEVEL", "debug")
 
 	maxRequestsLimit := OptionalEnv("MAX_REQUESTS_LIMIT", "1000")
@@ -99,6 +101,7 @@ func ReadDiscovery() (*Options, error) {
 		LocationPass:        locationPass,
 		MaxRequestsLimit:    limit,
 		DevPass:             devPass,
+		InternalPass:        internalPass,
 		ProposalsCacheTTL:   *proposalsCacheTTL,
 		ProposalsCacheLimit: proposalsCacheLimit,
 		CountriesCacheLimit: countriesCacheLimit,

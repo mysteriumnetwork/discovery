@@ -45,7 +45,7 @@ type ListOpts struct {
 	presetID                int
 }
 
-func (s *Service) List(opts ListOpts) []v3.Proposal {
+func (s *Service) List(opts ListOpts, limited bool) []v3.Proposal {
 	proposals := s.Repository.List(repoListOpts{
 		providerIDS:        opts.providerIDS,
 		serviceType:        opts.serviceType,
@@ -56,7 +56,7 @@ func (s *Service) List(opts ListOpts) []v3.Proposal {
 		compatibilityMin:   opts.compatibilityMin,
 		compatibilityMax:   opts.compatibilityMax,
 		tags:               opts.tags,
-	})
+	}, limited)
 
 	or := &metrics.OracleResponses{}
 	or.Load(s.qualityService, opts.from)
@@ -77,7 +77,7 @@ func (s *Service) Metadata(opts repoMetadataOpts) []v3.Metadata {
 	return s.Repository.Metadata(opts, or.QualityResponse)
 }
 
-func (s *Service) ListCountriesNumbers(opts ListOpts) map[string]int {
+func (s *Service) ListCountriesNumbers(opts ListOpts, limited bool) map[string]int {
 	if opts.presetID == 0 {
 		return s.Repository.ListCountriesNumbers(repoListOpts{
 			providerIDS:        opts.providerIDS,
@@ -102,7 +102,7 @@ func (s *Service) ListCountriesNumbers(opts ListOpts) map[string]int {
 		compatibilityMin:   opts.compatibilityMin,
 		compatibilityMax:   opts.compatibilityMax,
 		tags:               opts.tags,
-	})
+	}, limited)
 
 	or := &metrics.OracleResponses{}
 	or.Load(s.qualityService, opts.from)

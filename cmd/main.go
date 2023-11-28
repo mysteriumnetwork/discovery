@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog/log"
@@ -15,7 +16,6 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	_ "go.uber.org/automaxprocs"
 
-	"github.com/gin-contrib/pprof"
 	"github.com/mysteriumnetwork/discovery/config"
 	_ "github.com/mysteriumnetwork/discovery/docs"
 	"github.com/mysteriumnetwork/discovery/health"
@@ -78,6 +78,11 @@ func main() {
 	v4 := r.Group("/api/v4")
 	v4.Use(limitMW)
 
+	internal := r.Group("/internal/v4", gin.BasicAuth(gin.Accounts{
+		"internal": cfg.InternalPass,
+	}))
+	internal.Use(limitMW)
+
 	proposalsAPI := proposal.NewAPI(
 		proposalService,
 		locationProvider,
@@ -87,9 +92,9 @@ func main() {
 	)
 	proposalsAPI.RegisterRoutes(v3)
 	proposalsAPI.RegisterRoutes(v4)
+	proposalsAPI.RegisterInternalRoutes(internal)
 
-	health.NewAPI().RegisterRoutes(v3)
-	health.NewAPI().RegisterRoutes(v4)
+	health.NewAPI().RegisterRoutes(v3, v4, internal)
 
 	brokerListener := listener.New(cfg.BrokerURL.String(), proposalRepo)
 
