@@ -13,22 +13,18 @@ import (
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
 )
 
-const (
-	// TODO: lower this values once dvpn apps start using proposal numbers endpoint.
-	countryHardLimit = 100000
-	countrySoftLimit = 100000
-)
-
 type Enhancer interface {
 	Enhance(proposal *v3.Proposal)
 }
 
 type Repository struct {
-	expirationJobDelay time.Duration
-	expirationDuration time.Duration
-	mu                 sync.RWMutex
-	proposals          map[string]record
-	enhancers          []Enhancer
+	expirationJobDelay           time.Duration
+	expirationDuration           time.Duration
+	mu                           sync.RWMutex
+	proposals                    map[string]record
+	enhancers                    []Enhancer
+	proposalsHardLimitPerCountry int
+	proposalsSoftLimitPerCountry int
 }
 
 type repoListOpts struct {
@@ -52,12 +48,14 @@ type record struct {
 	expiresAt time.Time
 }
 
-func NewRepository(enhancers []Enhancer) *Repository {
+func NewRepository(enhancers []Enhancer, proposalsHardLimitPerCountry, proposalsSoftLimitPerCountry int) *Repository {
 	return &Repository{
-		expirationDuration: 3*time.Minute + 10*time.Second,
-		expirationJobDelay: 20 * time.Second,
-		proposals:          make(map[string]record),
-		enhancers:          enhancers,
+		expirationDuration:           3*time.Minute + 10*time.Second,
+		expirationJobDelay:           20 * time.Second,
+		proposals:                    make(map[string]record),
+		enhancers:                    enhancers,
+		proposalsHardLimitPerCountry: proposalsHardLimitPerCountry,
+		proposalsSoftLimitPerCountry: proposalsSoftLimitPerCountry,
 	}
 }
 
@@ -91,8 +89,8 @@ func (r *Repository) List(opts repoListOpts, limited bool) (res []v3.Proposal) {
 
 		countryLimit[p.proposal.Location.Country]++
 
-		if !limited || countryLimit[p.proposal.Location.Country] <= countryHardLimit {
-			if !limited || countryLimit[p.proposal.Location.Country] <= countrySoftLimit || countryLimit[p.proposal.Location.Country]%10 == 0 {
+		if !limited || countryLimit[p.proposal.Location.Country] <= r.proposalsHardLimitPerCountry {
+			if !limited || countryLimit[p.proposal.Location.Country] <= r.proposalsSoftLimitPerCountry || countryLimit[p.proposal.Location.Country]%10 == 0 {
 				res = append(res, p.proposal)
 			}
 		}
