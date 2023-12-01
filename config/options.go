@@ -37,6 +37,9 @@ type Options struct {
 	DevPass      string
 	InternalPass string
 
+	ProposalsHardLimitPerCountry int
+	ProposalsSoftLimitPerCountry int
+
 	MaxRequestsLimit int
 
 	ProposalsCacheTTL   time.Duration
@@ -85,6 +88,15 @@ func ReadDiscovery() (*Options, error) {
 	internalPass := OptionalEnv("INTERNAL_PASS", "")
 	logLevel := OptionalEnv("LOG_LEVEL", "debug")
 
+	proposalsHardLimitPerCountry, err := OptionalEnvInt("PROPOSALS_HARD_LIMIT_PER_COUNTRY", "1000")
+	if err != nil {
+		return nil, err
+	}
+	proposalsSoftLimitPerCountry, err := OptionalEnvInt("PROPOSALS_SOFT_LIMIT_PER_COUNTRY", "1000")
+	if err != nil {
+		return nil, err
+	}
+
 	maxRequestsLimit := OptionalEnv("MAX_REQUESTS_LIMIT", "1000")
 	limit, err := strconv.Atoi(maxRequestsLimit)
 	if err != nil {
@@ -92,20 +104,22 @@ func ReadDiscovery() (*Options, error) {
 	}
 
 	return &Options{
-		QualityOracleURL:    *qualityOracleURL,
-		QualityCacheTTL:     *qualityCacheTTL,
-		BrokerURL:           *brokerURL,
-		BadgerAddress:       *badgerAddress,
-		LocationAddress:     *locationAddress,
-		LocationUser:        locationUser,
-		LocationPass:        locationPass,
-		MaxRequestsLimit:    limit,
-		DevPass:             devPass,
-		InternalPass:        internalPass,
-		ProposalsCacheTTL:   *proposalsCacheTTL,
-		ProposalsCacheLimit: proposalsCacheLimit,
-		CountriesCacheLimit: countriesCacheLimit,
-		LogLevel:            logLevel,
+		QualityOracleURL:             *qualityOracleURL,
+		QualityCacheTTL:              *qualityCacheTTL,
+		BrokerURL:                    *brokerURL,
+		BadgerAddress:                *badgerAddress,
+		LocationAddress:              *locationAddress,
+		LocationUser:                 locationUser,
+		LocationPass:                 locationPass,
+		MaxRequestsLimit:             limit,
+		DevPass:                      devPass,
+		InternalPass:                 internalPass,
+		ProposalsCacheTTL:            *proposalsCacheTTL,
+		ProposalsCacheLimit:          proposalsCacheLimit,
+		CountriesCacheLimit:          countriesCacheLimit,
+		LogLevel:                     logLevel,
+		ProposalsHardLimitPerCountry: proposalsHardLimitPerCountry,
+		ProposalsSoftLimitPerCountry: proposalsSoftLimitPerCountry,
 	}, nil
 }
 

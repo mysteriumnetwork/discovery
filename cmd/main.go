@@ -63,7 +63,7 @@ func main() {
 	}
 
 	tagEnhancer := tags.NewEnhancer(tags.NewApi(cfg.BadgerAddress.String()))
-	proposalRepo := proposal.NewRepository([]proposal.Enhancer{tagEnhancer})
+	proposalRepo := proposal.NewRepository([]proposal.Enhancer{tagEnhancer}, cfg.ProposalsHardLimitPerCountry, cfg.ProposalsSoftLimitPerCountry)
 	qualityOracleAPI := oracleapi.New(cfg.QualityOracleURL.String())
 	qualityService := quality.NewService(qualityOracleAPI, cfg.QualityCacheTTL)
 	proposalService := proposal.NewService(proposalRepo, qualityService)
