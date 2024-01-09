@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 	"github.com/mysteriumnetwork/discovery/price/pricing"
 	"github.com/rs/zerolog/log"
 )
