@@ -13,6 +13,15 @@ import (
 	"github.com/mysteriumnetwork/go-rest/apierror"
 )
 
+const (
+	errCodeParsingJson = "err_parsing_config"
+
+	errCodeNoConfig     = "err_no_config"
+	errCodeUpdateConfig = "err_update_config"
+
+	errRedisPingFailed = "failed_redis_ping"
+)
+
 type APIByService struct {
 	pricer *pricingbyservice.PriceGetter
 	cfger  pricingbyservice.ConfigProvider

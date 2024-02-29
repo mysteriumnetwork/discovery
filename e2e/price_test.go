@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/mysteriumnetwork/discovery/price/pricing"
+	"github.com/mysteriumnetwork/discovery/price/pricingbyservice"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,14 +31,39 @@ func TestMain(m *testing.M) {
 func Test_LatestPrices(t *testing.T) {
 	prices, err := PricerAPI.LatestPrices()
 	assert.NoError(t, err)
-	assert.NotNil(t, prices.Defaults.Current.Residential.PricePerGiB)
-	assert.NotNil(t, prices.Defaults.Current.Residential.PricePerHour)
-	assert.NotNil(t, prices.Defaults.Current.Other.PricePerGiB)
-	assert.NotNil(t, prices.Defaults.Current.Other.PricePerHour)
-	assert.NotNil(t, prices.Defaults.Previous.Residential.PricePerGiB)
-	assert.NotNil(t, prices.Defaults.Previous.Residential.PricePerHour)
-	assert.NotNil(t, prices.Defaults.Previous.Other.PricePerGiB)
-	assert.NotNil(t, prices.Defaults.Previous.Other.PricePerHour)
+	assert.NotNil(t, prices.Defaults.Current.Residential.DVPN.PricePerGiB)
+	assert.NotNil(t, prices.Defaults.Current.Residential.DVPN.PricePerHour)
+	assert.NotNil(t, prices.Defaults.Current.Residential.Scraping.PricePerGiB)
+	assert.NotNil(t, prices.Defaults.Current.Residential.Scraping.PricePerHour)
+	assert.NotNil(t, prices.Defaults.Current.Residential.Wireguard.PricePerGiB)
+	assert.NotNil(t, prices.Defaults.Current.Residential.Wireguard.PricePerHour)
+	assert.NotNil(t, prices.Defaults.Current.Residential.DataTransfer.PricePerGiB)
+	assert.NotNil(t, prices.Defaults.Current.Residential.DataTransfer.PricePerHour)
+	assert.NotNil(t, prices.Defaults.Current.Other.DVPN.PricePerGiB)
+	assert.NotNil(t, prices.Defaults.Current.Other.DVPN.PricePerHour)
+	assert.NotNil(t, prices.Defaults.Current.Other.Scraping.PricePerGiB)
+	assert.NotNil(t, prices.Defaults.Current.Other.Scraping.PricePerHour)
+	assert.NotNil(t, prices.Defaults.Current.Other.Wireguard.PricePerGiB)
+	assert.NotNil(t, prices.Defaults.Current.Other.Wireguard.PricePerHour)
+	assert.NotNil(t, prices.Defaults.Current.Other.DataTransfer.PricePerGiB)
+	assert.NotNil(t, prices.Defaults.Current.Other.DataTransfer.PricePerHour)
+	assert.NotNil(t, prices.Defaults.Previous.Residential.DVPN.PricePerGiB)
+	assert.NotNil(t, prices.Defaults.Previous.Residential.DVPN.PricePerHour)
+	assert.NotNil(t, prices.Defaults.Previous.Residential.Scraping.PricePerGiB)
+	assert.NotNil(t, prices.Defaults.Previous.Residential.Scraping.PricePerHour)
+	assert.NotNil(t, prices.Defaults.Previous.Residential.Wireguard.PricePerGiB)
+	assert.NotNil(t, prices.Defaults.Previous.Residential.Wireguard.PricePerHour)
+	assert.NotNil(t, prices.Defaults.Previous.Residential.DataTransfer.PricePerGiB)
+	assert.NotNil(t, prices.Defaults.Previous.Residential.DataTransfer.PricePerHour)
+	assert.NotNil(t, prices.Defaults.Previous.Other.DVPN.PricePerGiB)
+	assert.NotNil(t, prices.Defaults.Previous.Other.DVPN.PricePerHour)
+	assert.NotNil(t, prices.Defaults.Previous.Other.Scraping.PricePerGiB)
+	assert.NotNil(t, prices.Defaults.Previous.Other.Scraping.PricePerHour)
+	assert.NotNil(t, prices.Defaults.Previous.Other.Wireguard.PricePerGiB)
+	assert.NotNil(t, prices.Defaults.Previous.Other.Wireguard.PricePerHour)
+	assert.NotNil(t, prices.Defaults.Previous.Other.DataTransfer.PricePerGiB)
+	assert.NotNil(t, prices.Defaults.Previous.Other.DataTransfer.PricePerHour)
+
 	assert.Greater(t, prices.CurrentValidUntil.UnixNano(), time.Unix(0, 0).UnixNano())
 	assert.Greater(t, prices.PreviousValidUntil.UnixNano(), time.Unix(0, 0).UnixNano())
 	assert.Greater(t, prices.CurrentServerTime.UnixNano(), time.Unix(0, 0).UnixNano())
@@ -64,22 +89,22 @@ func Test_GetConfig(t *testing.T) {
 
 func Test_PostConfig(t *testing.T) {
 	t.Run("rejected with bad token", func(t *testing.T) {
-		err := PricerAPI.UpdatePriceConfig("tkn", pricing.Config{})
+		err := PricerAPI.UpdatePriceConfig("tkn", pricingbyservice.Config{})
 		assert.Error(t, err)
 		assert.Equal(t, "401", err.Error())
 	})
 
 	t.Run("rejected with invalid config", func(t *testing.T) {
-		err := PricerAPI.UpdatePriceConfig(validToken, pricing.Config{})
+		err := PricerAPI.UpdatePriceConfig(validToken, pricingbyservice.Config{})
 		assert.Error(t, err)
 		assert.Equal(t, "400", err.Error())
 	})
 
 	t.Run("accepts with valid config", func(t *testing.T) {
-		toSend := pricing.Config{}
+		toSend := pricingbyservice.Config{}
 		err := json.Unmarshal([]byte(expectedPricingConfig), &toSend)
 		assert.NoError(t, err)
-		toSend.BasePrices.Other.PricePerGiB = 11
+		toSend.BasePrices.Other.Wireguard.PricePerGiB = 11
 
 		err = PricerAPI.UpdatePriceConfig(validToken, toSend)
 		assert.NoError(t, err)
@@ -110,12 +135,40 @@ var expectedPricingConfig = `
 {
 	"base_prices": {
 	  "residential": {
-		"price_per_hour_usd": 0.00036,
-		"price_per_gib_usd": 0.06
+		"data_transfer": {
+			"price_per_hour_usd": 0.00036,
+			"price_per_gib_usd": 0.06
+		},
+		"dvpn": {
+			"price_per_hour_usd": 0.00036,
+			"price_per_gib_usd": 0.06
+		},
+		"scraping": {
+			"price_per_hour_usd": 0.00036,
+			"price_per_gib_usd": 0.06
+		},
+		"wireguard": {
+			"price_per_hour_usd": 0.00036,
+			"price_per_gib_usd": 0.06
+		}
 	  },
 	  "other": {
-		"price_per_hour_usd": 0.00036,
-		"price_per_gib_usd": 0.06
+		"data_transfer": {
+			"price_per_hour_usd": 0.00036,
+			"price_per_gib_usd": 0.06
+		},
+		"dvpn": {
+			"price_per_hour_usd": 0.00036,
+			"price_per_gib_usd": 0.06
+		},
+		"scraping": {
+			"price_per_hour_usd": 0.00036,
+			"price_per_gib_usd": 0.06
+		},
+		"wireguard": {
+			"price_per_hour_usd": 0.00036,
+			"price_per_gib_usd": 0.06
+		}
 	  }
 	},
 	"country_modifiers": {

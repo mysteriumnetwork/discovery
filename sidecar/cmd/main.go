@@ -14,13 +14,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 	"github.com/mysteriumnetwork/discovery/config"
 	"github.com/mysteriumnetwork/discovery/metrics"
-	"github.com/mysteriumnetwork/discovery/price/pricing"
 	"github.com/mysteriumnetwork/discovery/price/pricingbyservice"
 	mlog "github.com/mysteriumnetwork/logger"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
 
 	// unconfuse the number of cores go can use in k8s
@@ -57,7 +56,7 @@ func main() {
 	defer mrkt.Stop()
 	log.Info().Msg("market started")
 
-	cfger := pricing.NewConfigProviderDB(rdb)
+	cfger := pricingbyservice.NewConfigProviderDB(rdb)
 	_, err = cfger.Get()
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to load cfg")
@@ -66,11 +65,11 @@ func main() {
 
 	metrics.InitialiseMonitoring()
 
-	pricer, err := pricing.NewPricer(
+	pricer, err := pricingbyservice.NewPricer(
 		cfger,
 		mrkt,
 		time.Minute*5,
-		pricing.Bound{Min: 0.1, Max: 3.0},
+		pricingbyservice.Bound{Min: 0.1, Max: 3.0},
 		rdb,
 	)
 	if err != nil {
@@ -147,12 +146,12 @@ func getPort() int {
 	return port
 }
 
-func buildMarket(cfg *Options) *pricing.Market {
-	apis := []pricing.ExternalPriceAPI{
+func buildMarket(cfg *Options) *pricingbyservice.Market {
+	apis := []pricingbyservice.ExternalPriceAPI{
 		coingecko.NewAPI(cfg.GeckoURL.String(), cfg.TokenRateCacheTTL),
 		coinranking.NewAPI(cfg.CoinRankingURL.String(), cfg.CoinRankingToken, cfg.TokenRateCacheTTL),
 	}
-	mrkt := pricing.NewMarket(apis, time.Minute*15)
+	mrkt := pricingbyservice.NewMarket(apis, time.Minute*15)
 	return mrkt
 }
 

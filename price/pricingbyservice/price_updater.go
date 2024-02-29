@@ -12,7 +12,6 @@ import (
 	"github.com/redis/go-redis/v9"
 
 	"github.com/mysteriumnetwork/discovery/metrics"
-	"github.com/mysteriumnetwork/discovery/price/pricing"
 	"github.com/mysteriumnetwork/payments/units"
 	"github.com/rs/zerolog/log"
 )
@@ -242,8 +241,8 @@ func (p *PriceUpdater) generateNewDefaults(mystUSD float64, cfg Config) *PriceHi
 
 func (p *PriceUpdater) generateNewPerCountry(mystUSD float64, cfg Config) map[string]*PriceHistory {
 	countries := make(map[string]*PriceHistory)
-	for countryCode := range pricing.CountryCodeToName {
-		mod, ok := cfg.CountryModifiers[pricing.ISO3166CountryCode(countryCode)]
+	for countryCode := range CountryCodeToName {
+		mod, ok := cfg.CountryModifiers[ISO3166CountryCode(countryCode)]
 		if !ok {
 			mod = Modifier{
 				Residential: 1,

@@ -18,7 +18,6 @@ import (
 	_ "github.com/mysteriumnetwork/discovery/docs"
 	"github.com/mysteriumnetwork/discovery/middleware"
 	"github.com/mysteriumnetwork/discovery/price"
-	"github.com/mysteriumnetwork/discovery/price/pricing"
 	"github.com/mysteriumnetwork/discovery/price/pricingbyservice"
 	"github.com/mysteriumnetwork/go-rest/apierror"
 	mlog "github.com/mysteriumnetwork/logger"
@@ -58,10 +57,9 @@ func main() {
 		log.Fatal().Err(err).Msg("could not reach redis")
 	}
 
-	v3 := r.Group("/api/v3")
 	v4 := r.Group("/api/v4")
 
-	cfger := pricing.NewConfigProviderDB(rdb)
+	cfger := pricingbyservice.NewConfigProviderDB(rdb)
 
 	_, err = cfger.Get()
 	if err != nil {
@@ -74,17 +72,12 @@ func main() {
 		log.Fatal().Err(err).Msg("Failed to load cfg by service")
 	}
 
-	getter, err := pricing.NewPriceGetter(rdb)
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to initialize price getter")
-	}
 	getterByService, err := pricingbyservice.NewPriceGetter(rdb)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to initialize price getter by service")
 	}
 
 	ac := middleware.NewJWTChecker(cfg.SentinelURL, cfg.UniverseJWTSecret)
-	price.NewAPI(getter, cfger, ac).RegisterRoutes(v3)
 	price.NewAPIByService(rdb, getterByService, cfgerByService, ac).RegisterRoutes(v4)
 
 	if err := r.Run(); err != nil {
