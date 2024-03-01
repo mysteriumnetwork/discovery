@@ -154,8 +154,8 @@ type PriceUSD struct {
 }
 
 func (p PriceUSD) Validate() error {
-	if p.PricePerGiB < 0 || p.PricePerHour < 0 {
-		return errors.New("prices should be zero or non negative")
+	if p.PricePerGiB <= 0 || p.PricePerHour <= 0 {
+		return errors.New("prices should be higher than 0")
 	}
 
 	return nil

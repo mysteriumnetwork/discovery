@@ -125,6 +125,31 @@ func TestConfig_Validate(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "detects unset pricing",
+			fields: fields{
+				BasePrices: PriceByTypeUSD{
+					Residential: &PriceByServiceTypeUSD{
+						Wireguard:    mprice,
+						Scraping:     mprice,
+						DataTransfer: mprice,
+						DVPN:         mprice,
+					},
+					Other: &PriceByServiceTypeUSD{
+						Scraping:     mprice,
+						DataTransfer: mprice,
+						DVPN:         mprice,
+					},
+				},
+				CountryModifiers: map[ISO3166CountryCode]Modifier{
+					"US": {
+						Residential: 1,
+						Other:       1,
+					},
+				},
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
