@@ -5,7 +5,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/mysteriumnetwork/discovery/price/pricing"
 	"github.com/mysteriumnetwork/payments/units"
 )
 
@@ -578,7 +577,7 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 							},
 						},
 					},
-					CountryModifiers: map[pricing.ISO3166CountryCode]Modifier{
+					CountryModifiers: map[ISO3166CountryCode]Modifier{
 						"US": {
 							Residential: 2,
 							Other:       3,
@@ -805,7 +804,7 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 							},
 						},
 					},
-					CountryModifiers: map[pricing.ISO3166CountryCode]Modifier{
+					CountryModifiers: map[ISO3166CountryCode]Modifier{
 						"US": {
 							Residential: 2,
 							Other:       3,
@@ -975,7 +974,7 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 							},
 						},
 					},
-					CountryModifiers: map[pricing.ISO3166CountryCode]Modifier{
+					CountryModifiers: map[ISO3166CountryCode]Modifier{
 						"US": {
 							Residential: 2,
 							Other:       3,

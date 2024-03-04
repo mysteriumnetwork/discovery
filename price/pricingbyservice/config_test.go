@@ -3,8 +3,6 @@ package pricingbyservice
 import (
 	_ "embed"
 	"testing"
-
-	"github.com/mysteriumnetwork/discovery/price/pricing"
 )
 
 func TestConfig_Validate(t *testing.T) {
@@ -14,7 +12,7 @@ func TestConfig_Validate(t *testing.T) {
 	}
 	type fields struct {
 		BasePrices       PriceByTypeUSD
-		CountryModifiers map[pricing.ISO3166CountryCode]Modifier
+		CountryModifiers map[ISO3166CountryCode]Modifier
 	}
 	tests := []struct {
 		name    string
@@ -38,7 +36,7 @@ func TestConfig_Validate(t *testing.T) {
 						DVPN:         mprice,
 					},
 				},
-				CountryModifiers: map[pricing.ISO3166CountryCode]Modifier{
+				CountryModifiers: map[ISO3166CountryCode]Modifier{
 					"US": {
 						Residential: 1,
 						Other:       1,
@@ -64,7 +62,7 @@ func TestConfig_Validate(t *testing.T) {
 						DVPN:         mprice,
 					},
 				},
-				CountryModifiers: map[pricing.ISO3166CountryCode]Modifier{
+				CountryModifiers: map[ISO3166CountryCode]Modifier{
 					"us": {
 						Residential: 1,
 						Other:       1,
@@ -90,7 +88,7 @@ func TestConfig_Validate(t *testing.T) {
 						DVPN:         mprice,
 					},
 				},
-				CountryModifiers: map[pricing.ISO3166CountryCode]Modifier{
+				CountryModifiers: map[ISO3166CountryCode]Modifier{
 					"US": {
 						Residential: -1,
 					},
@@ -118,7 +116,7 @@ func TestConfig_Validate(t *testing.T) {
 						DVPN: mprice,
 					},
 				},
-				CountryModifiers: map[pricing.ISO3166CountryCode]Modifier{
+				CountryModifiers: map[ISO3166CountryCode]Modifier{
 					"US": {
 						Residential: 1,
 						Other:       1,
@@ -143,7 +141,7 @@ func TestConfig_Validate(t *testing.T) {
 						DVPN:         mprice,
 					},
 				},
-				CountryModifiers: map[pricing.ISO3166CountryCode]Modifier{
+				CountryModifiers: map[ISO3166CountryCode]Modifier{
 					"US": {
 						Residential: 1,
 						Other:       1,

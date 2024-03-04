@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/mysteriumnetwork/discovery/price/pricing"
 	"github.com/rs/zerolog/log"
 )
 
@@ -86,8 +85,8 @@ func (cpd *ConfigProviderDB) fetchConfig() (Config, error) {
 }
 
 type Config struct {
-	BasePrices       PriceByTypeUSD                          `json:"base_prices"`
-	CountryModifiers map[pricing.ISO3166CountryCode]Modifier `json:"country_modifiers"`
+	BasePrices       PriceByTypeUSD                  `json:"base_prices"`
+	CountryModifiers map[ISO3166CountryCode]Modifier `json:"country_modifiers"`
 }
 
 func (c Config) Validate() error {
@@ -156,7 +155,7 @@ type PriceUSD struct {
 
 func (p PriceUSD) Validate() error {
 	if p.PricePerGiB <= 0 || p.PricePerHour <= 0 {
-		return errors.New("prices should be zero or non negative")
+		return errors.New("prices should be higher than 0")
 	}
 
 	return nil

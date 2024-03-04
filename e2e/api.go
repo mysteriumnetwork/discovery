@@ -7,7 +7,7 @@ import (
 	"github.com/dghubble/sling"
 
 	"github.com/mysteriumnetwork/discovery/health"
-	"github.com/mysteriumnetwork/discovery/price/pricing"
+	"github.com/mysteriumnetwork/discovery/price/pricingbyservice"
 	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 )
 
@@ -62,21 +62,21 @@ type pricerAPI struct {
 	basePath string
 }
 
-func (a *pricerAPI) LatestPrices() (latestPrices pricing.LatestPrices, err error) {
-	_, err = sling.New().Base(a.basePath).Get("/api/v3/prices").Receive(&latestPrices, nil)
+func (a *pricerAPI) LatestPrices() (latestPrices pricingbyservice.LatestPrices, err error) {
+	_, err = sling.New().Base(a.basePath).Get("/api/v4/prices").Receive(&latestPrices, nil)
 	return latestPrices, err
 }
 
-func (a *pricerAPI) GetPriceConfig(token string) (config pricing.Config, err error) {
-	resp, err := sling.New().Base(a.basePath).Add("Authorization", "Bearer "+token).Get("/api/v3/prices/config").Receive(&config, nil)
+func (a *pricerAPI) GetPriceConfig(token string) (config pricingbyservice.Config, err error) {
+	resp, err := sling.New().Base(a.basePath).Add("Authorization", "Bearer "+token).Get("/api/v4/prices/config").Receive(&config, nil)
 	if resp.StatusCode == 401 {
 		return config, errors.New(fmt.Sprint(resp.StatusCode))
 	}
 	return config, err
 }
 
-func (a *pricerAPI) UpdatePriceConfig(token string, cfg pricing.Config) (err error) {
-	resp, err := sling.New().Base(a.basePath).Add("Authorization", "Bearer "+token).BodyJSON(&cfg).Post("/api/v3/prices/config").Receive(nil, nil)
+func (a *pricerAPI) UpdatePriceConfig(token string, cfg pricingbyservice.Config) (err error) {
+	resp, err := sling.New().Base(a.basePath).Add("Authorization", "Bearer "+token).BodyJSON(&cfg).Post("/api/v4/prices/config").Receive(nil, nil)
 	if resp.StatusCode == 401 || resp.StatusCode == 400 {
 		return errors.New(fmt.Sprint(resp.StatusCode))
 	}
