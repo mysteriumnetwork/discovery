@@ -13,6 +13,9 @@ type OracleResponses struct {
 }
 
 func (or *OracleResponses) Load(qualityService *quality.Service, fromCountry string) {
+	if len(fromCountry) != 2 {
+		fromCountry = "NL"
+	}
 	qRes, err := qualityService.Quality(fromCountry)
 	if err != nil {
 		log.Error().Err(err).Msgf("Could not fetch quality for consumer (country=%s)", fromCountry)
