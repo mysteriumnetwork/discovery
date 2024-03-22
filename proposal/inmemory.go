@@ -5,6 +5,7 @@
 package proposal
 
 import (
+	"errors"
 	"strings"
 	"sync"
 	"time"
@@ -12,6 +13,8 @@ import (
 	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
 )
+
+var ErrProposalIncompatible = errors.New("compatibility too low")
 
 type Enhancer interface {
 	Enhance(proposal *v3.Proposal)
@@ -25,6 +28,7 @@ type Repository struct {
 	enhancers                    []Enhancer
 	proposalsHardLimitPerCountry int
 	proposalsSoftLimitPerCountry int
+	compatibilityMin             int
 }
 
 type repoListOpts struct {
@@ -48,7 +52,7 @@ type record struct {
 	expiresAt time.Time
 }
 
-func NewRepository(enhancers []Enhancer, proposalsHardLimitPerCountry, proposalsSoftLimitPerCountry int) *Repository {
+func NewRepository(enhancers []Enhancer, proposalsHardLimitPerCountry, proposalsSoftLimitPerCountry, compatibilityMin int) *Repository {
 	return &Repository{
 		expirationDuration:           3*time.Minute + 10*time.Second,
 		expirationJobDelay:           20 * time.Second,
@@ -56,6 +60,7 @@ func NewRepository(enhancers []Enhancer, proposalsHardLimitPerCountry, proposals
 		enhancers:                    enhancers,
 		proposalsHardLimitPerCountry: proposalsHardLimitPerCountry,
 		proposalsSoftLimitPerCountry: proposalsSoftLimitPerCountry,
+		compatibilityMin:             compatibilityMin,
 	}
 }
 
@@ -153,6 +158,10 @@ func (r *Repository) Metadata(opts repoMetadataOpts, or map[string]*oracleapi.De
 func (r *Repository) Store(proposal v3.Proposal) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+
+	if proposal.Compatibility < r.compatibilityMin {
+		return ErrProposalIncompatible
+	}
 
 	r.proposals[proposal.Key()] = record{
 		proposal:  proposal,
