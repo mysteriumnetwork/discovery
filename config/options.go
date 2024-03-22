@@ -40,6 +40,8 @@ type Options struct {
 	ProposalsHardLimitPerCountry int
 	ProposalsSoftLimitPerCountry int
 
+	CompatibilityMin int
+
 	MaxRequestsLimit int
 
 	ProposalsCacheTTL   time.Duration
@@ -73,6 +75,11 @@ func ReadDiscovery() (*Options, error) {
 		return nil, err
 	}
 	badgerAddress, err := RequiredEnvURL("BADGER_ADDRESS")
+	if err != nil {
+		return nil, err
+	}
+
+	compatibility, err := OptionalEnvInt("COMPATIBILITY_MIN", "0")
 	if err != nil {
 		return nil, err
 	}
@@ -117,6 +124,7 @@ func ReadDiscovery() (*Options, error) {
 		ProposalsCacheTTL:            *proposalsCacheTTL,
 		ProposalsCacheLimit:          proposalsCacheLimit,
 		CountriesCacheLimit:          countriesCacheLimit,
+		CompatibilityMin:             compatibility,
 		LogLevel:                     logLevel,
 		ProposalsHardLimitPerCountry: proposalsHardLimitPerCountry,
 		ProposalsSoftLimitPerCountry: proposalsSoftLimitPerCountry,
