@@ -133,48 +133,48 @@ func init() {
 
 var expectedPricingConfig = `
 {
-	"base_prices": {
-	  "residential": {
-		"data_transfer": {
-			"price_per_hour_usd": 0.00036,
-			"price_per_gib_usd": 0.06
-		},
-		"dvpn": {
-			"price_per_hour_usd": 0.00036,
-			"price_per_gib_usd": 0.06
-		},
-		"scraping": {
-			"price_per_hour_usd": 0.00036,
-			"price_per_gib_usd": 0.06
-		},
-		"wireguard": {
-			"price_per_hour_usd": 0.00036,
-			"price_per_gib_usd": 0.06
-		}
-	  },
-	  "other": {
-		"data_transfer": {
-			"price_per_hour_usd": 0.00036,
-			"price_per_gib_usd": 0.06
-		},
-		"dvpn": {
-			"price_per_hour_usd": 0.00036,
-			"price_per_gib_usd": 0.06
-		},
-		"scraping": {
-			"price_per_hour_usd": 0.00036,
-			"price_per_gib_usd": 0.06
-		},
-		"wireguard": {
-			"price_per_hour_usd": 0.00036,
-			"price_per_gib_usd": 0.06
-		}
-	  }
-	},
-	"country_modifiers": {
-	  "US": {
-		"residential": 1.5,
-		"other": 1.2
-	  }
-	}
+    "base_prices": {
+        "residential": {
+            "wireguard": {
+                "price_per_hour_usd": 0.00005,
+                "price_per_gib_usd": 0.2
+            },
+            "scraping": {
+                "price_per_hour_usd": 0.00005,
+                "price_per_gib_usd": 0.191
+            },
+            "data_transfer": {
+                "price_per_hour_usd": 0.00005,
+                "price_per_gib_usd": 0.016
+            },
+            "dvpn": {
+                "price_per_hour_usd": 0.00005,
+                "price_per_gib_usd": 0.05
+            }
+        },
+        "other": {
+            "wireguard": {
+                "price_per_hour_usd": 0.00005,
+                "price_per_gib_usd": 0.09
+            },
+            "scraping": {
+                "price_per_hour_usd": 0.00005,
+                "price_per_gib_usd": 0.0101
+            },
+            "data_transfer": {
+                "price_per_hour_usd": 0.00005,
+                "price_per_gib_usd": 0.012
+            },
+            "dvpn": {
+                "price_per_hour_usd": 0.00005,
+                "price_per_gib_usd": 0.03
+            }
+        }
+    },
+    "country_modifiers": {
+        "US": {
+            "residential": 1,
+            "other": 1
+        }
+    }
 }`
