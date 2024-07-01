@@ -59,7 +59,7 @@ func (s *Service) List(opts ListOpts, limited bool) []v3.Proposal {
 	}, limited)
 
 	or := &metrics.OracleResponses{}
-	or.Load(s.qualityService, opts.from)
+	or.Load(s.qualityService)
 
 	return metrics.EnhanceWithMetrics(proposals, or.QualityResponse, metrics.Filters{
 		IncludeMonitoringFailed: opts.includeMonitoringFailed,
@@ -72,7 +72,7 @@ func (s *Service) List(opts ListOpts, limited bool) []v3.Proposal {
 
 func (s *Service) Metadata(opts repoMetadataOpts) []v3.Metadata {
 	or := &metrics.OracleResponses{}
-	or.Load(s.qualityService, "US")
+	or.Load(s.qualityService)
 
 	return s.Repository.Metadata(opts, or.QualityResponse)
 }
@@ -105,7 +105,7 @@ func (s *Service) ListCountriesNumbers(opts ListOpts, limited bool) map[string]i
 	}, limited)
 
 	or := &metrics.OracleResponses{}
-	or.Load(s.qualityService, opts.from)
+	or.Load(s.qualityService)
 
 	eps := metrics.EnhanceWithMetrics(proposals, or.QualityResponse, metrics.Filters{
 		IncludeMonitoringFailed: opts.includeMonitoringFailed,

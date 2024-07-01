@@ -25,8 +25,8 @@ func New(url string) *API {
 	}
 }
 
-func (a *API) Quality(country string) (map[string]*DetailedQuality, error) {
-	resp, err := a.client.Get(fmt.Sprintf("%s/api/v2/providers/detailed?country=%s", a.url, country))
+func (a *API) Quality() (map[string]*DetailedQuality, error) {
+	resp, err := a.client.Get(fmt.Sprintf("%s/api/v2/providers/detailed?country=US", a.url))
 	if err != nil {
 		return nil, fmt.Errorf("request failed: %w", err)
 	}
