@@ -12,13 +12,10 @@ type OracleResponses struct {
 	QualityResponse map[string]*oracleapi.DetailedQuality
 }
 
-func (or *OracleResponses) Load(qualityService *quality.Service, fromCountry string) {
-	if len(fromCountry) != 2 {
-		fromCountry = "NL"
-	}
-	qRes, err := qualityService.Quality(fromCountry)
+func (or *OracleResponses) Load(qualityService *quality.Service) {
+	qRes, err := qualityService.Quality()
 	if err != nil {
-		log.Error().Err(err).Msgf("Could not fetch quality for consumer (country=%s)", fromCountry)
+		log.Error().Err(err).Msgf("Could not fetch quality for consumer")
 	}
 	or.QualityResponse = qRes
 }
