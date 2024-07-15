@@ -25,7 +25,6 @@ import (
 	"github.com/mysteriumnetwork/discovery/proposal"
 	"github.com/mysteriumnetwork/discovery/quality"
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
-	"github.com/mysteriumnetwork/discovery/tags"
 	"github.com/mysteriumnetwork/go-rest/apierror"
 	mlog "github.com/mysteriumnetwork/logger"
 )
@@ -62,8 +61,7 @@ func main() {
 		pprof.RouteRegister(devGroup, "pprof")
 	}
 
-	tagEnhancer := tags.NewEnhancer(tags.NewApi(cfg.BadgerAddress.String()))
-	proposalRepo := proposal.NewRepository([]proposal.Enhancer{tagEnhancer}, cfg.ProposalsHardLimitPerCountry, cfg.ProposalsSoftLimitPerCountry, cfg.CompatibilityMin)
+	proposalRepo := proposal.NewRepository(cfg.ProposalsHardLimitPerCountry, cfg.ProposalsSoftLimitPerCountry, cfg.CompatibilityMin)
 	qualityOracleAPI := oracleapi.New(cfg.QualityOracleURL.String())
 	qualityService := quality.NewService(qualityOracleAPI, cfg.QualityCacheTTL)
 	proposalService := proposal.NewService(proposalRepo, qualityService)

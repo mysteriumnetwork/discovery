@@ -6,7 +6,6 @@ package proposal
 
 import (
 	"errors"
-	"strings"
 	"sync"
 	"time"
 
@@ -25,7 +24,6 @@ type Repository struct {
 	expirationDuration           time.Duration
 	mu                           sync.RWMutex
 	proposals                    map[string]record
-	enhancers                    []Enhancer
 	proposalsHardLimitPerCountry int
 	proposalsSoftLimitPerCountry int
 	compatibilityMin             int
@@ -40,7 +38,6 @@ type repoListOpts struct {
 	accessPolicySource string
 	compatibilityMin   int
 	compatibilityMax   int
-	tags               string
 }
 
 type repoMetadataOpts struct {
@@ -52,12 +49,11 @@ type record struct {
 	expiresAt time.Time
 }
 
-func NewRepository(enhancers []Enhancer, proposalsHardLimitPerCountry, proposalsSoftLimitPerCountry, compatibilityMin int) *Repository {
+func NewRepository(proposalsHardLimitPerCountry, proposalsSoftLimitPerCountry, compatibilityMin int) *Repository {
 	return &Repository{
 		expirationDuration:           3*time.Minute + 10*time.Second,
 		expirationJobDelay:           20 * time.Second,
 		proposals:                    make(map[string]record),
-		enhancers:                    enhancers,
 		proposalsHardLimitPerCountry: proposalsHardLimitPerCountry,
 		proposalsSoftLimitPerCountry: proposalsSoftLimitPerCountry,
 		compatibilityMin:             compatibilityMin,
@@ -263,22 +259,6 @@ func match(p v3.Proposal, opts repoListOpts) bool {
 		for _, v := range p.AccessPolicies {
 			if v.Source == opts.accessPolicySource {
 				found = true
-			}
-		}
-
-		if !found {
-			return false
-		}
-	}
-
-	if opts.tags != "" {
-		found := false
-
-		for _, ot := range strings.Split(opts.tags, ",") {
-			for _, pt := range p.Tags {
-				if ot == pt {
-					found = true
-				}
 			}
 		}
 

@@ -25,8 +25,6 @@ type Options struct {
 	RedisPass    string
 	RedisDB      int
 
-	BadgerAddress url.URL
-
 	LocationAddress url.URL
 	LocationUser    string
 	LocationPass    string
@@ -74,10 +72,6 @@ func ReadDiscovery() (*Options, error) {
 	if err != nil {
 		return nil, err
 	}
-	badgerAddress, err := RequiredEnvURL("BADGER_ADDRESS")
-	if err != nil {
-		return nil, err
-	}
 
 	compatibility, err := OptionalEnvInt("COMPATIBILITY_MIN", "0")
 	if err != nil {
@@ -114,7 +108,6 @@ func ReadDiscovery() (*Options, error) {
 		QualityOracleURL:             *qualityOracleURL,
 		QualityCacheTTL:              *qualityCacheTTL,
 		BrokerURL:                    *brokerURL,
-		BadgerAddress:                *badgerAddress,
 		LocationAddress:              *locationAddress,
 		LocationUser:                 locationUser,
 		LocationPass:                 locationPass,

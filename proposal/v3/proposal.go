@@ -42,7 +42,6 @@ type Proposal struct {
 	Contacts       []Contact      `json:"contacts"`
 	AccessPolicies []AccessPolicy `json:"access_policies,omitempty"`
 	Quality        Quality        `json:"quality"`
-	Tags           []string       `json:"tags,omitempty"`
 }
 
 func NewProposal(providerID, serviceType string) *Proposal {

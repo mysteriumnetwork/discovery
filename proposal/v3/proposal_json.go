@@ -18,7 +18,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV3(in *jlexer.Lexer, out *Quality) {
+func easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV3(in *jlexer.Lexer, out *Quality) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -57,7 +57,7 @@ func easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV3(in *jlex
 		in.Consumed()
 	}
 }
-func easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV3(out *jwriter.Writer, in Quality) {
+func easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV3(out *jwriter.Writer, in Quality) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -92,27 +92,27 @@ func easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV3(out *jwr
 // MarshalJSON supports json.Marshaler interface
 func (v Quality) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV3(&w, v)
+	easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV3(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Quality) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV3(w, v)
+	easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV3(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Quality) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV3(&r, v)
+	easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV3(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Quality) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV3(l, v)
+	easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV3(l, v)
 }
-func easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV31(in *jlexer.Lexer, out *ProposalUnregisterMessage) {
+func easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV31(in *jlexer.Lexer, out *ProposalUnregisterMessage) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -143,7 +143,7 @@ func easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV31(in *jle
 		in.Consumed()
 	}
 }
-func easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV31(out *jwriter.Writer, in ProposalUnregisterMessage) {
+func easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV31(out *jwriter.Writer, in ProposalUnregisterMessage) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -158,27 +158,27 @@ func easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV31(out *jw
 // MarshalJSON supports json.Marshaler interface
 func (v ProposalUnregisterMessage) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV31(&w, v)
+	easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV31(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v ProposalUnregisterMessage) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV31(w, v)
+	easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV31(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *ProposalUnregisterMessage) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV31(&r, v)
+	easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV31(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *ProposalUnregisterMessage) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV31(l, v)
+	easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV31(l, v)
 }
-func easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV32(in *jlexer.Lexer, out *ProposalPingMessage) {
+func easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV32(in *jlexer.Lexer, out *ProposalPingMessage) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -209,7 +209,7 @@ func easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV32(in *jle
 		in.Consumed()
 	}
 }
-func easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV32(out *jwriter.Writer, in ProposalPingMessage) {
+func easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV32(out *jwriter.Writer, in ProposalPingMessage) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -224,27 +224,27 @@ func easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV32(out *jw
 // MarshalJSON supports json.Marshaler interface
 func (v ProposalPingMessage) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV32(&w, v)
+	easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV32(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v ProposalPingMessage) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV32(w, v)
+	easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV32(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *ProposalPingMessage) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV32(&r, v)
+	easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV32(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *ProposalPingMessage) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV32(l, v)
+	easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV32(l, v)
 }
-func easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV33(in *jlexer.Lexer, out *Proposal) {
+func easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV33(in *jlexer.Lexer, out *Proposal) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -323,29 +323,6 @@ func easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV33(in *jle
 			}
 		case "quality":
 			(out.Quality).UnmarshalEasyJSON(in)
-		case "tags":
-			if in.IsNull() {
-				in.Skip()
-				out.Tags = nil
-			} else {
-				in.Delim('[')
-				if out.Tags == nil {
-					if !in.IsDelim(']') {
-						out.Tags = make([]string, 0, 4)
-					} else {
-						out.Tags = []string{}
-					}
-				} else {
-					out.Tags = (out.Tags)[:0]
-				}
-				for !in.IsDelim(']') {
-					var v3 string
-					v3 = string(in.String())
-					out.Tags = append(out.Tags, v3)
-					in.WantComma()
-				}
-				in.Delim(']')
-			}
 		default:
 			in.SkipRecursive()
 		}
@@ -356,7 +333,7 @@ func easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV33(in *jle
 		in.Consumed()
 	}
 }
-func easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV33(out *jwriter.Writer, in Proposal) {
+func easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV33(out *jwriter.Writer, in Proposal) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -397,11 +374,11 @@ func easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV33(out *jw
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v4, v5 := range in.Contacts {
-				if v4 > 0 {
+			for v3, v4 := range in.Contacts {
+				if v3 > 0 {
 					out.RawByte(',')
 				}
-				(v5).MarshalEasyJSON(out)
+				(v4).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -411,11 +388,11 @@ func easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV33(out *jw
 		out.RawString(prefix)
 		{
 			out.RawByte('[')
-			for v6, v7 := range in.AccessPolicies {
-				if v6 > 0 {
+			for v5, v6 := range in.AccessPolicies {
+				if v5 > 0 {
 					out.RawByte(',')
 				}
-				(v7).MarshalEasyJSON(out)
+				(v6).MarshalEasyJSON(out)
 			}
 			out.RawByte(']')
 		}
@@ -425,47 +402,33 @@ func easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV33(out *jw
 		out.RawString(prefix)
 		(in.Quality).MarshalEasyJSON(out)
 	}
-	if len(in.Tags) != 0 {
-		const prefix string = ",\"tags\":"
-		out.RawString(prefix)
-		{
-			out.RawByte('[')
-			for v8, v9 := range in.Tags {
-				if v8 > 0 {
-					out.RawByte(',')
-				}
-				out.String(string(v9))
-			}
-			out.RawByte(']')
-		}
-	}
 	out.RawByte('}')
 }
 
 // MarshalJSON supports json.Marshaler interface
 func (v Proposal) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV33(&w, v)
+	easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV33(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Proposal) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV33(w, v)
+	easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV33(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Proposal) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV33(&r, v)
+	easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV33(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Proposal) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV33(l, v)
+	easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV33(l, v)
 }
-func easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV34(in *jlexer.Lexer, out *Price) {
+func easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV34(in *jlexer.Lexer, out *Price) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -518,7 +481,7 @@ func easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV34(in *jle
 		in.Consumed()
 	}
 }
-func easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV34(out *jwriter.Writer, in Price) {
+func easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV34(out *jwriter.Writer, in Price) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -546,27 +509,27 @@ func easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV34(out *jw
 // MarshalJSON supports json.Marshaler interface
 func (v Price) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV34(&w, v)
+	easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV34(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Price) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV34(w, v)
+	easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV34(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Price) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV34(&r, v)
+	easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV34(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Price) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV34(l, v)
+	easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV34(l, v)
 }
-func easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV35(in *jlexer.Lexer, out *Location) {
+func easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV35(in *jlexer.Lexer, out *Location) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -609,7 +572,7 @@ func easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV35(in *jle
 		in.Consumed()
 	}
 }
-func easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV35(out *jwriter.Writer, in Location) {
+func easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV35(out *jwriter.Writer, in Location) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -685,27 +648,27 @@ func easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV35(out *jw
 // MarshalJSON supports json.Marshaler interface
 func (v Location) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV35(&w, v)
+	easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV35(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Location) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV35(w, v)
+	easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV35(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Location) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV35(&r, v)
+	easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV35(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Location) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV35(l, v)
+	easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV35(l, v)
 }
-func easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV36(in *jlexer.Lexer, out *Contact) {
+func easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV36(in *jlexer.Lexer, out *Contact) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -748,7 +711,7 @@ func easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV36(in *jle
 		in.Consumed()
 	}
 }
-func easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV36(out *jwriter.Writer, in Contact) {
+func easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV36(out *jwriter.Writer, in Contact) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -772,27 +735,27 @@ func easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV36(out *jw
 // MarshalJSON supports json.Marshaler interface
 func (v Contact) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV36(&w, v)
+	easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV36(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Contact) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV36(w, v)
+	easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV36(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Contact) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV36(&r, v)
+	easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV36(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Contact) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV36(l, v)
+	easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV36(l, v)
 }
-func easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV37(in *jlexer.Lexer, out *AccessPolicy) {
+func easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV37(in *jlexer.Lexer, out *AccessPolicy) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -825,7 +788,7 @@ func easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV37(in *jle
 		in.Consumed()
 	}
 }
-func easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV37(out *jwriter.Writer, in AccessPolicy) {
+func easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV37(out *jwriter.Writer, in AccessPolicy) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -845,23 +808,23 @@ func easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV37(out *jw
 // MarshalJSON supports json.Marshaler interface
 func (v AccessPolicy) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV37(&w, v)
+	easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV37(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v AccessPolicy) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson316ad6c2EncodeGithubComMysteriumnetworkDiscoveryProposalV37(w, v)
+	easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV37(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *AccessPolicy) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV37(&r, v)
+	easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV37(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *AccessPolicy) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV37(l, v)
+	easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV37(l, v)
 }
