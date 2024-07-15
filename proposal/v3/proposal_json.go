@@ -4,10 +4,11 @@ package v3
 
 import (
 	json "encoding/json"
+	big "math/big"
+
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
-	big "math/big"
 )
 
 // suppress unused package warning
@@ -323,29 +324,6 @@ func easyjson316ad6c2DecodeGithubComMysteriumnetworkDiscoveryProposalV33(in *jle
 			}
 		case "quality":
 			(out.Quality).UnmarshalEasyJSON(in)
-		case "tags":
-			if in.IsNull() {
-				in.Skip()
-				out.Tags = nil
-			} else {
-				in.Delim('[')
-				if out.Tags == nil {
-					if !in.IsDelim(']') {
-						out.Tags = make([]string, 0, 4)
-					} else {
-						out.Tags = []string{}
-					}
-				} else {
-					out.Tags = (out.Tags)[:0]
-				}
-				for !in.IsDelim(']') {
-					var v3 string
-					v3 = string(in.String())
-					out.Tags = append(out.Tags, v3)
-					in.WantComma()
-				}
-				in.Delim(']')
-			}
 		default:
 			in.SkipRecursive()
 		}

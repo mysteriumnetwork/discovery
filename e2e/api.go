@@ -11,8 +11,10 @@ import (
 	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 )
 
-var DiscoveryAPI = newDiscoveryAPI(DiscoveryAPIurl)
-var PricerAPI = newPricingAPI(PricerAPIUrl)
+var (
+	DiscoveryAPI = newDiscoveryAPI(DiscoveryAPIurl)
+	PricerAPI    = newPricingAPI(PricerAPIUrl)
+)
 
 func newDiscoveryAPI(basePath string) *discoveryAPI {
 	return &discoveryAPI{
@@ -47,7 +49,6 @@ type Query struct {
 	CompatibilityMin        int      `url:"compatibility_min"`
 	CompatibilityMax        int      `url:"compatibility_max"`
 	QualityMin              float64  `url:"quality_min"`
-	Tags                    string   `url:"tags"`
 	IncludeMonitoringFailed bool     `url:"include_monitoring_failed"`
 	NATCompatibility        string   `url:"nat_compatibility"`
 }

@@ -14,7 +14,6 @@ services:
       - PORT=8080
       - QUALITY_ORACLE_URL=https://quality.mysterium.network
       - QUALITY_CACHE_TTL=20s
-      - BADGER_ADDRESS=https://badger.mysterium.network
       - BROKER_URL=nats://broker.mysterium.network
       - UNIVERSE_JWT_SECRET=suchsecret
       - REDIS_ADDRESS=redis:6379

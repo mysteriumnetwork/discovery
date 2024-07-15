@@ -39,7 +39,6 @@ type ListOpts struct {
 	compatibilityMax        int
 	bandwidthMin            float64
 	qualityMin              float64
-	tags                    string
 	includeMonitoringFailed bool
 	natCompatibility        string
 	presetID                int
@@ -55,7 +54,6 @@ func (s *Service) List(opts ListOpts, limited bool) []v3.Proposal {
 		accessPolicySource: opts.accessPolicySource,
 		compatibilityMin:   opts.compatibilityMin,
 		compatibilityMax:   opts.compatibilityMax,
-		tags:               opts.tags,
 	}, limited)
 
 	or := &metrics.OracleResponses{}
@@ -88,7 +86,6 @@ func (s *Service) ListCountriesNumbers(opts ListOpts, limited bool) map[string]i
 			accessPolicySource: opts.accessPolicySource,
 			compatibilityMin:   opts.compatibilityMin,
 			compatibilityMax:   opts.compatibilityMax,
-			tags:               opts.tags,
 		})
 	}
 
@@ -101,7 +98,6 @@ func (s *Service) ListCountriesNumbers(opts ListOpts, limited bool) map[string]i
 		accessPolicySource: opts.accessPolicySource,
 		compatibilityMin:   opts.compatibilityMin,
 		compatibilityMax:   opts.compatibilityMax,
-		tags:               opts.tags,
 	}, limited)
 
 	or := &metrics.OracleResponses{}

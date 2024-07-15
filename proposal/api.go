@@ -206,7 +206,6 @@ func (a *API) proposalArgs(c *gin.Context) ListOpts {
 		accessPolicy:       c.Query("access_policy"),
 		accessPolicySource: c.Query("access_policy_source"),
 		ipType:             c.Query("ip_type"),
-		tags:               c.Query("tags"),
 	}
 
 	pids, _ := c.GetQueryArray("provider_id")

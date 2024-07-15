@@ -4,7 +4,7 @@
 ### Features
 * Fetch MYST prices from the public API
 * Create prices for nodes based on the load and multiplier in the countries
-* Listen for proposals from NATS Broker and enhance them with quality metrics and tags
+* Listen for proposals from NATS Broker and enhance them with quality metrics
 * Run proposal expiration job
 * Update price config by Universe Admin
 * Use Postgres to save proposals, configs, and country multipliers
@@ -27,7 +27,6 @@ MYSTERIUM_LOG_MODE=json
 PORT=8080
 QUALITY_ORACLE_URL=https://testnet3-quality.mysterium.network
 QUALITY_CACHE_TTL=20s
-BADGER_ADDRESS=https://testnet3-badger.mysterium.network
 BROKER_URL=nats://testnet3-broker.mysterium.network
 UNIVERSE_JWT_SECRET=Some_Secret
 REDIS_ADDRESS=redis:6379
@@ -63,7 +62,6 @@ COINRANKING_TOKEN=Some_Token
 #### Code structure
 
 * `/config` - [Discovery] config parser. Env params
-* `/tags` - [Discovery] Tags proposals enhancer for SuperProxy
 * `/docs` - [Discovery] Auto generated Swagger for REST API
 * `/e2e` - e2e tests
 * `/health` - [Discovery] health checker REST API

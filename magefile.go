@@ -86,7 +86,6 @@ func Run() error {
 		"COINRANKING_TOKEN":   "",
 		"UNIVERSE_JWT_SECRET": "",
 		"REDIS_ADDRESS":       "localhost:6379",
-		"BADGER_ADDRESS":      "https://badger.mysterium.network",
 		"LOCATION_ADDRESS":    "https://location.mysterium.network/api/v1/location",
 		"SENTINEL_URL":        "https://sentinel.mysterium.network",
 	}
