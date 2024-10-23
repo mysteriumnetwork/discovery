@@ -17,7 +17,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjsonBa0ee0e3DecodeGithubComMysteriumnetworkDiscoveryProposalV3(in *jlexer.Lexer, out *Metadata) {
+func easyjsonCc79d2bdDecodeGithubComMysteriumnetworkDiscoveryProposalV3(in *jlexer.Lexer, out *Metadata) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -64,7 +64,7 @@ func easyjsonBa0ee0e3DecodeGithubComMysteriumnetworkDiscoveryProposalV3(in *jlex
 		in.Consumed()
 	}
 }
-func easyjsonBa0ee0e3EncodeGithubComMysteriumnetworkDiscoveryProposalV3(out *jwriter.Writer, in Metadata) {
+func easyjsonCc79d2bdEncodeGithubComMysteriumnetworkDiscoveryProposalV3(out *jwriter.Writer, in Metadata) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -114,23 +114,23 @@ func easyjsonBa0ee0e3EncodeGithubComMysteriumnetworkDiscoveryProposalV3(out *jwr
 // MarshalJSON supports json.Marshaler interface
 func (v Metadata) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonBa0ee0e3EncodeGithubComMysteriumnetworkDiscoveryProposalV3(&w, v)
+	easyjsonCc79d2bdEncodeGithubComMysteriumnetworkDiscoveryProposalV3(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Metadata) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonBa0ee0e3EncodeGithubComMysteriumnetworkDiscoveryProposalV3(w, v)
+	easyjsonCc79d2bdEncodeGithubComMysteriumnetworkDiscoveryProposalV3(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Metadata) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonBa0ee0e3DecodeGithubComMysteriumnetworkDiscoveryProposalV3(&r, v)
+	easyjsonCc79d2bdDecodeGithubComMysteriumnetworkDiscoveryProposalV3(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Metadata) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonBa0ee0e3DecodeGithubComMysteriumnetworkDiscoveryProposalV3(l, v)
+	easyjsonCc79d2bdDecodeGithubComMysteriumnetworkDiscoveryProposalV3(l, v)
 }

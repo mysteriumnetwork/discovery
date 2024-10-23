@@ -45,6 +45,8 @@ func easyjsonAd058f64DecodeGithubComMysteriumnetworkDiscoveryProposalV3(in *jlex
 			out.Bandwidth = float64(in.Float64())
 		case "uptime":
 			out.Uptime = float64(in.Float64())
+		case "packetLoss":
+			out.PacketLoss = float64(in.Float64())
 		case "monitoring_failed":
 			out.MonitoringFailed = bool(in.Bool())
 		default:
@@ -80,6 +82,11 @@ func easyjsonAd058f64EncodeGithubComMysteriumnetworkDiscoveryProposalV3(out *jwr
 		const prefix string = ",\"uptime\":"
 		out.RawString(prefix)
 		out.Float64(float64(in.Uptime))
+	}
+	{
+		const prefix string = ",\"packetLoss\":"
+		out.RawString(prefix)
+		out.Float64(float64(in.PacketLoss))
 	}
 	if in.MonitoringFailed {
 		const prefix string = ",\"monitoring_failed\":"

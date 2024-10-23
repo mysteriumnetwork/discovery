@@ -67,6 +67,7 @@ func EnhanceWithMetrics(proposals []v3.Proposal, or map[string]*oracleapi.Detail
 		p.Quality.Latency = q.Latency
 		p.Quality.Bandwidth = q.Bandwidth
 		p.Quality.Uptime = q.Uptime
+		p.Quality.PacketLoss = q.PacketLoss
 		p.Quality.MonitoringFailed = q.MonitoringFailed
 
 		if !matchPreset(f.PresetID, p) {
