@@ -8,7 +8,7 @@ import (
 )
 
 func Run() error {
-	defer sh.RunV("docker-compose", "-f", e2e.DockerFile, "down", "-v")
+	defer sh.RunV("docker", "compose", "-f", e2e.DockerFile, "down", "-v")
 	err := UpDevDependencies()
 	if err != nil {
 		return err
@@ -34,7 +34,7 @@ func UpDevDependencies() error {
 }
 
 func upDependencies() error {
-	err := sh.RunV("docker-compose", "-f", e2e.DockerFile, "up", "-d", "dev")
+	err := sh.RunV("docker", "compose", "-f", e2e.DockerFile, "up", "-d", "dev")
 	if err != nil {
 		return err
 	}
@@ -43,5 +43,5 @@ func upDependencies() error {
 }
 
 func upApp() error {
-	return sh.RunV("docker-compose", "-f", e2e.DockerFile, "up", "--build", "-d", "discovery", "discopricer")
+	return sh.RunV("docker", "compose", "-f", e2e.DockerFile, "up", "--build", "-d", "discovery", "discopricer")
 }
