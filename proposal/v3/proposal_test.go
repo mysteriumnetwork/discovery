@@ -2,13 +2,14 @@ package v3_test
 
 import (
 	"encoding/json"
-	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 	"reflect"
 	"testing"
+
+	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 )
 
 func TestProposal_MarshalBinary(t *testing.T) {
-	proposalJson := `{"id":0,"format":"service-proposal/v3","compatibility":2,"provider_id":"0x55d9995cf3482ee0628fe25e3c95a95899f23cad","service_type":"scraping","location":{"continent":"EU","country":"PL","region":"Malopolskie","city":"Nowy Sacz","asn":5617,"isp":"Orange Polska Spolka Akcyjna","ip_type":"residential"},"contacts":[{"type":"nats/p2p/v1","definition":{"broker_addresses":["nats://broker.mysterium.network:4222","nats://broker.mysterium.network:4222","nats://51.15.22.197:4222","nats://51.15.23.12:4222","nats://51.15.23.14:4222","nats://51.15.23.16:4222"]}}],"access_policies":[{"id":"mysterium","source":"https://trust.mysterium.network/api/v1/access-policies/mysterium"}],"quality":{"quality":2.0250000000000004,"latency":824.898867,"bandwidth":10.275812,"uptime":24}}`
+	proposalJson := `{"id":0,"format":"service-proposal/v3","compatibility":2,"provider_id":"0x55d9995cf3482ee0628fe25e3c95a95899f23cad","service_type":"scraping","location":{"continent":"EU","country":"PL","region":"Malopolskie","city":"Nowy Sacz","asn":5617,"isp":"Orange Polska Spolka Akcyjna","ip_type":"residential"},"contacts":[{"type":"nats/p2p/v1","definition":{"broker_addresses":["nats://broker.mysterium.network:4222","nats://broker.mysterium.network:4222","nats://51.15.22.197:4222","nats://51.15.23.12:4222","nats://51.15.23.14:4222","nats://51.15.23.16:4222"]}}],"access_policies":[{"id":"mysterium","source":"https://trust.mysterium.network/api/v1/access-policies/mysterium"}],"quality":{"quality":2.0250000000000004,"latency":824.898867,"bandwidth":10.275812,"uptime":24,"packetLoss":0.5}}`
 	def := json.RawMessage(`{
 			"broker_addresses": [
 				"nats://broker.mysterium.network:4222",
@@ -51,6 +52,7 @@ func TestProposal_MarshalBinary(t *testing.T) {
 			Latency:          824.898867,
 			Bandwidth:        10.275812,
 			Uptime:           24,
+			PacketLoss:       0.5,
 			MonitoringFailed: false,
 		},
 	}
@@ -97,6 +99,7 @@ func BenchmarkProposal_UnmarshalBinary(b *testing.B) {
 			Latency:          497.234331,
 			Bandwidth:        1.825416,
 			Uptime:           24,
+			PacketLoss:       0.5,
 			MonitoringFailed: true,
 		},
 	}

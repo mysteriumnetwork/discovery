@@ -57,6 +57,7 @@ type DetailedQuality struct {
 	Latency          float64 `json:"latency" example:"75.5"`
 	Uptime           float64 `json:"uptime" example:"7.7"`
 	Bandwidth        float64 `json:"bandwidth" example:"15.5"`
+	PacketLoss       float64 `json:"packetLoss" example:"0.5"`
 }
 
 // CountryLoad represents the ratio of providers to active sessions for country.

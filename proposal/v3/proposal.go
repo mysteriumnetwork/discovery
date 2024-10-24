@@ -111,6 +111,8 @@ type Quality struct {
 	Bandwidth float64 `json:"bandwidth"`
 	// Uptime in hours per day
 	Uptime float64 `json:"uptime"`
+	// PacketLoss in percantage
+	PacketLoss float64 `json:"packetLoss"`
 	// MonitoringFailed did monitoring agent succeed to connect to the node.
 	MonitoringFailed bool `json:"monitoring_failed,omitempty"`
 }
