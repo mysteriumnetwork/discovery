@@ -37,6 +37,11 @@ func EnhanceWithMetrics(proposals []v3.Proposal, or map[string]*oracleapi.Detail
 	for _, p := range proposals {
 		key := p.Key()
 
+		if p.ServiceType == "quic_scraping" {
+			// TODO: remove this once we have proper service type for scraping
+			key = p.ProviderID + ".scraping"
+		}
+
 		if len(or) == 0 {
 			res = append(res, p)
 			continue

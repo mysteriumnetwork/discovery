@@ -53,11 +53,6 @@ func NewProposal(providerID, serviceType string) *Proposal {
 }
 
 func (p Proposal) Key() string {
-	if p.ServiceType == "quic_scraping" {
-		// TODO: remove this once we have proper service type for scraping
-		return p.ProviderID + ".scraping"
-	}
-
 	return p.ProviderID + "." + p.ServiceType
 }
 
