@@ -85,6 +85,12 @@ var defaultPrices = LatestPrices{
 					PricePerGiB:               big.NewInt(150000000000000000),
 					PricePerGiBHumanReadable:  0.15,
 				},
+				QUICScraping: Price{
+					PricePerHour:              big.NewInt(900000000000000),
+					PricePerHourHumanReadable: 0.0009,
+					PricePerGiB:               big.NewInt(150000000000000000),
+					PricePerGiBHumanReadable:  0.15,
+				},
 				DataTransfer: Price{
 					PricePerHour:              big.NewInt(900000000000000),
 					PricePerHourHumanReadable: 0.0009,
@@ -106,6 +112,12 @@ var defaultPrices = LatestPrices{
 					PricePerGiBHumanReadable:  0.15,
 				},
 				Scraping: Price{
+					PricePerHour:              big.NewInt(900000000000000),
+					PricePerHourHumanReadable: 0.0009,
+					PricePerGiB:               big.NewInt(150000000000000000),
+					PricePerGiBHumanReadable:  0.15,
+				},
+				QUICScraping: Price{
 					PricePerHour:              big.NewInt(900000000000000),
 					PricePerHourHumanReadable: 0.0009,
 					PricePerGiB:               big.NewInt(150000000000000000),
@@ -139,6 +151,12 @@ var defaultPrices = LatestPrices{
 					PricePerGiB:               big.NewInt(150000000000000000),
 					PricePerGiBHumanReadable:  0.15,
 				},
+				QUICScraping: Price{
+					PricePerHour:              big.NewInt(900000000000000),
+					PricePerHourHumanReadable: 0.0009,
+					PricePerGiB:               big.NewInt(150000000000000000),
+					PricePerGiBHumanReadable:  0.15,
+				},
 				DataTransfer: Price{
 					PricePerHour:              big.NewInt(900000000000000),
 					PricePerHourHumanReadable: 0.0009,
@@ -160,6 +178,12 @@ var defaultPrices = LatestPrices{
 					PricePerGiBHumanReadable:  0.15,
 				},
 				Scraping: Price{
+					PricePerHour:              big.NewInt(900000000000000),
+					PricePerHourHumanReadable: 0.0009,
+					PricePerGiB:               big.NewInt(150000000000000000),
+					PricePerGiBHumanReadable:  0.15,
+				},
+				QUICScraping: Price{
 					PricePerHour:              big.NewInt(900000000000000),
 					PricePerHourHumanReadable: 0.0009,
 					PricePerGiB:               big.NewInt(150000000000000000),

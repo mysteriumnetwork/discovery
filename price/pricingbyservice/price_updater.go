@@ -10,10 +10,10 @@ import (
 
 	"github.com/fln/pprotect"
 	"github.com/redis/go-redis/v9"
+	"github.com/rs/zerolog/log"
 
 	"github.com/mysteriumnetwork/discovery/metrics"
 	"github.com/mysteriumnetwork/payments/units"
-	"github.com/rs/zerolog/log"
 )
 
 const PriceRedisKey = "DISCOVERY_CURRENT_PRICE_BY_SERVICE"
@@ -139,6 +139,10 @@ func (p *PriceUpdater) submitPriceMetric(country string, price *PriceByType) {
 	metrics.CurrentPriceByCountry.WithLabelValues(country, "other", "scraping", "per_hour").Set(price.Other.Scraping.PricePerHourHumanReadable)
 	metrics.CurrentPriceByCountry.WithLabelValues(country, "residential", "scraping", "per_gib").Set(price.Residential.Scraping.PricePerGiBHumanReadable)
 	metrics.CurrentPriceByCountry.WithLabelValues(country, "residential", "scraping", "per_hour").Set(price.Residential.Scraping.PricePerHourHumanReadable)
+	metrics.CurrentPriceByCountry.WithLabelValues(country, "other", "quic_scraping", "per_gib").Set(price.Other.QUICScraping.PricePerGiBHumanReadable)
+	metrics.CurrentPriceByCountry.WithLabelValues(country, "other", "quic_scraping", "per_hour").Set(price.Other.QUICScraping.PricePerHourHumanReadable)
+	metrics.CurrentPriceByCountry.WithLabelValues(country, "residential", "quic_scraping", "per_gib").Set(price.Residential.QUICScraping.PricePerGiBHumanReadable)
+	metrics.CurrentPriceByCountry.WithLabelValues(country, "residential", "quic_scraping", "per_hour").Set(price.Residential.QUICScraping.PricePerHourHumanReadable)
 
 	metrics.CurrentPriceByCountry.WithLabelValues(country, "other", "data_transfer", "per_gib").Set(price.Other.DataTransfer.PricePerGiBHumanReadable)
 	metrics.CurrentPriceByCountry.WithLabelValues(country, "other", "data_transfer", "per_hour").Set(price.Other.DataTransfer.PricePerHourHumanReadable)
@@ -190,6 +194,12 @@ func (p *PriceUpdater) generateNewDefaults(mystUSD float64, cfg Config) *PriceHi
 					PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.Scraping.PricePerGiB, 1),
 					PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.Scraping.PricePerGiB, 1),
 				},
+				QUICScraping: Price{
+					PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.QUICScraping.PricePerHour, 1),
+					PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.QUICScraping.PricePerHour, 1),
+					PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.QUICScraping.PricePerGiB, 1),
+					PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.QUICScraping.PricePerGiB, 1),
+				},
 				DataTransfer: Price{
 					PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.DataTransfer.PricePerHour, 1),
 					PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.DataTransfer.PricePerHour, 1),
@@ -215,6 +225,12 @@ func (p *PriceUpdater) generateNewDefaults(mystUSD float64, cfg Config) *PriceHi
 					PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.Scraping.PricePerHour, 1),
 					PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.Scraping.PricePerGiB, 1),
 					PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.Scraping.PricePerGiB, 1),
+				},
+				QUICScraping: Price{
+					PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.QUICScraping.PricePerHour, 1),
+					PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.QUICScraping.PricePerHour, 1),
+					PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.QUICScraping.PricePerGiB, 1),
+					PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.QUICScraping.PricePerGiB, 1),
 				},
 				DataTransfer: Price{
 					PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerHour, 1),
@@ -265,6 +281,12 @@ func (p *PriceUpdater) generateNewPerCountry(mystUSD float64, cfg Config) map[st
 						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.Scraping.PricePerGiB, mod.Residential),
 						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.Scraping.PricePerGiB, mod.Residential),
 					},
+					QUICScraping: Price{
+						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.QUICScraping.PricePerHour, mod.Residential),
+						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.QUICScraping.PricePerHour, mod.Residential),
+						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.QUICScraping.PricePerGiB, mod.Residential),
+						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.QUICScraping.PricePerGiB, mod.Residential),
+					},
 					DataTransfer: Price{
 						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.DataTransfer.PricePerHour, mod.Residential),
 						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.DataTransfer.PricePerHour, mod.Residential),
@@ -290,6 +312,12 @@ func (p *PriceUpdater) generateNewPerCountry(mystUSD float64, cfg Config) map[st
 						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.Scraping.PricePerHour, mod.Other),
 						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.Scraping.PricePerGiB, mod.Other),
 						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.Scraping.PricePerGiB, mod.Other),
+					},
+					QUICScraping: Price{
+						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.QUICScraping.PricePerHour, mod.Other),
+						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.QUICScraping.PricePerHour, mod.Other),
+						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.QUICScraping.PricePerGiB, mod.Other),
+						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.QUICScraping.PricePerGiB, mod.Other),
 					},
 					DataTransfer: Price{
 						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerHour, mod.Other),
@@ -388,6 +416,7 @@ type PriceByType struct {
 type PriceByServiceType struct {
 	Wireguard    Price `json:"wireguard"`
 	Scraping     Price `json:"scraping"`
+	QUICScraping Price `json:"quic_scraping"`
 	DataTransfer Price `json:"data_transfer"`
 	DVPN         Price `json:"dvpn"`
 }

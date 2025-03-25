@@ -14,8 +14,9 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/mysteriumnetwork/discovery/price/pricingbyservice"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/mysteriumnetwork/discovery/price/pricingbyservice"
 )
 
 func TestMain(m *testing.M) {
@@ -35,6 +36,8 @@ func Test_LatestPrices(t *testing.T) {
 	assert.NotNil(t, prices.Defaults.Current.Residential.DVPN.PricePerHour)
 	assert.NotNil(t, prices.Defaults.Current.Residential.Scraping.PricePerGiB)
 	assert.NotNil(t, prices.Defaults.Current.Residential.Scraping.PricePerHour)
+	assert.NotNil(t, prices.Defaults.Current.Residential.QUICScraping.PricePerGiB)
+	assert.NotNil(t, prices.Defaults.Current.Residential.QUICScraping.PricePerHour)
 	assert.NotNil(t, prices.Defaults.Current.Residential.Wireguard.PricePerGiB)
 	assert.NotNil(t, prices.Defaults.Current.Residential.Wireguard.PricePerHour)
 	assert.NotNil(t, prices.Defaults.Current.Residential.DataTransfer.PricePerGiB)
@@ -43,6 +46,8 @@ func Test_LatestPrices(t *testing.T) {
 	assert.NotNil(t, prices.Defaults.Current.Other.DVPN.PricePerHour)
 	assert.NotNil(t, prices.Defaults.Current.Other.Scraping.PricePerGiB)
 	assert.NotNil(t, prices.Defaults.Current.Other.Scraping.PricePerHour)
+	assert.NotNil(t, prices.Defaults.Current.Other.QUICScraping.PricePerGiB)
+	assert.NotNil(t, prices.Defaults.Current.Other.QUICScraping.PricePerHour)
 	assert.NotNil(t, prices.Defaults.Current.Other.Wireguard.PricePerGiB)
 	assert.NotNil(t, prices.Defaults.Current.Other.Wireguard.PricePerHour)
 	assert.NotNil(t, prices.Defaults.Current.Other.DataTransfer.PricePerGiB)
@@ -51,6 +56,8 @@ func Test_LatestPrices(t *testing.T) {
 	assert.NotNil(t, prices.Defaults.Previous.Residential.DVPN.PricePerHour)
 	assert.NotNil(t, prices.Defaults.Previous.Residential.Scraping.PricePerGiB)
 	assert.NotNil(t, prices.Defaults.Previous.Residential.Scraping.PricePerHour)
+	assert.NotNil(t, prices.Defaults.Previous.Residential.QUICScraping.PricePerGiB)
+	assert.NotNil(t, prices.Defaults.Previous.Residential.QUICScraping.PricePerHour)
 	assert.NotNil(t, prices.Defaults.Previous.Residential.Wireguard.PricePerGiB)
 	assert.NotNil(t, prices.Defaults.Previous.Residential.Wireguard.PricePerHour)
 	assert.NotNil(t, prices.Defaults.Previous.Residential.DataTransfer.PricePerGiB)
@@ -59,6 +66,8 @@ func Test_LatestPrices(t *testing.T) {
 	assert.NotNil(t, prices.Defaults.Previous.Other.DVPN.PricePerHour)
 	assert.NotNil(t, prices.Defaults.Previous.Other.Scraping.PricePerGiB)
 	assert.NotNil(t, prices.Defaults.Previous.Other.Scraping.PricePerHour)
+	assert.NotNil(t, prices.Defaults.Previous.Other.QUICScraping.PricePerGiB)
+	assert.NotNil(t, prices.Defaults.Previous.Other.QUICScraping.PricePerHour)
 	assert.NotNil(t, prices.Defaults.Previous.Other.Wireguard.PricePerGiB)
 	assert.NotNil(t, prices.Defaults.Previous.Other.Wireguard.PricePerHour)
 	assert.NotNil(t, prices.Defaults.Previous.Other.DataTransfer.PricePerGiB)
@@ -143,6 +152,10 @@ var expectedPricingConfig = `
                 "price_per_hour_usd": 0.00005,
                 "price_per_gib_usd": 0.191
             },
+			"quic_scraping": {
+                "price_per_hour_usd": 0.00005,
+                "price_per_gib_usd": 0.191
+            },
             "data_transfer": {
                 "price_per_hour_usd": 0.00005,
                 "price_per_gib_usd": 0.016
@@ -158,6 +171,10 @@ var expectedPricingConfig = `
                 "price_per_gib_usd": 0.09
             },
             "scraping": {
+                "price_per_hour_usd": 0.00005,
+                "price_per_gib_usd": 0.0101
+            },
+			"quic_scraping": {
                 "price_per_hour_usd": 0.00005,
                 "price_per_gib_usd": 0.0101
             },
