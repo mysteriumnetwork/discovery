@@ -26,12 +26,14 @@ func TestConfig_Validate(t *testing.T) {
 					Residential: &PriceByServiceTypeUSD{
 						Wireguard:    mprice,
 						Scraping:     mprice,
+						QUICScraping: mprice,
 						DataTransfer: mprice,
 						DVPN:         mprice,
 					},
 					Other: &PriceByServiceTypeUSD{
 						Wireguard:    mprice,
 						Scraping:     mprice,
+						QUICScraping: mprice,
 						DataTransfer: mprice,
 						DVPN:         mprice,
 					},
@@ -52,12 +54,14 @@ func TestConfig_Validate(t *testing.T) {
 					Residential: &PriceByServiceTypeUSD{
 						Wireguard:    mprice,
 						Scraping:     mprice,
+						QUICScraping: mprice,
 						DataTransfer: mprice,
 						DVPN:         mprice,
 					},
 					Other: &PriceByServiceTypeUSD{
 						Wireguard:    mprice,
 						Scraping:     mprice,
+						QUICScraping: mprice,
 						DataTransfer: mprice,
 						DVPN:         mprice,
 					},
@@ -78,12 +82,14 @@ func TestConfig_Validate(t *testing.T) {
 					Residential: &PriceByServiceTypeUSD{
 						Wireguard:    mprice,
 						Scraping:     mprice,
+						QUICScraping: mprice,
 						DataTransfer: mprice,
 						DVPN:         mprice,
 					},
 					Other: &PriceByServiceTypeUSD{
 						Wireguard:    mprice,
 						Scraping:     mprice,
+						QUICScraping: mprice,
 						DataTransfer: mprice,
 						DVPN:         mprice,
 					},
@@ -103,12 +109,14 @@ func TestConfig_Validate(t *testing.T) {
 					Residential: &PriceByServiceTypeUSD{
 						Wireguard:    mprice,
 						Scraping:     mprice,
+						QUICScraping: mprice,
 						DataTransfer: mprice,
 						DVPN:         mprice,
 					},
 					Other: &PriceByServiceTypeUSD{
-						Wireguard: mprice,
-						Scraping:  mprice,
+						Wireguard:    mprice,
+						Scraping:     mprice,
+						QUICScraping: mprice,
 						DataTransfer: PriceUSD{
 							PricePerHour: -1,
 							PricePerGiB:  2,
@@ -132,11 +140,13 @@ func TestConfig_Validate(t *testing.T) {
 					Residential: &PriceByServiceTypeUSD{
 						Wireguard:    mprice,
 						Scraping:     mprice,
+						QUICScraping: mprice,
 						DataTransfer: mprice,
 						DVPN:         mprice,
 					},
 					Other: &PriceByServiceTypeUSD{
 						Scraping:     mprice,
+						QUICScraping: mprice,
 						DataTransfer: mprice,
 						DVPN:         mprice,
 					},

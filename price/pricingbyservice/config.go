@@ -131,6 +131,7 @@ func (p PriceByTypeUSD) Validate() error {
 type PriceByServiceTypeUSD struct {
 	Wireguard    PriceUSD `json:"wireguard"`
 	Scraping     PriceUSD `json:"scraping"`
+	QUICScraping PriceUSD `json:"quic_scraping"`
 	DataTransfer PriceUSD `json:"data_transfer"`
 	DVPN         PriceUSD `json:"dvpn"`
 }
@@ -140,6 +141,9 @@ func (p PriceByServiceTypeUSD) Validate() error {
 		return err
 	}
 	if err := p.Scraping.Validate(); err != nil {
+		return err
+	}
+	if err := p.QUICScraping.Validate(); err != nil {
 		return err
 	}
 	if err := p.DVPN.Validate(); err != nil {
@@ -184,6 +188,10 @@ var defaultPriceConfig = `{
                 "price_per_hour_usd": 0.00005,
                 "price_per_gib_usd": 0.191
             },
+			"quic_scraping": {
+                "price_per_hour_usd": 0.00005,
+                "price_per_gib_usd": 0.191
+            },
             "data_transfer": {
                 "price_per_hour_usd": 0.00005,
                 "price_per_gib_usd": 0.016
@@ -199,6 +207,10 @@ var defaultPriceConfig = `{
                 "price_per_gib_usd": 0.09
             },
             "scraping": {
+                "price_per_hour_usd": 0.00005,
+                "price_per_gib_usd": 0.0101
+            },
+			"quic_scraping": {
                 "price_per_hour_usd": 0.00005,
                 "price_per_gib_usd": 0.0101
             },
