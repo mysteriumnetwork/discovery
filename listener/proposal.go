@@ -97,6 +97,22 @@ func (l *Listener) Listen() error {
 		return err
 	}
 
+	// TODO remove the workaround when the node unregister is fixed and all nodes updated.
+	if _, err := conn.Subscribe("signed.*.*.proposal-unregister.v3", func(msg *nats.Msg) {
+		unregisterMsg := v3.ProposalUnregisterMessage{}
+		if err := json.Unmarshal(msg.Data, &unregisterMsg); err != nil {
+			log.Err(err).Msg("Failed to unregister proposal")
+		} else if unregisterMsg.IsEmpty() {
+			log.Err(errors.New("unknown format")).
+				Bytes("message", msg.Data).
+				Msg("Failed to unregister proposal")
+		} else {
+			l.repository.Remove(unregisterMsg.Key())
+		}
+	}); err != nil {
+		return err
+	}
+
 	return nil
 }
 
