@@ -239,9 +239,9 @@ func (a *API) populateCountryMiddleware() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		from := c.Query("from")
 		var err error
-		if len(from) != 2 {
-			from, err = a.location.Country(c.ClientIP())
-		}
+		// if len(from) != 2 {
+		// from, err = a.location.Country(c.ClientIP())
+		// }
 		if err != nil {
 			from = "NL"
 			log.Error().Err(err).Msg("Failed to autodetect client country")
