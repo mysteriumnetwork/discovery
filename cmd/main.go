@@ -20,7 +20,6 @@ import (
 	_ "github.com/mysteriumnetwork/discovery/docs"
 	"github.com/mysteriumnetwork/discovery/health"
 	"github.com/mysteriumnetwork/discovery/listener"
-	"github.com/mysteriumnetwork/discovery/location"
 	"github.com/mysteriumnetwork/discovery/middleware"
 	"github.com/mysteriumnetwork/discovery/proposal"
 	"github.com/mysteriumnetwork/discovery/quality"
@@ -68,8 +67,6 @@ func main() {
 	go proposalService.StartExpirationJob()
 	defer proposalService.Shutdown()
 
-	locationProvider := location.NewLocationProvider(cfg.LocationAddress.String(), cfg.LocationUser, cfg.LocationPass)
-
 	limitMW := LimitMiddleware(cfg.MaxRequestsLimit)
 	v3 := r.Group("/api/v3")
 	v3.Use(limitMW)
@@ -83,7 +80,6 @@ func main() {
 
 	proposalsAPI := proposal.NewAPI(
 		proposalService,
-		locationProvider,
 		cfg.ProposalsCacheTTL,
 		cfg.ProposalsCacheLimit,
 		cfg.CountriesCacheLimit,

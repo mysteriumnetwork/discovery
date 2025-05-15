@@ -25,10 +25,6 @@ type Options struct {
 	RedisPass    string
 	RedisDB      int
 
-	LocationAddress url.URL
-	LocationUser    string
-	LocationPass    string
-
 	UniverseJWTSecret string
 	SentinelURL       string
 
@@ -78,13 +74,6 @@ func ReadDiscovery() (*Options, error) {
 		return nil, err
 	}
 
-	locationUser := OptionalEnv("LOCATION_USER", "")
-	locationPass := OptionalEnv("LOCATION_PASS", "")
-	locationAddress, err := RequiredEnvURL("LOCATION_ADDRESS")
-	if err != nil {
-		return nil, err
-	}
-
 	devPass := OptionalEnv("DEV_PASS", "")
 	internalPass := OptionalEnv("INTERNAL_PASS", "")
 	logLevel := OptionalEnv("LOG_LEVEL", "debug")
@@ -108,9 +97,6 @@ func ReadDiscovery() (*Options, error) {
 		QualityOracleURL:             *qualityOracleURL,
 		QualityCacheTTL:              *qualityCacheTTL,
 		BrokerURL:                    *brokerURL,
-		LocationAddress:              *locationAddress,
-		LocationUser:                 locationUser,
-		LocationPass:                 locationPass,
 		MaxRequestsLimit:             limit,
 		DevPass:                      devPass,
 		InternalPass:                 internalPass,
