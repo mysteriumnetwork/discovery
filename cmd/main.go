@@ -90,12 +90,14 @@ func main() {
 
 	health.NewAPI().RegisterRoutes(v3, v4, internal)
 
-	brokerListener := listener.New(cfg.BrokerURL.String(), proposalRepo)
+	for _, brokerURL := range cfg.BrokerURL {
+		brokerListener := listener.New(brokerURL.String(), proposalRepo)
 
-	if err := brokerListener.Listen(); err != nil {
-		log.Fatal().Err(err).Msg("Could not listen to the broker")
+		if err := brokerListener.Listen(); err != nil {
+			log.Fatal().Err(err).Msg("Could not listen to the broker")
+		}
+		defer brokerListener.Shutdown()
 	}
-	defer brokerListener.Shutdown()
 
 	if err := r.Run(); err != nil {
 		log.Err(err).Send()
