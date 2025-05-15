@@ -12,7 +12,6 @@ services:
       - QUALITY_CACHE_TTL=1s
       - PROPOSALS_CACHE_TTL=0s
       - BROKER_URL=nats://broker
-      - LOCATION_ADDRESS=http://wiremock:8080
       - UNIVERSE_JWT_SECRET=suchsecret
       - REDIS_ADDRESS=redis:6379
     depends_on:

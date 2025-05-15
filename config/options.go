@@ -19,15 +19,11 @@ type Options struct {
 	QualityOracleURL url.URL
 	QualityCacheTTL  time.Duration
 
-	BrokerURL url.URL
+	BrokerURL []url.URL
 
 	RedisAddress []string
 	RedisPass    string
 	RedisDB      int
-
-	LocationAddress url.URL
-	LocationUser    string
-	LocationPass    string
 
 	UniverseJWTSecret string
 	SentinelURL       string
@@ -68,19 +64,12 @@ func ReadDiscovery() (*Options, error) {
 	if err != nil {
 		return nil, err
 	}
-	brokerURL, err := RequiredEnvURL("BROKER_URL")
+	brokerURL, err := RequiredEnvURLs("BROKER_URL")
 	if err != nil {
 		return nil, err
 	}
 
 	compatibility, err := OptionalEnvInt("COMPATIBILITY_MIN", "0")
-	if err != nil {
-		return nil, err
-	}
-
-	locationUser := OptionalEnv("LOCATION_USER", "")
-	locationPass := OptionalEnv("LOCATION_PASS", "")
-	locationAddress, err := RequiredEnvURL("LOCATION_ADDRESS")
 	if err != nil {
 		return nil, err
 	}
@@ -107,10 +96,7 @@ func ReadDiscovery() (*Options, error) {
 	return &Options{
 		QualityOracleURL:             *qualityOracleURL,
 		QualityCacheTTL:              *qualityCacheTTL,
-		BrokerURL:                    *brokerURL,
-		LocationAddress:              *locationAddress,
-		LocationUser:                 locationUser,
-		LocationPass:                 locationPass,
+		BrokerURL:                    brokerURL,
 		MaxRequestsLimit:             limit,
 		DevPass:                      devPass,
 		InternalPass:                 internalPass,
@@ -181,6 +167,30 @@ func RequiredEnvURL(key string) (*url.URL, error) {
 		return nil, fmt.Errorf("failed to parse %s from value '%s'", key, strVal)
 	}
 	return parsedURL, nil
+}
+
+func RequiredEnvURLs(key string) ([]url.URL, error) {
+	strVal, err := RequiredEnv(key)
+	if err != nil {
+		return nil, err
+	}
+
+	parsedURLs := []url.URL{}
+
+	for _, urlStr := range strings.Split(strVal, ";") {
+		parsedURL, err := url.Parse(urlStr)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse %s from value '%s'", key, strVal)
+		}
+
+		parsedURLs = append(parsedURLs, *parsedURL)
+	}
+
+	if len(parsedURLs) == 0 {
+		return nil, fmt.Errorf("no valid URLs found in %s", key)
+	}
+
+	return parsedURLs, nil
 }
 
 func RequiredEnvDuration(key string) (*time.Duration, error) {

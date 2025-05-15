@@ -37,7 +37,6 @@ func (a *discoveryAPI) GetStatus() (status health.StatusResponse, err error) {
 }
 
 type Query struct {
-	From                    string   `url:"from"`
 	ProviderID              []string `url:"provider_id"`
 	ServiceType             string   `url:"service_type"`
 	Country                 string   `url:"location_country"`
