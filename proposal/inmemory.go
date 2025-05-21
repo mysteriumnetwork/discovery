@@ -5,7 +5,9 @@
 package proposal
 
 import (
+	"encoding/json"
 	"errors"
+	"strings"
 	"sync"
 	"time"
 
@@ -159,6 +161,8 @@ func (r *Repository) Store(proposal v3.Proposal) error {
 		return ErrProposalIncompatible
 	}
 
+	proposal = removeOldBrokerIPs(proposal)
+
 	r.proposals[proposal.Key()] = record{
 		proposal:  proposal,
 		expiresAt: time.Now().Add(r.expirationDuration),
@@ -187,6 +191,51 @@ func (r *Repository) Expire() (count int64) {
 	proposalActive(activeProposals)
 
 	return count
+}
+
+func removeOldBrokerIPs(proposal v3.Proposal) v3.Proposal {
+	for i, c := range proposal.Contacts {
+		if c.Type != "nats/p2p/v1" {
+			continue
+		}
+
+		type definition struct {
+			BrokerAddresses []string `json:"broker_addresses"`
+		}
+
+		var def definition
+		if c.Definition == nil {
+			continue
+		}
+
+		if err := json.Unmarshal(*c.Definition, &def); err != nil {
+			continue
+		}
+
+		var addresses []string
+
+		for _, addr := range def.BrokerAddresses {
+			if strings.Contains(addr, "51.158.204.30") || strings.Contains(addr, "51.158.204.75") || strings.Contains(addr, "51.158.204.9") || strings.Contains(addr, "51.158.204.23") {
+				continue
+			}
+
+			addresses = append(addresses, addr)
+		}
+
+		result, err := json.Marshal(addresses)
+		if err != nil {
+			continue
+		}
+
+		msg := json.RawMessage(`{"broker_addresses":` + string(result) + `}`)
+
+		proposal.Contacts[i] = v3.Contact{
+			Type:       c.Type,
+			Definition: &msg,
+		}
+	}
+
+	return proposal
 }
 
 func (r *Repository) Remove(key string) {
