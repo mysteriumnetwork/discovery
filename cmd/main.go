@@ -109,9 +109,6 @@ func printBanner() {
 	log.Info().Msg(strings.Repeat("▰", 60))
 	log.Info().Msgf(" Starting discovery version: %s", Version)
 	log.Info().Msg(strings.Repeat("▰", 60))
-	log.Info().Msg(" She has carried us into the future")
-	log.Info().Msg(" and it will be our privilege to make that future bright.")
-	log.Info().Msg(strings.Repeat("▱", 60))
 }
 
 func LimitMiddleware(size int) gin.HandlerFunc {
