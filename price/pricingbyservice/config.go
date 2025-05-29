@@ -134,6 +134,7 @@ type PriceByServiceTypeUSD struct {
 	QUICScraping PriceUSD `json:"quic_scraping"`
 	DataTransfer PriceUSD `json:"data_transfer"`
 	DVPN         PriceUSD `json:"dvpn"`
+	Monitoring   PriceUSD `json:"monitoring"`
 }
 
 func (p PriceByServiceTypeUSD) Validate() error {
@@ -147,6 +148,9 @@ func (p PriceByServiceTypeUSD) Validate() error {
 		return err
 	}
 	if err := p.DVPN.Validate(); err != nil {
+		return err
+	}
+	if err := p.Monitoring.Validate(); err != nil {
 		return err
 	}
 	return p.DataTransfer.Validate()
@@ -199,6 +203,10 @@ var defaultPriceConfig = `{
             "dvpn": {
                 "price_per_hour_usd": 0.00005,
                 "price_per_gib_usd": 0.05
+            },
+            "monitoring": {
+                "price_per_hour_usd": 0.00005,
+                "price_per_gib_usd": 0.05
             }
         },
         "other": {
@@ -221,6 +229,10 @@ var defaultPriceConfig = `{
             "dvpn": {
                 "price_per_hour_usd": 0.00005,
                 "price_per_gib_usd": 0.03
+            },
+            "monitoring": {
+                "price_per_hour_usd": 0.00005,
+                "price_per_gib_usd": 0.05
             }
         }
     },

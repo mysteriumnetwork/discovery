@@ -29,6 +29,7 @@ func TestConfig_Validate(t *testing.T) {
 						QUICScraping: mprice,
 						DataTransfer: mprice,
 						DVPN:         mprice,
+						Monitoring:   mprice,
 					},
 					Other: &PriceByServiceTypeUSD{
 						Wireguard:    mprice,
@@ -36,6 +37,7 @@ func TestConfig_Validate(t *testing.T) {
 						QUICScraping: mprice,
 						DataTransfer: mprice,
 						DVPN:         mprice,
+						Monitoring:   mprice,
 					},
 				},
 				CountryModifiers: map[ISO3166CountryCode]Modifier{
@@ -57,6 +59,7 @@ func TestConfig_Validate(t *testing.T) {
 						QUICScraping: mprice,
 						DataTransfer: mprice,
 						DVPN:         mprice,
+						Monitoring:   mprice,
 					},
 					Other: &PriceByServiceTypeUSD{
 						Wireguard:    mprice,
@@ -64,6 +67,7 @@ func TestConfig_Validate(t *testing.T) {
 						QUICScraping: mprice,
 						DataTransfer: mprice,
 						DVPN:         mprice,
+						Monitoring:   mprice,
 					},
 				},
 				CountryModifiers: map[ISO3166CountryCode]Modifier{
@@ -85,6 +89,7 @@ func TestConfig_Validate(t *testing.T) {
 						QUICScraping: mprice,
 						DataTransfer: mprice,
 						DVPN:         mprice,
+						Monitoring:   mprice,
 					},
 					Other: &PriceByServiceTypeUSD{
 						Wireguard:    mprice,
@@ -92,6 +97,7 @@ func TestConfig_Validate(t *testing.T) {
 						QUICScraping: mprice,
 						DataTransfer: mprice,
 						DVPN:         mprice,
+						Monitoring:   mprice,
 					},
 				},
 				CountryModifiers: map[ISO3166CountryCode]Modifier{
@@ -112,6 +118,7 @@ func TestConfig_Validate(t *testing.T) {
 						QUICScraping: mprice,
 						DataTransfer: mprice,
 						DVPN:         mprice,
+						Monitoring:   mprice,
 					},
 					Other: &PriceByServiceTypeUSD{
 						Wireguard:    mprice,
@@ -121,7 +128,8 @@ func TestConfig_Validate(t *testing.T) {
 							PricePerHour: -1,
 							PricePerGiB:  2,
 						},
-						DVPN: mprice,
+						DVPN:       mprice,
+						Monitoring: mprice,
 					},
 				},
 				CountryModifiers: map[ISO3166CountryCode]Modifier{
@@ -143,12 +151,14 @@ func TestConfig_Validate(t *testing.T) {
 						QUICScraping: mprice,
 						DataTransfer: mprice,
 						DVPN:         mprice,
+						Monitoring:   mprice,
 					},
 					Other: &PriceByServiceTypeUSD{
 						Scraping:     mprice,
 						QUICScraping: mprice,
 						DataTransfer: mprice,
 						DVPN:         mprice,
+						Monitoring:   mprice,
 					},
 				},
 				CountryModifiers: map[ISO3166CountryCode]Modifier{
