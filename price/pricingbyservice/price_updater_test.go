@@ -159,6 +159,10 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
+							Monitoring: PriceUSD{
+								PricePerHour: 0.01,
+								PricePerGiB:  0.02,
+							},
 						},
 						Other: &PriceByServiceTypeUSD{
 							Wireguard: PriceUSD{
@@ -178,6 +182,10 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 								PricePerGiB:  0.04,
 							},
 							DVPN: PriceUSD{
+								PricePerHour: 0.03,
+								PricePerGiB:  0.04,
+							},
+							Monitoring: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
@@ -221,6 +229,12 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 							PricePerGiB:               units.FloatEthToBigIntWei(0.02),
 							PricePerGiBHumanReadable:  0.02,
 						},
+						Monitoring: Price{
+							PricePerHour:              units.FloatEthToBigIntWei(0.01),
+							PricePerHourHumanReadable: 0.01,
+							PricePerGiB:               units.FloatEthToBigIntWei(0.02),
+							PricePerGiBHumanReadable:  0.02,
+						},
 					},
 					Other: &PriceByServiceType{
 						Wireguard: Price{
@@ -248,6 +262,12 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 							PricePerGiBHumanReadable:  0.04,
 						},
 						DVPN: Price{
+							PricePerHour:              units.FloatEthToBigIntWei(0.03),
+							PricePerHourHumanReadable: 0.03,
+							PricePerGiB:               units.FloatEthToBigIntWei(0.04),
+							PricePerGiBHumanReadable:  0.04,
+						},
+						Monitoring: Price{
 							PricePerHour:              units.FloatEthToBigIntWei(0.03),
 							PricePerHourHumanReadable: 0.03,
 							PricePerGiB:               units.FloatEthToBigIntWei(0.04),
@@ -287,6 +307,12 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 							PricePerGiB:               units.FloatEthToBigIntWei(0.02),
 							PricePerGiBHumanReadable:  0.02,
 						},
+						Monitoring: Price{
+							PricePerHour:              units.FloatEthToBigIntWei(0.01),
+							PricePerHourHumanReadable: 0.01,
+							PricePerGiB:               units.FloatEthToBigIntWei(0.02),
+							PricePerGiBHumanReadable:  0.02,
+						},
 					},
 					Other: &PriceByServiceType{
 						Wireguard: Price{
@@ -314,6 +340,12 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 							PricePerGiBHumanReadable:  0.04,
 						},
 						DVPN: Price{
+							PricePerHour:              units.FloatEthToBigIntWei(0.03),
+							PricePerHourHumanReadable: 0.03,
+							PricePerGiB:               units.FloatEthToBigIntWei(0.04),
+							PricePerGiBHumanReadable:  0.04,
+						},
+						Monitoring: Price{
 							PricePerHour:              units.FloatEthToBigIntWei(0.03),
 							PricePerHourHumanReadable: 0.03,
 							PricePerGiB:               units.FloatEthToBigIntWei(0.04),
@@ -360,6 +392,12 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 									PricePerGiB:               units.FloatEthToBigIntWei(0.06),
 									PricePerGiBHumanReadable:  0.06,
 								},
+								Monitoring: Price{
+									PricePerHour:              units.FloatEthToBigIntWei(0.05),
+									PricePerHourHumanReadable: 0.05,
+									PricePerGiB:               units.FloatEthToBigIntWei(0.06),
+									PricePerGiBHumanReadable:  0.06,
+								},
 							},
 							Other: &PriceByServiceType{
 								Wireguard: Price{
@@ -392,6 +430,12 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 									PricePerGiB:               units.FloatEthToBigIntWei(0.08),
 									PricePerGiBHumanReadable:  0.08,
 								},
+								Monitoring: Price{
+									PricePerHour:              units.FloatEthToBigIntWei(0.07),
+									PricePerHourHumanReadable: 0.07,
+									PricePerGiB:               units.FloatEthToBigIntWei(0.08),
+									PricePerGiBHumanReadable:  0.08,
+								},
 							},
 						},
 					},
@@ -419,6 +463,10 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
+							Monitoring: PriceUSD{
+								PricePerHour: 0.01,
+								PricePerGiB:  0.02,
+							},
 						},
 						Other: &PriceByServiceTypeUSD{
 							Wireguard: PriceUSD{
@@ -438,6 +486,10 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 								PricePerGiB:  0.04,
 							},
 							DVPN: PriceUSD{
+								PricePerHour: 0.03,
+								PricePerGiB:  0.04,
+							},
+							Monitoring: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
@@ -481,6 +533,12 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 							PricePerGiB:               units.FloatEthToBigIntWei(0.02),
 							PricePerGiBHumanReadable:  0.02,
 						},
+						Monitoring: Price{
+							PricePerHour:              units.FloatEthToBigIntWei(0.01),
+							PricePerHourHumanReadable: 0.01,
+							PricePerGiB:               units.FloatEthToBigIntWei(0.02),
+							PricePerGiBHumanReadable:  0.02,
+						},
 					},
 					Other: &PriceByServiceType{
 						Wireguard: Price{
@@ -508,6 +566,12 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 							PricePerGiBHumanReadable:  0.04,
 						},
 						DVPN: Price{
+							PricePerHour:              units.FloatEthToBigIntWei(0.03),
+							PricePerHourHumanReadable: 0.03,
+							PricePerGiB:               units.FloatEthToBigIntWei(0.04),
+							PricePerGiBHumanReadable:  0.04,
+						},
+						Monitoring: Price{
 							PricePerHour:              units.FloatEthToBigIntWei(0.03),
 							PricePerHourHumanReadable: 0.03,
 							PricePerGiB:               units.FloatEthToBigIntWei(0.04),
@@ -547,6 +611,12 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 							PricePerGiB:               units.FloatEthToBigIntWei(0.06),
 							PricePerGiBHumanReadable:  0.06,
 						},
+						Monitoring: Price{
+							PricePerHour:              units.FloatEthToBigIntWei(0.05),
+							PricePerHourHumanReadable: 0.05,
+							PricePerGiB:               units.FloatEthToBigIntWei(0.06),
+							PricePerGiBHumanReadable:  0.06,
+						},
 					},
 					Other: &PriceByServiceType{
 						Wireguard: Price{
@@ -574,6 +644,12 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 							PricePerGiBHumanReadable:  0.08,
 						},
 						DVPN: Price{
+							PricePerHour:              units.FloatEthToBigIntWei(0.07),
+							PricePerHourHumanReadable: 0.07,
+							PricePerGiB:               units.FloatEthToBigIntWei(0.08),
+							PricePerGiBHumanReadable:  0.08,
+						},
+						Monitoring: Price{
 							PricePerHour:              units.FloatEthToBigIntWei(0.07),
 							PricePerHourHumanReadable: 0.07,
 							PricePerGiB:               units.FloatEthToBigIntWei(0.08),
@@ -637,6 +713,10 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
+							Monitoring: PriceUSD{
+								PricePerHour: 0.01,
+								PricePerGiB:  0.02,
+							},
 						},
 						Other: &PriceByServiceTypeUSD{
 							Wireguard: PriceUSD{
@@ -656,6 +736,10 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 								PricePerGiB:  0.04,
 							},
 							DVPN: PriceUSD{
+								PricePerHour: 0.03,
+								PricePerGiB:  0.04,
+							},
+							Monitoring: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
@@ -706,6 +790,12 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 								PricePerGiB:               calculatePriceMYST(1, 0.02, 2),
 								PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.02, 2),
 							},
+							Monitoring: Price{
+								PricePerHour:              calculatePriceMYST(1, 0.01, 2),
+								PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.01, 2),
+								PricePerGiB:               calculatePriceMYST(1, 0.02, 2),
+								PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.02, 2),
+							},
 						},
 						Other: &PriceByServiceType{
 							Wireguard: Price{
@@ -733,6 +823,12 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 								PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.04, 3),
 							},
 							DVPN: Price{
+								PricePerHour:              calculatePriceMYST(1, 0.03, 3),
+								PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.03, 3),
+								PricePerGiB:               calculatePriceMYST(1, 0.04, 3),
+								PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.04, 3),
+							},
+							Monitoring: Price{
 								PricePerHour:              calculatePriceMYST(1, 0.03, 3),
 								PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.03, 3),
 								PricePerGiB:               calculatePriceMYST(1, 0.04, 3),
@@ -772,6 +868,12 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 								PricePerGiB:               calculatePriceMYST(1, 0.02, 2),
 								PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.02, 2),
 							},
+							Monitoring: Price{
+								PricePerHour:              calculatePriceMYST(1, 0.01, 2),
+								PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.01, 2),
+								PricePerGiB:               calculatePriceMYST(1, 0.02, 2),
+								PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.02, 2),
+							},
 						},
 						Other: &PriceByServiceType{
 							Wireguard: Price{
@@ -799,6 +901,12 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 								PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.04, 3),
 							},
 							DVPN: Price{
+								PricePerHour:              calculatePriceMYST(1, 0.03, 3),
+								PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.03, 3),
+								PricePerGiB:               calculatePriceMYST(1, 0.04, 3),
+								PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.04, 3),
+							},
+							Monitoring: Price{
 								PricePerHour:              calculatePriceMYST(1, 0.03, 3),
 								PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.03, 3),
 								PricePerGiB:               calculatePriceMYST(1, 0.04, 3),
@@ -848,6 +956,12 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 										PricePerGiB:               units.FloatEthToBigIntWei(0.06),
 										PricePerGiBHumanReadable:  0.06,
 									},
+									Monitoring: Price{
+										PricePerHour:              units.FloatEthToBigIntWei(0.05),
+										PricePerHourHumanReadable: 0.05,
+										PricePerGiB:               units.FloatEthToBigIntWei(0.06),
+										PricePerGiBHumanReadable:  0.06,
+									},
 								},
 								Other: &PriceByServiceType{
 									Wireguard: Price{
@@ -875,6 +989,12 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 										PricePerGiBHumanReadable:  0.08,
 									},
 									DVPN: Price{
+										PricePerHour:              units.FloatEthToBigIntWei(0.07),
+										PricePerHourHumanReadable: 0.07,
+										PricePerGiB:               units.FloatEthToBigIntWei(0.08),
+										PricePerGiBHumanReadable:  0.08,
+									},
+									Monitoring: Price{
 										PricePerHour:              units.FloatEthToBigIntWei(0.07),
 										PricePerHourHumanReadable: 0.07,
 										PricePerGiB:               units.FloatEthToBigIntWei(0.08),
@@ -908,6 +1028,10 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
+							Monitoring: PriceUSD{
+								PricePerHour: 0.01,
+								PricePerGiB:  0.02,
+							},
 						},
 						Other: &PriceByServiceTypeUSD{
 							Wireguard: PriceUSD{
@@ -927,6 +1051,10 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 								PricePerGiB:  0.04,
 							},
 							DVPN: PriceUSD{
+								PricePerHour: 0.03,
+								PricePerGiB:  0.04,
+							},
+							Monitoring: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
@@ -977,6 +1105,12 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 								PricePerGiB:               calculatePriceMYST(1, 0.02, 2),
 								PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.02, 2),
 							},
+							Monitoring: Price{
+								PricePerHour:              calculatePriceMYST(1, 0.01, 2),
+								PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.01, 2),
+								PricePerGiB:               calculatePriceMYST(1, 0.02, 2),
+								PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.02, 2),
+							},
 						},
 						Other: &PriceByServiceType{
 							Wireguard: Price{
@@ -1004,6 +1138,12 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 								PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.04, 3),
 							},
 							DVPN: Price{
+								PricePerHour:              calculatePriceMYST(1, 0.03, 3),
+								PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.03, 3),
+								PricePerGiB:               calculatePriceMYST(1, 0.04, 3),
+								PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.04, 3),
+							},
+							Monitoring: Price{
 								PricePerHour:              calculatePriceMYST(1, 0.03, 3),
 								PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.03, 3),
 								PricePerGiB:               calculatePriceMYST(1, 0.04, 3),
@@ -1043,6 +1183,12 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 								PricePerGiB:               units.FloatEthToBigIntWei(0.06),
 								PricePerGiBHumanReadable:  0.06,
 							},
+							Monitoring: Price{
+								PricePerHour:              units.FloatEthToBigIntWei(0.05),
+								PricePerHourHumanReadable: 0.05,
+								PricePerGiB:               units.FloatEthToBigIntWei(0.06),
+								PricePerGiBHumanReadable:  0.06,
+							},
 						},
 						Other: &PriceByServiceType{
 							Wireguard: Price{
@@ -1070,6 +1216,12 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 								PricePerGiBHumanReadable:  0.08,
 							},
 							DVPN: Price{
+								PricePerHour:              units.FloatEthToBigIntWei(0.07),
+								PricePerHourHumanReadable: 0.07,
+								PricePerGiB:               units.FloatEthToBigIntWei(0.08),
+								PricePerGiBHumanReadable:  0.08,
+							},
+							Monitoring: Price{
 								PricePerHour:              units.FloatEthToBigIntWei(0.07),
 								PricePerHourHumanReadable: 0.07,
 								PricePerGiB:               units.FloatEthToBigIntWei(0.08),
@@ -1110,6 +1262,10 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 								PricePerHour: 0.01,
 								PricePerGiB:  0.02,
 							},
+							Monitoring: PriceUSD{
+								PricePerHour: 0.01,
+								PricePerGiB:  0.02,
+							},
 						},
 						Other: &PriceByServiceTypeUSD{
 							Wireguard: PriceUSD{
@@ -1129,6 +1285,10 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 								PricePerGiB:  0.04,
 							},
 							DVPN: PriceUSD{
+								PricePerHour: 0.03,
+								PricePerGiB:  0.04,
+							},
+							Monitoring: PriceUSD{
 								PricePerHour: 0.03,
 								PricePerGiB:  0.04,
 							},
@@ -1179,6 +1339,12 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 								PricePerGiB:               calculatePriceMYST(1, 0.02, 2),
 								PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.02, 2),
 							},
+							Monitoring: Price{
+								PricePerHour:              calculatePriceMYST(1, 0.01, 2),
+								PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.01, 2),
+								PricePerGiB:               calculatePriceMYST(1, 0.02, 2),
+								PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.02, 2),
+							},
 						},
 						Other: &PriceByServiceType{
 							Wireguard: Price{
@@ -1206,6 +1372,12 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 								PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.04, 3),
 							},
 							DVPN: Price{
+								PricePerHour:              calculatePriceMYST(1, 0.03, 3),
+								PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.03, 3),
+								PricePerGiB:               calculatePriceMYST(1, 0.04, 3),
+								PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.04, 3),
+							},
+							Monitoring: Price{
 								PricePerHour:              calculatePriceMYST(1, 0.03, 3),
 								PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.03, 3),
 								PricePerGiB:               calculatePriceMYST(1, 0.04, 3),
@@ -1245,6 +1417,12 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 								PricePerGiB:               calculatePriceMYST(1, 0.02, 2),
 								PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.02, 2),
 							},
+							Monitoring: Price{
+								PricePerHour:              calculatePriceMYST(1, 0.01, 2),
+								PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.01, 2),
+								PricePerGiB:               calculatePriceMYST(1, 0.02, 2),
+								PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.02, 2),
+							},
 						},
 						Other: &PriceByServiceType{
 							Wireguard: Price{
@@ -1272,6 +1450,12 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 								PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.04, 3),
 							},
 							DVPN: Price{
+								PricePerHour:              calculatePriceMYST(1, 0.03, 3),
+								PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.03, 3),
+								PricePerGiB:               calculatePriceMYST(1, 0.04, 3),
+								PricePerGiBHumanReadable:  calculatePriceMystFloat(1, 0.04, 3),
+							},
+							Monitoring: Price{
 								PricePerHour:              calculatePriceMYST(1, 0.03, 3),
 								PricePerHourHumanReadable: calculatePriceMystFloat(1, 0.03, 3),
 								PricePerGiB:               calculatePriceMYST(1, 0.04, 3),

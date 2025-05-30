@@ -163,6 +163,10 @@ var expectedPricingConfig = `
             "dvpn": {
                 "price_per_hour_usd": 0.00005,
                 "price_per_gib_usd": 0.05
+            },
+			"monitoring": {
+                "price_per_hour_usd": 0.00005,
+                "price_per_gib_usd": 0.05
             }
         },
         "other": {
@@ -183,6 +187,10 @@ var expectedPricingConfig = `
                 "price_per_gib_usd": 0.012
             },
             "dvpn": {
+                "price_per_hour_usd": 0.00005,
+                "price_per_gib_usd": 0.03
+            },
+            "monitoring": {
                 "price_per_hour_usd": 0.00005,
                 "price_per_gib_usd": 0.03
             }
