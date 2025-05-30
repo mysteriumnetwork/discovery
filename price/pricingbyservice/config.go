@@ -232,7 +232,7 @@ var defaultPriceConfig = `{
             },
             "monitoring": {
                 "price_per_hour_usd": 0.00005,
-                "price_per_gib_usd": 0.05
+                "price_per_gib_usd": 0.03
             }
         }
     },
