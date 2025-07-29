@@ -7,6 +7,7 @@ package main
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
@@ -91,18 +92,46 @@ func main() {
 	health.NewAPI().RegisterRoutes(v3, v4, internal)
 
 	for _, brokerURL := range cfg.BrokerURL {
-		brokerListener := listener.New(brokerURL.String(), proposalRepo)
-
-		if err := brokerListener.Listen(); err != nil {
-			log.Fatal().Err(err).Msg("Could not listen to the broker")
+		brokerListener := connectToBroker(brokerURL.String(), proposalRepo)
+		if brokerListener != nil {
+			defer brokerListener.Shutdown()
+		} else {
+			log.Fatal().Msgf("Failed to connect to broker %s, stopping", brokerURL)
 		}
-		defer brokerListener.Shutdown()
 	}
 
 	if err := r.Run(); err != nil {
 		log.Err(err).Send()
 		return
 	}
+}
+
+func connectToBroker(brokerURL string, proposalRepo *proposal.Repository) *listener.Listener {
+	brokerListener := listener.New(brokerURL, proposalRepo)
+
+	const maxRetries = 3
+
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		if err := brokerListener.Listen(); err != nil {
+			if attempt == maxRetries-1 {
+				log.Error().Err(err).Msgf("Could not connect to broker %s after %d attempts, skipping", brokerURL, maxRetries)
+
+				return nil
+			}
+
+			// Exponential backoff: 1s, 2s, 4s
+			backoffDuration := time.Duration(1<<attempt) * time.Second
+			log.Warn().Err(err).Msgf("Failed to connect to broker %s (attempt %d/%d), retrying in %v...",
+				brokerURL, attempt+1, maxRetries, backoffDuration)
+			time.Sleep(backoffDuration)
+		} else {
+			log.Info().Msgf("Successfully connected to broker %s", brokerURL)
+
+			return brokerListener
+		}
+	}
+
+	return nil
 }
 
 func printBanner() {
