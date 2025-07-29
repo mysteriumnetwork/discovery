@@ -33,6 +33,7 @@ func (l *Listener) Listen() error {
 	opts := func(opts *nats.Options) error {
 		opts.PingInterval = time.Second * 5
 		opts.MaxReconnect = 5
+		opts.Timeout = time.Second * 10
 		opts.ClosedCB = func(c *nats.Conn) {
 			panic("nats connection closed")
 		}
