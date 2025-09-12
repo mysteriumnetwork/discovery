@@ -23,6 +23,7 @@ import (
 	"github.com/mysteriumnetwork/discovery/listener"
 	"github.com/mysteriumnetwork/discovery/middleware"
 	"github.com/mysteriumnetwork/discovery/proposal"
+	"github.com/mysteriumnetwork/discovery/proposal/aggregate"
 	"github.com/mysteriumnetwork/discovery/quality"
 	"github.com/mysteriumnetwork/discovery/quality/oracleapi"
 	"github.com/mysteriumnetwork/go-rest/apierror"
@@ -62,9 +63,10 @@ func main() {
 	}
 
 	proposalRepo := proposal.NewRepository(cfg.ProposalsHardLimitPerCountry, cfg.ProposalsSoftLimitPerCountry, cfg.CompatibilityMin)
+	aggregatedRepo := aggregate.NewRepository(cfg.ProposalsHardLimitPerCountry, cfg.ProposalsSoftLimitPerCountry)
 	qualityOracleAPI := oracleapi.New(cfg.QualityOracleURL.String())
 	qualityService := quality.NewService(qualityOracleAPI, cfg.QualityCacheTTL)
-	proposalService := proposal.NewService(proposalRepo, qualityService)
+	proposalService := proposal.NewService(proposalRepo, aggregatedRepo, qualityService)
 	go proposalService.StartExpirationJob()
 	defer proposalService.Shutdown()
 
@@ -92,11 +94,11 @@ func main() {
 	health.NewAPI().RegisterRoutes(v3, v4, internal)
 
 	for _, brokerURL := range cfg.BrokerURL {
-		brokerListener := connectToBroker(brokerURL.String(), proposalRepo)
+		brokerListener := connectToBroker(brokerURL.String(), proposalRepo, aggregatedRepo)
 		if brokerListener != nil {
 			defer brokerListener.Shutdown()
 		} else {
-			log.Fatal().Msgf("Failed to connect to broker %s, stopping", brokerURL)
+			log.Fatal().Msgf("Failed to connect to broker %v, stopping", brokerURL)
 		}
 	}
 
@@ -106,8 +108,8 @@ func main() {
 	}
 }
 
-func connectToBroker(brokerURL string, proposalRepo *proposal.Repository) *listener.Listener {
-	brokerListener := listener.New(brokerURL, proposalRepo)
+func connectToBroker(brokerURL string, proposalRepo *proposal.Repository, aggregatedRepo *aggregate.Repository) *listener.Listener {
+	brokerListener := listener.New(brokerURL, proposalRepo, aggregatedRepo)
 
 	const maxRetries = 3
 

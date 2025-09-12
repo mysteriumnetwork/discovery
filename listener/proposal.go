@@ -13,18 +13,21 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/mysteriumnetwork/discovery/proposal"
+	"github.com/mysteriumnetwork/discovery/proposal/aggregate"
 	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 )
 
 type Listener struct {
 	repository *proposal.Repository
+	aggregated *aggregate.Repository
 	brokerURL  string
 	conn       *nats.Conn
 }
 
-func New(brokerURL string, repository *proposal.Repository) *Listener {
+func New(brokerURL string, repository *proposal.Repository, aggregated *aggregate.Repository) *Listener {
 	return &Listener{
 		repository: repository,
+		aggregated: aggregated,
 		brokerURL:  brokerURL,
 	}
 }
@@ -60,6 +63,9 @@ func (l *Listener) Listen() error {
 			if err != nil {
 				log.Err(err).Msg("Failed to store proposal")
 			}
+			if err := l.aggregated.StoreV3(pingMsg.Proposal); err != nil {
+				log.Err(err).Msg("Failed to store v4 proposal")
+			}
 		}
 	}); err != nil {
 		return err
@@ -78,6 +84,9 @@ func (l *Listener) Listen() error {
 			if err != nil {
 				log.Err(err).Msg("Failed to store proposal")
 			}
+			if err := l.aggregated.StoreV3(pingMsg.Proposal); err != nil {
+				log.Err(err).Msg("Failed to store v4 proposal")
+			}
 		}
 	}); err != nil {
 		return err
@@ -93,6 +102,7 @@ func (l *Listener) Listen() error {
 				Msg("Failed to unregister proposal")
 		} else {
 			l.repository.Remove(unregisterMsg.Key())
+			l.aggregated.Remove(unregisterMsg.Proposal.ProviderID) // v4 uses ProviderID as key
 		}
 	}); err != nil {
 		return err
@@ -109,6 +119,7 @@ func (l *Listener) Listen() error {
 				Msg("Failed to unregister proposal")
 		} else {
 			l.repository.Remove(unregisterMsg.Key())
+			l.aggregated.Remove(unregisterMsg.Proposal.ProviderID) // v4 uses ProviderID as key
 		}
 	}); err != nil {
 		return err
