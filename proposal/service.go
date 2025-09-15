@@ -9,6 +9,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"github.com/mysteriumnetwork/discovery/proposal/aggregate"
 	"github.com/mysteriumnetwork/discovery/proposal/metrics"
 	v3 "github.com/mysteriumnetwork/discovery/proposal/v3"
 	"github.com/mysteriumnetwork/discovery/quality"
@@ -16,19 +17,20 @@ import (
 
 type Service struct {
 	*Repository
+	Aggregated     *aggregate.Repository
 	qualityService *quality.Service
 	shutdown       chan struct{}
 }
 
-func NewService(repository *Repository, qualityService *quality.Service) *Service {
+func NewService(repository *Repository, aggregated *aggregate.Repository, qualityService *quality.Service) *Service {
 	return &Service{
 		Repository:     repository,
+		Aggregated:     aggregated,
 		qualityService: qualityService,
 	}
 }
 
 type ListOpts struct {
-	from                    string
 	providerIDS             []string
 	serviceType             string
 	locationCountry         string
@@ -60,6 +62,27 @@ func (s *Service) List(opts ListOpts, limited bool) []v3.Proposal {
 	or.Load(s.qualityService)
 
 	return metrics.EnhanceWithMetrics(proposals, or.QualityResponse, metrics.Filters{
+		IncludeMonitoringFailed: opts.includeMonitoringFailed,
+		NATCompatibility:        opts.natCompatibility,
+		BandwidthMin:            opts.bandwidthMin,
+		QualityMin:              opts.qualityMin,
+		PresetID:                opts.presetID,
+	})
+}
+
+func (s *Service) ListAggregated(opts ListOpts) []aggregate.Proposal {
+	proposals := s.Aggregated.List(aggregate.RepoListOpts{
+		ProviderIDS:  opts.providerIDS,
+		ServiceType:  opts.serviceType,
+		Country:      opts.locationCountry,
+		IpType:       opts.ipType,
+		AccessPolicy: opts.accessPolicy,
+	})
+
+	or := &metrics.OracleResponses{}
+	or.Load(s.qualityService)
+
+	return aggregate.EnhanceWithMetrics(proposals, or.QualityResponse, aggregate.Filters{
 		IncludeMonitoringFailed: opts.includeMonitoringFailed,
 		NATCompatibility:        opts.natCompatibility,
 		BandwidthMin:            opts.bandwidthMin,
@@ -126,6 +149,8 @@ func (s *Service) StartExpirationJob() {
 		case <-time.After(s.expirationJobDelay):
 			count := s.Repository.Expire()
 			log.Debug().Msgf("Expired proposals: %v", count)
+			count = s.Aggregated.Expire()
+			log.Debug().Msgf("Expired aggregated proposals: %v", count)
 		case <-s.shutdown:
 			return
 		}
