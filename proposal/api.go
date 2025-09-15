@@ -15,10 +15,11 @@ import (
 )
 
 type API struct {
-	service           *Service
-	proposalsCache    *persist.MemoryStore
-	countriesCache    *persist.MemoryStore
-	proposalsCacheTTL time.Duration
+	service                  *Service
+	proposalsCache           *persist.MemoryStore
+	countriesCache           *persist.MemoryStore
+	aggregatedProposalsCache *persist.MemoryStore
+	proposalsCacheTTL        time.Duration
 }
 
 func NewAPI(service *Service,
@@ -35,6 +36,8 @@ func NewAPI(service *Service,
 		a.proposalsCache.Cache.SetCacheSizeLimit(proposalsCacheLimit)
 		a.countriesCache = persist.NewMemoryStore(proposalsCacheTTL)
 		a.countriesCache.Cache.SetCacheSizeLimit(countriesCacheLimit)
+		a.aggregatedProposalsCache = persist.NewMemoryStore(proposalsCacheTTL)
+		a.aggregatedProposalsCache.Cache.SetCacheSizeLimit(proposalsCacheLimit)
 	}
 	return a
 }
@@ -175,10 +178,17 @@ func (a *API) RegisterInternalRoutes(r gin.IRoutes) {
 			),
 			a.AllProposals,
 		)
+		r.GET("/proposals/aggregated",
+			cache.Cache(
+				a.aggregatedProposalsCache,
+				a.proposalsCacheTTL,
+				cache.WithCacheStrategyByRequest(cacheStrategy),
+			),
+			a.AggregatedProposals)
 	} else {
 		r.GET("/proposals", a.AllProposals)
+		r.GET("/proposals/aggregated", a.AggregatedProposals)
 	}
-	r.GET("/proposals/aggregated", a.AggregatedProposals)
 	r.GET("/proposals-metadata", a.ProposalsMetadata)
 }
 

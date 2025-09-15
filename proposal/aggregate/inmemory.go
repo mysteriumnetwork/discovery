@@ -50,7 +50,6 @@ func (r *Repository) List(opts RepoListOpts) (res []Proposal) {
 	defer r.mu.RUnlock()
 
 	proposals := r.proposals
-	countryLimit := make(map[string]int)
 
 	if len(opts.ProviderIDS) > 0 && opts.ServiceType != "" {
 		// short path: skip iteration over collection,
@@ -68,14 +67,7 @@ func (r *Repository) List(opts RepoListOpts) (res []Proposal) {
 		if !match(p.proposal, opts) {
 			continue
 		}
-
-		countryLimit[p.proposal.Location.Country]++
-
-		if countryLimit[p.proposal.Location.Country] <= r.proposalsHardLimitPerCountry {
-			if countryLimit[p.proposal.Location.Country] <= r.proposalsSoftLimitPerCountry || countryLimit[p.proposal.Location.Country]%10 == 0 {
-				res = append(res, p.proposal)
-			}
-		}
+		res = append(res, p.proposal)
 	}
 
 	return res
@@ -165,7 +157,6 @@ func (r *Repository) Remove(key string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	// proposalRemoved(r.proposals[key].proposal)
 	delete(r.proposals, key)
 }
 
