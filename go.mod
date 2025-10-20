@@ -1,6 +1,6 @@
 module github.com/mysteriumnetwork/discovery
 
-go 1.20
+go 1.24.2
 
 require (
 	github.com/ReneKroon/ttlcache/v2 v2.9.0
@@ -11,19 +11,19 @@ require (
 	github.com/fln/pprotect v0.0.0-20160819093714-7d932ef9e7a2
 	github.com/gin-contrib/pprof v1.4.0
 	github.com/gin-gonic/gin v1.9.1
-	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/magefile/mage v1.15.0
 	github.com/mailru/easyjson v0.7.7
 	github.com/mysteriumnetwork/go-ci v0.0.0-20220711082519-1245471bae0d
 	github.com/mysteriumnetwork/go-rest v0.3.1
 	github.com/mysteriumnetwork/logger v0.0.8
-	github.com/mysteriumnetwork/payments v1.0.1-0.20230504074308-b9ebd048323b
+	github.com/mysteriumnetwork/payments/v3 v3.5.0-rc.1
 	github.com/mysteriumnetwork/token v0.0.0-20230103110440-8c69bf40ce61
 	github.com/nats-io/nats.go v1.26.0
 	github.com/prometheus/client_golang v1.15.1
-	github.com/rs/zerolog v1.29.1
-	github.com/stretchr/testify v1.8.3
+	github.com/redis/go-redis/v9 v9.4.0
+	github.com/rs/zerolog v1.30.0
+	github.com/stretchr/testify v1.8.4
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14
 	github.com/swaggo/gin-swagger v1.3.0
 	github.com/swaggo/swag v1.16.1
@@ -38,7 +38,6 @@ require (
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.6 // indirect
@@ -48,6 +47,7 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.14.1 // indirect
+	github.com/go-redis/redis/v8 v8.11.5 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
@@ -73,18 +73,17 @@ require (
 	github.com/prometheus/client_model v0.4.0 // indirect
 	github.com/prometheus/common v0.44.0 // indirect
 	github.com/prometheus/procfs v0.10.1 // indirect
-	github.com/redis/go-redis/v9 v9.4.0 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	golang.org/x/arch v0.3.0 // indirect
-	golang.org/x/crypto v0.9.0 // indirect
-	golang.org/x/net v0.10.0 // indirect
-	golang.org/x/sync v0.2.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/crypto v0.15.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/sync v0.5.0 // indirect
+	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.0.0-20220922220347-f3bd1da661af // indirect
-	golang.org/x/tools v0.9.3 // indirect
+	golang.org/x/tools v0.13.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

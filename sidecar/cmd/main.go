@@ -23,8 +23,8 @@ import (
 	"github.com/rs/zerolog/log"
 
 	// unconfuse the number of cores go can use in k8s
-	"github.com/mysteriumnetwork/payments/exchange/coingecko"
-	"github.com/mysteriumnetwork/payments/exchange/coinranking"
+	"github.com/mysteriumnetwork/payments/v3/exchange/coingecko"
+	"github.com/mysteriumnetwork/payments/v3/exchange/coinranking"
 	_ "go.uber.org/automaxprocs"
 )
 
