@@ -13,7 +13,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/mysteriumnetwork/discovery/metrics"
-	"github.com/mysteriumnetwork/payments/units"
+	"github.com/mysteriumnetwork/payments/v3/units"
 )
 
 const PriceRedisKey = "DISCOVERY_CURRENT_PRICE_BY_SERVICE"

@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/mysteriumnetwork/payments/units"
+	"github.com/mysteriumnetwork/payments/v3/units"
 )
 
 func Test_calculatePrice(t *testing.T) {
