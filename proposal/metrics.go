@@ -53,8 +53,16 @@ var discoveryProvidersTotal = prometheus.NewGaugeVec(
 	[]string{"format", "compatibility", "country", "node_type"},
 )
 
+var discoveryProviderASNDiversity = prometheus.NewGaugeVec(
+	prometheus.GaugeOpts{
+		Name: "discovery_provider_asn_diversity",
+		Help: "Number of providers sharing the same ASN as the given provider",
+	},
+	[]string{"provider", "country", "node_type"},
+)
+
 func init() {
-	prometheus.MustRegister(discoveryProposalAdded, discoveryProposalExpired, discoveryProposalRemoved, discoveryProposalActive, discoveryProvidersTotal)
+	prometheus.MustRegister(discoveryProposalAdded, discoveryProposalExpired, discoveryProposalRemoved, discoveryProposalActive, discoveryProvidersTotal, discoveryProviderASNDiversity)
 }
 
 func accessPolicies(p v3.Proposal) string {
@@ -102,5 +110,34 @@ func proposalActive(proposals []v3.Proposal) {
 
 	for labels, value := range total {
 		discoveryProvidersTotal.WithLabelValues(strings.Split(labels, "|")...).Set(float64(value))
+	}
+
+	providerASNDiversity(proposals)
+}
+
+type providerInfo struct {
+	asn      int
+	country  string
+	nodeType string
+}
+
+func providerASNDiversity(proposals []v3.Proposal) {
+	providers := make(map[string]providerInfo)
+	asnCount := make(map[int]int)
+	for _, p := range proposals {
+		if _, ok := providers[p.ProviderID]; !ok {
+			providers[p.ProviderID] = providerInfo{
+				asn:      p.Location.ASN,
+				country:  p.Location.Country,
+				nodeType: string(p.Location.IPType),
+			}
+			asnCount[p.Location.ASN]++
+		}
+	}
+
+	// Reset stale label combinations before writing fresh values.
+	discoveryProviderASNDiversity.Reset()
+	for providerID, info := range providers {
+		discoveryProviderASNDiversity.WithLabelValues(providerID, info.country, info.nodeType).Set(float64(asnCount[info.asn]))
 	}
 }
