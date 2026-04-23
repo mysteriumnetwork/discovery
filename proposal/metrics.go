@@ -58,7 +58,7 @@ var discoveryProviderASNDiversity = prometheus.NewGaugeVec(
 		Name: "discovery_provider_asn_diversity",
 		Help: "Number of providers sharing the same ASN as the given provider",
 	},
-	[]string{"provider", "country", "node_type"},
+	[]string{"provider", "asn", "country", "node_type"},
 )
 
 func init() {
@@ -138,6 +138,6 @@ func providerASNDiversity(proposals []v3.Proposal) {
 	// Reset stale label combinations before writing fresh values.
 	discoveryProviderASNDiversity.Reset()
 	for providerID, info := range providers {
-		discoveryProviderASNDiversity.WithLabelValues(providerID, info.country, info.nodeType).Set(float64(asnCount[info.asn]))
+		discoveryProviderASNDiversity.WithLabelValues(providerID, strconv.Itoa(info.asn), info.country, info.nodeType).Set(float64(asnCount[info.asn]))
 	}
 }
