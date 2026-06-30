@@ -28,6 +28,7 @@ type FiatPriceAPI interface {
 
 type PriceUpdater struct {
 	priceAPI      FiatPriceAPI
+	demandIndexes CountryDemandIndexProvider
 	priceLifetime time.Duration
 	mystBound     Bound
 	db            redis.UniversalClient
@@ -43,6 +44,7 @@ type PriceUpdater struct {
 func NewPricer(
 	cfgProvider ConfigProvider,
 	priceAPI FiatPriceAPI,
+	demandIndexes CountryDemandIndexProvider,
 	priceLifetime time.Duration,
 	sensibleMystBound Bound,
 	db redis.UniversalClient,
@@ -50,6 +52,7 @@ func NewPricer(
 	pricer := &PriceUpdater{
 		cfgProvider:   cfgProvider,
 		priceAPI:      priceAPI,
+		demandIndexes: demandIndexes,
 		priceLifetime: priceLifetime,
 		mystBound:     sensibleMystBound,
 		stop:          make(chan struct{}),
@@ -101,10 +104,22 @@ func (p *PriceUpdater) updatePrices() error {
 		return err
 	}
 
-	p.lp = p.generateNewLatestPrice(mystUSD, cfg)
-
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
+	countryDemandIndexes, err := p.demandIndexes.DemandIndexes(ctx)
+	if err != nil {
+		return err
+	}
+	countryMultipliers := DemandBoostMultipliers(cfg, countryDemandIndexes)
+	countryServiceMultipliers := DemandBoostServiceMultipliers(cfg, countryDemandIndexes)
+	if countryMultipliers != nil && updateCountryModifiers(&cfg, countryMultipliers) {
+		if err := p.cfgProvider.Update(cfg); err != nil {
+			return fmt.Errorf("update country modifiers: %w", err)
+		}
+	}
+
+	p.lp = p.generateNewLatestPrice(mystUSD, cfg, countryServiceMultipliers)
+
 	marshalled, err := json.Marshal(p.lp)
 	if err != nil {
 		return err
@@ -119,6 +134,78 @@ func (p *PriceUpdater) updatePrices() error {
 
 	log.Info().Msgf("price update complete by service")
 	return nil
+}
+
+func DemandBoostMultipliers(cfg Config, demandIndexes map[ISO3166CountryCode]float64) map[ISO3166CountryCode]float64 {
+	if cfg.DemandBoost == nil {
+		return nil
+	}
+
+	multipliers := make(map[ISO3166CountryCode]float64)
+	for country, boostCfg := range cfg.DemandBoost.Countries {
+		multipliers[country] = demandBoostMultiplier(boostCfg, demandIndexes[country])
+	}
+
+	return multipliers
+}
+
+func DemandBoostServiceMultipliers(cfg Config, demandIndexes map[ISO3166CountryCode]float64) map[ISO3166CountryCode]map[ServiceType]float64 {
+	if cfg.DemandBoost == nil {
+		return nil
+	}
+
+	multipliers := make(map[ISO3166CountryCode]map[ServiceType]float64)
+	for country, boostCfg := range cfg.DemandBoost.Countries {
+		multiplier := demandBoostMultiplier(boostCfg, demandIndexes[country])
+		serviceTypes := boostCfg.ServiceTypes
+		if len(serviceTypes) == 0 {
+			serviceTypes = allServiceTypes
+		}
+
+		multipliers[country] = make(map[ServiceType]float64, len(serviceTypes))
+		for _, serviceType := range serviceTypes {
+			multipliers[country][serviceType] = multiplier
+		}
+	}
+
+	return multipliers
+}
+
+func demandBoostMultiplier(boostCfg DemandBoostCountryCfg, currentDemandIndex float64) float64 {
+	gapRatio := (boostCfg.TargetDemandIndex - currentDemandIndex) / boostCfg.TargetDemandIndex
+	if gapRatio < 0 {
+		gapRatio = 0
+	}
+	if gapRatio > 1 {
+		gapRatio = 1
+	}
+	return 1 + (gapRatio * boostCfg.MaxBonus)
+}
+
+func updateCountryModifiers(cfg *Config, multipliers map[ISO3166CountryCode]float64) bool {
+	modifiers := make(map[ISO3166CountryCode]Modifier, len(multipliers))
+	for country, multiplier := range multipliers {
+		modifiers[country] = Modifier{
+			Residential: multiplier,
+			Other:       multiplier,
+		}
+	}
+
+	if len(cfg.CountryModifiers) == len(modifiers) {
+		equal := true
+		for country, modifier := range modifiers {
+			if cfg.CountryModifiers[country] != modifier {
+				equal = false
+				break
+			}
+		}
+		if equal {
+			return false
+		}
+	}
+
+	cfg.CountryModifiers = modifiers
+	return true
 }
 
 func (p *PriceUpdater) submitMetrics() {
@@ -166,12 +253,12 @@ func (p *PriceUpdater) Stop() {
 	p.once.Do(func() { close(p.stop) })
 }
 
-func (p *PriceUpdater) generateNewLatestPrice(mystUSD float64, cfg Config) LatestPrices {
+func (p *PriceUpdater) generateNewLatestPrice(mystUSD float64, cfg Config, multipliers map[ISO3166CountryCode]map[ServiceType]float64) LatestPrices {
 	tm := time.Now().UTC()
 
 	newLP := LatestPrices{
 		Defaults:          p.generateNewDefaults(mystUSD, cfg),
-		PerCountry:        p.generateNewPerCountry(mystUSD, cfg),
+		PerCountry:        p.generateNewPerCountryWithOptionalServiceMultipliers(mystUSD, cfg, multipliers),
 		CurrentValidUntil: tm.Add(p.priceLifetime),
 	}
 
@@ -275,92 +362,130 @@ func (p *PriceUpdater) generateNewDefaults(mystUSD float64, cfg Config) *PriceHi
 }
 
 func (p *PriceUpdater) generateNewPerCountry(mystUSD float64, cfg Config) map[string]*PriceHistory {
-	countries := make(map[string]*PriceHistory)
-	for countryCode := range CountryCodeToName {
-		mod, ok := cfg.CountryModifiers[ISO3166CountryCode(countryCode)]
+	return p.generateNewPerCountryWithModifier(mystUSD, cfg, func(country ISO3166CountryCode, _ ServiceType) Modifier {
+		modifier, ok := cfg.CountryModifiers[country]
 		if !ok {
-			mod = Modifier{
-				Residential: 1,
-				Other:       1,
+			return Modifier{Residential: 1, Other: 1}
+		}
+		return modifier
+	})
+}
+
+func (p *PriceUpdater) generateNewPerCountryWithOptionalServiceMultipliers(mystUSD float64, cfg Config, multipliers map[ISO3166CountryCode]map[ServiceType]float64) map[string]*PriceHistory {
+	if multipliers == nil {
+		return p.generateNewPerCountry(mystUSD, cfg)
+	}
+	return p.generateNewPerCountryWithServiceMultipliers(mystUSD, cfg, multipliers)
+}
+
+func (p *PriceUpdater) generateNewPerCountryWithMultipliers(mystUSD float64, cfg Config, multipliers map[ISO3166CountryCode]float64) map[string]*PriceHistory {
+	return p.generateNewPerCountryWithModifier(mystUSD, cfg, func(country ISO3166CountryCode, _ ServiceType) Modifier {
+		multiplier, ok := multipliers[country]
+		if !ok {
+			multiplier = 1
+		}
+		return Modifier{Residential: multiplier, Other: multiplier}
+	})
+}
+
+func (p *PriceUpdater) generateNewPerCountryWithServiceMultipliers(mystUSD float64, cfg Config, multipliers map[ISO3166CountryCode]map[ServiceType]float64) map[string]*PriceHistory {
+	return p.generateNewPerCountryWithModifier(mystUSD, cfg, func(country ISO3166CountryCode, serviceType ServiceType) Modifier {
+		multiplier := float64(1)
+		if countryMultipliers, ok := multipliers[country]; ok {
+			if serviceMultiplier, ok := countryMultipliers[serviceType]; ok {
+				multiplier = serviceMultiplier
 			}
 		}
+		return Modifier{Residential: multiplier, Other: multiplier}
+	})
+}
+
+func (p *PriceUpdater) generateNewPerCountryWithModifier(mystUSD float64, cfg Config, modifierFor func(ISO3166CountryCode, ServiceType) Modifier) map[string]*PriceHistory {
+	countries := make(map[string]*PriceHistory)
+	for countryCode := range CountryCodeToName {
+		wireguardMod := modifierFor(countryCode, ServiceTypeWireguard)
+		scrapingMod := modifierFor(countryCode, ServiceTypeScraping)
+		quicScrapingMod := modifierFor(countryCode, ServiceTypeQUICScraping)
+		dataTransferMod := modifierFor(countryCode, ServiceTypeDataTransfer)
+		dvpnMod := modifierFor(countryCode, ServiceTypeDVPN)
+		monitoringMod := modifierFor(countryCode, ServiceTypeMonitoring)
 
 		ph := &PriceHistory{
 			Current: &PriceByType{
 				Residential: &PriceByServiceType{
 					Wireguard: Price{
-						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.Wireguard.PricePerHour, mod.Residential),
-						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.Wireguard.PricePerHour, mod.Residential),
-						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.Wireguard.PricePerGiB, mod.Residential),
-						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.Wireguard.PricePerGiB, mod.Residential),
+						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.Wireguard.PricePerHour, wireguardMod.Residential),
+						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.Wireguard.PricePerHour, wireguardMod.Residential),
+						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.Wireguard.PricePerGiB, wireguardMod.Residential),
+						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.Wireguard.PricePerGiB, wireguardMod.Residential),
 					},
 					Scraping: Price{
-						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.Scraping.PricePerHour, mod.Residential),
-						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.Scraping.PricePerHour, mod.Residential),
-						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.Scraping.PricePerGiB, mod.Residential),
-						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.Scraping.PricePerGiB, mod.Residential),
+						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.Scraping.PricePerHour, scrapingMod.Residential),
+						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.Scraping.PricePerHour, scrapingMod.Residential),
+						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.Scraping.PricePerGiB, scrapingMod.Residential),
+						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.Scraping.PricePerGiB, scrapingMod.Residential),
 					},
 					QUICScraping: Price{
-						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.QUICScraping.PricePerHour, mod.Residential),
-						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.QUICScraping.PricePerHour, mod.Residential),
-						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.QUICScraping.PricePerGiB, mod.Residential),
-						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.QUICScraping.PricePerGiB, mod.Residential),
+						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.QUICScraping.PricePerHour, quicScrapingMod.Residential),
+						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.QUICScraping.PricePerHour, quicScrapingMod.Residential),
+						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.QUICScraping.PricePerGiB, quicScrapingMod.Residential),
+						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.QUICScraping.PricePerGiB, quicScrapingMod.Residential),
 					},
 					DataTransfer: Price{
-						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.DataTransfer.PricePerHour, mod.Residential),
-						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.DataTransfer.PricePerHour, mod.Residential),
-						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.DataTransfer.PricePerGiB, mod.Residential),
-						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.DataTransfer.PricePerGiB, mod.Residential),
+						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.DataTransfer.PricePerHour, dataTransferMod.Residential),
+						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.DataTransfer.PricePerHour, dataTransferMod.Residential),
+						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.DataTransfer.PricePerGiB, dataTransferMod.Residential),
+						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.DataTransfer.PricePerGiB, dataTransferMod.Residential),
 					},
 					DVPN: Price{
-						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.DVPN.PricePerHour, mod.Residential),
-						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.DVPN.PricePerHour, mod.Residential),
-						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.DVPN.PricePerGiB, mod.Residential),
-						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.DVPN.PricePerGiB, mod.Residential),
+						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.DVPN.PricePerHour, dvpnMod.Residential),
+						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.DVPN.PricePerHour, dvpnMod.Residential),
+						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.DVPN.PricePerGiB, dvpnMod.Residential),
+						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.DVPN.PricePerGiB, dvpnMod.Residential),
 					},
 					Monitoring: Price{
-						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.Monitoring.PricePerHour, mod.Residential),
-						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.Monitoring.PricePerHour, mod.Residential),
-						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.Monitoring.PricePerGiB, mod.Residential),
-						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.Monitoring.PricePerGiB, mod.Residential),
+						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.Monitoring.PricePerHour, monitoringMod.Residential),
+						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.Monitoring.PricePerHour, monitoringMod.Residential),
+						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.Monitoring.PricePerGiB, monitoringMod.Residential),
+						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.Monitoring.PricePerGiB, monitoringMod.Residential),
 					},
 				},
 				Other: &PriceByServiceType{
 					Wireguard: Price{
-						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.Wireguard.PricePerHour, mod.Other),
-						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.Wireguard.PricePerHour, mod.Other),
-						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.Wireguard.PricePerGiB, mod.Other),
-						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.Wireguard.PricePerGiB, mod.Other),
+						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.Wireguard.PricePerHour, wireguardMod.Other),
+						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.Wireguard.PricePerHour, wireguardMod.Other),
+						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.Wireguard.PricePerGiB, wireguardMod.Other),
+						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.Wireguard.PricePerGiB, wireguardMod.Other),
 					},
 					Scraping: Price{
-						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.Scraping.PricePerHour, mod.Other),
-						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.Scraping.PricePerHour, mod.Other),
-						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.Scraping.PricePerGiB, mod.Other),
-						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.Scraping.PricePerGiB, mod.Other),
+						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.Scraping.PricePerHour, scrapingMod.Other),
+						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.Scraping.PricePerHour, scrapingMod.Other),
+						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.Scraping.PricePerGiB, scrapingMod.Other),
+						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.Scraping.PricePerGiB, scrapingMod.Other),
 					},
 					QUICScraping: Price{
-						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.QUICScraping.PricePerHour, mod.Other),
-						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.QUICScraping.PricePerHour, mod.Other),
-						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.QUICScraping.PricePerGiB, mod.Other),
-						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.QUICScraping.PricePerGiB, mod.Other),
+						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.QUICScraping.PricePerHour, quicScrapingMod.Other),
+						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.QUICScraping.PricePerHour, quicScrapingMod.Other),
+						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.QUICScraping.PricePerGiB, quicScrapingMod.Other),
+						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.QUICScraping.PricePerGiB, quicScrapingMod.Other),
 					},
 					DataTransfer: Price{
-						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerHour, mod.Other),
-						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerHour, mod.Other),
-						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerGiB, mod.Other),
-						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerGiB, mod.Other),
+						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerHour, dataTransferMod.Other),
+						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerHour, dataTransferMod.Other),
+						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerGiB, dataTransferMod.Other),
+						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerGiB, dataTransferMod.Other),
 					},
 					DVPN: Price{
-						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.DVPN.PricePerHour, mod.Other),
-						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.DVPN.PricePerHour, mod.Other),
-						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.DVPN.PricePerGiB, mod.Other),
-						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.DVPN.PricePerGiB, mod.Other),
+						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.DVPN.PricePerHour, dvpnMod.Other),
+						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.DVPN.PricePerHour, dvpnMod.Other),
+						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.DVPN.PricePerGiB, dvpnMod.Other),
+						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.DVPN.PricePerGiB, dvpnMod.Other),
 					},
 					Monitoring: Price{
-						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.Monitoring.PricePerHour, mod.Other),
-						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.Monitoring.PricePerHour, mod.Other),
-						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.Monitoring.PricePerGiB, mod.Other),
-						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.Monitoring.PricePerGiB, mod.Other),
+						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.Monitoring.PricePerHour, monitoringMod.Other),
+						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.Monitoring.PricePerHour, monitoringMod.Other),
+						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.Monitoring.PricePerGiB, monitoringMod.Other),
+						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.Monitoring.PricePerGiB, monitoringMod.Other),
 					},
 				},
 			},

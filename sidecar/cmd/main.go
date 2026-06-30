@@ -35,6 +35,14 @@ func main() {
 		log.Fatal().Err(err).Msg("Failed to read config")
 	}
 
+	prometheusDemandIndexes := pricingbyservice.NewPrometheusDemandIndexProvider(
+		&cfg.PrometheusURL,
+		cfg.PrometheusUsername,
+		cfg.PrometheusPassword,
+		pricingbyservice.CountryDemandIndexQuery,
+	)
+	countryDemandIndexes := pricingbyservice.NewDailyCountryDemandIndexProvider(prometheusDemandIndexes)
+
 	rdb := redis.NewUniversalClient(&redis.UniversalOptions{
 		Addrs:    cfg.RedisAddress,
 		Password: cfg.RedisPass,
@@ -64,10 +72,10 @@ func main() {
 	log.Info().Msg("cfger started")
 
 	metrics.InitialiseMonitoring()
-
 	pricer, err := pricingbyservice.NewPricer(
 		cfger,
 		mrkt,
+		countryDemandIndexes,
 		time.Minute*5,
 		pricingbyservice.Bound{Min: 0.1, Max: 3.0},
 		rdb,
@@ -78,27 +86,6 @@ func main() {
 	}
 	log.Info().Msg("pricer started")
 	defer pricer.Stop()
-
-	cfgerByService := pricingbyservice.NewConfigProviderDB(rdb)
-	_, err = cfger.Get()
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to load cfg")
-	}
-	log.Info().Msg("cfger by service started")
-
-	pricerByService, err := pricingbyservice.NewPricer(
-		cfgerByService,
-		mrkt,
-		time.Minute*5,
-		pricingbyservice.Bound{Min: 0.1, Max: 3.0},
-		rdb,
-	)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to initialize Pricer by service")
-		return
-	}
-	log.Info().Msg("pricer by service started")
-	defer pricerByService.Stop()
 
 	router := gin.New()
 	router.Use(gin.Recovery())
@@ -162,17 +149,27 @@ func configureLogger() {
 }
 
 type Options struct {
-	RedisAddress      []string
-	RedisPass         string
-	RedisDB           int
-	QualityOracleURL  url.URL
-	GeckoURL          url.URL
-	CoinRankingURL    url.URL
-	TokenRateCacheTTL time.Duration
-	CoinRankingToken  string
+	RedisAddress       []string
+	RedisPass          string
+	RedisDB            int
+	QualityOracleURL   url.URL
+	GeckoURL           url.URL
+	CoinRankingURL     url.URL
+	TokenRateCacheTTL  time.Duration
+	CoinRankingToken   string
+	PrometheusURL      url.URL
+	PrometheusUsername string
+	PrometheusPassword string
 }
 
 func ReadConfig() (*Options, error) {
+	prometheusURL, err := config.RequiredEnvURL("PROMETHEUS_URL")
+	if err != nil {
+		return nil, err
+	}
+	prometheusUsername := config.OptionalEnv("PROMETHEUS_USERNAME", "")
+	prometheusPassword := config.OptionalEnv("PROMETHEUS_PASSWORD", "")
+
 	redisAddress, err := config.RequiredEnv("REDIS_ADDRESS")
 	if err != nil {
 		return nil, err
@@ -211,13 +208,16 @@ func ReadConfig() (*Options, error) {
 		return nil, err
 	}
 	return &Options{
-		RedisAddress:      strings.Split(redisAddress, ";"),
-		RedisPass:         redisPass,
-		RedisDB:           redisDBint,
-		QualityOracleURL:  *qualityOracleURL,
-		GeckoURL:          *geckoURL,
-		CoinRankingURL:    *coinRankingURL,
-		TokenRateCacheTTL: *tokenRateCacheTTL,
-		CoinRankingToken:  coinRankingToken,
+		RedisAddress:       strings.Split(redisAddress, ";"),
+		RedisPass:          redisPass,
+		RedisDB:            redisDBint,
+		QualityOracleURL:   *qualityOracleURL,
+		GeckoURL:           *geckoURL,
+		CoinRankingURL:     *coinRankingURL,
+		TokenRateCacheTTL:  *tokenRateCacheTTL,
+		CoinRankingToken:   coinRankingToken,
+		PrometheusURL:      *prometheusURL,
+		PrometheusUsername: prometheusUsername,
+		PrometheusPassword: prometheusPassword,
 	}, nil
 }

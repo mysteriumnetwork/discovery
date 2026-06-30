@@ -1,12 +1,153 @@
 package pricingbyservice
 
 import (
+	"math"
 	"math/big"
 	"reflect"
 	"testing"
 
 	"github.com/mysteriumnetwork/payments/v3/units"
 )
+
+func TestUpdateCountryModifiers(t *testing.T) {
+	cfg := Config{
+		CountryModifiers: map[ISO3166CountryCode]Modifier{
+			"US": {Residential: 1, Other: 1},
+		},
+	}
+
+	changed := updateCountryModifiers(&cfg, map[ISO3166CountryCode]float64{
+		"US": 1.5,
+		"DE": 1,
+	})
+
+	if !changed {
+		t.Fatal("expected country modifiers to change")
+	}
+	want := map[ISO3166CountryCode]Modifier{
+		"US": {Residential: 1.5, Other: 1.5},
+		"DE": {Residential: 1, Other: 1},
+	}
+	if !reflect.DeepEqual(want, cfg.CountryModifiers) {
+		t.Fatalf("country modifiers = %#v, want %#v", cfg.CountryModifiers, want)
+	}
+
+	if updateCountryModifiers(&cfg, map[ISO3166CountryCode]float64{"US": 1.5, "DE": 1}) {
+		t.Fatal("expected unchanged country modifiers not to trigger an update")
+	}
+}
+
+func TestDemandBoostMultipliers(t *testing.T) {
+	cfg := Config{
+		DemandBoost: &DemandBoostConfig{
+			Countries: map[ISO3166CountryCode]DemandBoostCountryCfg{
+				"PL": {TargetDemandIndex: 0.1, MaxBonus: 0.5},
+				"DE": {TargetDemandIndex: 0.1, MaxBonus: 0.5},
+				"US": {TargetDemandIndex: 0.1, MaxBonus: 0.5},
+				"GB": {TargetDemandIndex: 0.05, MaxBonus: 1},
+			},
+		},
+	}
+
+	got := DemandBoostMultipliers(cfg, map[ISO3166CountryCode]float64{
+		"PL": 0.00972,
+		"DE": 0.1,
+		"US": 0.2,
+		"GB": 0.025,
+	})
+
+	want := map[ISO3166CountryCode]float64{"PL": 1.4514, "DE": 1, "US": 1, "GB": 1.5}
+	for country, wantMultiplier := range want {
+		if math.Abs(got[country]-wantMultiplier) > 0.0000001 {
+			t.Fatalf("country %v multiplier = %v, want %v", country, got[country], wantMultiplier)
+		}
+	}
+}
+
+func TestDemandBoostMultipliersDefaultsMissingDemandIndexToMaxBoost(t *testing.T) {
+	cfg := Config{
+		DemandBoost: &DemandBoostConfig{
+			Countries: map[ISO3166CountryCode]DemandBoostCountryCfg{
+				"PL": {TargetDemandIndex: 0.1, MaxBonus: 0.5},
+			},
+		},
+	}
+
+	got := DemandBoostMultipliers(cfg, nil)
+
+	if got["PL"] != 1.5 {
+		t.Fatalf("missing demand index multiplier = %v, want 1.5", got["PL"])
+	}
+}
+
+func TestDemandBoostServiceMultipliers(t *testing.T) {
+	cfg := Config{
+		DemandBoost: &DemandBoostConfig{
+			Countries: map[ISO3166CountryCode]DemandBoostCountryCfg{
+				"PL": {
+					TargetDemandIndex: 0.1,
+					MaxBonus:          0.5,
+					ServiceTypes:      []ServiceType{ServiceTypeDVPN, ServiceTypeWireguard},
+				},
+				"GB": {TargetDemandIndex: 0.1, MaxBonus: 0.5},
+			},
+		},
+	}
+
+	got := DemandBoostServiceMultipliers(cfg, map[ISO3166CountryCode]float64{
+		"PL": 0,
+		"GB": 0,
+	})
+
+	if got["PL"][ServiceTypeDVPN] != 1.5 || got["PL"][ServiceTypeWireguard] != 1.5 {
+		t.Fatalf("expected PL selected service multipliers to be boosted, got %#v", got["PL"])
+	}
+	if _, ok := got["PL"][ServiceTypeScraping]; ok {
+		t.Fatalf("expected PL scraping to be omitted, got %#v", got["PL"])
+	}
+	if len(got["GB"]) != len(allServiceTypes) {
+		t.Fatalf("expected empty GB service list to include all services, got %#v", got["GB"])
+	}
+}
+
+func TestGenerateNewPerCountryWithServiceMultipliers(t *testing.T) {
+	price := PriceUSD{PricePerHour: 1, PricePerGiB: 2}
+	cfg := Config{
+		BasePrices: PriceByTypeUSD{
+			Residential: &PriceByServiceTypeUSD{
+				Wireguard: price, Scraping: price, QUICScraping: price,
+				DataTransfer: price, DVPN: price, Monitoring: price,
+			},
+			Other: &PriceByServiceTypeUSD{
+				Wireguard: price, Scraping: price, QUICScraping: price,
+				DataTransfer: price, DVPN: price, Monitoring: price,
+			},
+		},
+	}
+	pricer := &PriceUpdater{}
+
+	prices := pricer.generateNewPerCountryWithServiceMultipliers(1, cfg, map[ISO3166CountryCode]map[ServiceType]float64{
+		"PL": {
+			ServiceTypeDVPN: 1.5,
+		},
+	})
+
+	if prices["PL"].Current.Residential.DVPN.PricePerHourHumanReadable != 1.5 {
+		t.Fatalf("expected PL DVPN to be boosted")
+	}
+	if prices["PL"].Current.Residential.Wireguard.PricePerHourHumanReadable != 1 {
+		t.Fatalf("expected PL wireguard to remain unboosted")
+	}
+	if prices["PL"].Current.Other.DVPN.PricePerHourHumanReadable != 1.5 {
+		t.Fatalf("expected PL other DVPN to be boosted")
+	}
+}
+
+func TestDemandBoostMultipliersDisabledWhenConfigMissing(t *testing.T) {
+	if got := DemandBoostMultipliers(Config{}, nil); got != nil {
+		t.Fatalf("demandBoostMultipliers() = %#v, want nil", got)
+	}
+}
 
 func Test_calculatePrice(t *testing.T) {
 	type args struct {
