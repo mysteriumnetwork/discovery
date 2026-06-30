@@ -183,3 +183,69 @@ func TestConfig_Validate(t *testing.T) {
 		})
 	}
 }
+
+func TestDemandBoostConfig_Validate(t *testing.T) {
+	tests := []struct {
+		name    string
+		cfg     DemandBoostConfig
+		wantErr bool
+	}{
+		{
+			name: "accepts valid config",
+			cfg: DemandBoostConfig{
+				Countries: map[ISO3166CountryCode]DemandBoostCountryCfg{
+					"PL": {TargetDemandIndex: 0.1, MaxBonus: 0.5},
+				},
+			},
+		},
+		{
+			name: "rejects invalid country",
+			cfg: DemandBoostConfig{
+				Countries: map[ISO3166CountryCode]DemandBoostCountryCfg{
+					"pl": {TargetDemandIndex: 0.1, MaxBonus: 0.5},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "rejects negative max bonus",
+			cfg: DemandBoostConfig{
+				Countries: map[ISO3166CountryCode]DemandBoostCountryCfg{
+					"PL": {TargetDemandIndex: 0.1, MaxBonus: -0.1},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "rejects unset target demand index",
+			cfg: DemandBoostConfig{
+				Countries: map[ISO3166CountryCode]DemandBoostCountryCfg{
+					"PL": {MaxBonus: 0.5},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "rejects invalid service type",
+			cfg: DemandBoostConfig{
+				Countries: map[ISO3166CountryCode]DemandBoostCountryCfg{
+					"PL": {
+						TargetDemandIndex: 0.1,
+						MaxBonus:          0.5,
+						ServiceTypes:      []ServiceType{"bad_service"},
+					},
+				},
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.cfg.Validate()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("DemandBoostConfig.Validate() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

@@ -87,6 +87,7 @@ func (cpd *ConfigProviderDB) fetchConfig() (Config, error) {
 type Config struct {
 	BasePrices       PriceByTypeUSD                  `json:"base_prices"`
 	CountryModifiers map[ISO3166CountryCode]Modifier `json:"country_modifiers"`
+	DemandBoost      *DemandBoostConfig              `json:"demand_boost,omitempty"`
 }
 
 func (c Config) Validate() error {
@@ -107,6 +108,86 @@ func (c Config) Validate() error {
 		}
 	}
 
+	if c.DemandBoost != nil {
+		if err := c.DemandBoost.Validate(); err != nil {
+			return fmt.Errorf("demand boost invalid: %w", err)
+		}
+	}
+
+	return nil
+}
+
+type DemandBoostConfig struct {
+	Countries map[ISO3166CountryCode]DemandBoostCountryCfg `json:"countries"`
+}
+
+func (d DemandBoostConfig) Validate() error {
+	for country, cfg := range d.Countries {
+		if err := country.Validate(); err != nil {
+			return err
+		}
+		if err := cfg.Validate(); err != nil {
+			return fmt.Errorf("country %v contains invalid demand boost: %w", country, err)
+		}
+	}
+
+	return nil
+}
+
+type DemandBoostCountryCfg struct {
+	TargetDemandIndex float64       `json:"target_demand_index"`
+	MaxBonus          float64       `json:"max_bonus"`
+	ServiceTypes      []ServiceType `json:"service_types,omitempty"`
+}
+
+func (d DemandBoostCountryCfg) Validate() error {
+	if d.TargetDemandIndex <= 0 {
+		return errors.New("target demand index should be higher than 0")
+	}
+	if d.MaxBonus < 0 {
+		return errors.New("max bonus should be non negative")
+	}
+	for _, serviceType := range d.ServiceTypes {
+		if err := serviceType.Validate(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+type ServiceType string
+
+const (
+	ServiceTypeWireguard    ServiceType = "wireguard"
+	ServiceTypeScraping     ServiceType = "scraping"
+	ServiceTypeQUICScraping ServiceType = "quic_scraping"
+	ServiceTypeDataTransfer ServiceType = "data_transfer"
+	ServiceTypeDVPN         ServiceType = "dvpn"
+	ServiceTypeMonitoring   ServiceType = "monitoring"
+)
+
+var validServiceTypes = map[ServiceType]struct{}{
+	ServiceTypeWireguard:    {},
+	ServiceTypeScraping:     {},
+	ServiceTypeQUICScraping: {},
+	ServiceTypeDataTransfer: {},
+	ServiceTypeDVPN:         {},
+	ServiceTypeMonitoring:   {},
+}
+
+var allServiceTypes = []ServiceType{
+	ServiceTypeWireguard,
+	ServiceTypeScraping,
+	ServiceTypeQUICScraping,
+	ServiceTypeDataTransfer,
+	ServiceTypeDVPN,
+	ServiceTypeMonitoring,
+}
+
+func (s ServiceType) Validate() error {
+	if _, ok := validServiceTypes[s]; !ok {
+		return fmt.Errorf("%v is an invalid service type", s)
+	}
 	return nil
 }
 
@@ -241,5 +322,8 @@ var defaultPriceConfig = `{
             "residential": 1,
             "other": 1
         }
+    },
+    "demand_boost": {
+        "countries": {}
     }
 }`
