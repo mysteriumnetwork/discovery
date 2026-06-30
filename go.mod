@@ -1,6 +1,6 @@
 module github.com/mysteriumnetwork/discovery
 
-go 1.24.2
+go 1.26
 
 require (
 	github.com/ReneKroon/ttlcache/v2 v2.9.0
