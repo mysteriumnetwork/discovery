@@ -322,8 +322,5 @@ var defaultPriceConfig = `{
             "residential": 1,
             "other": 1
         }
-    },
-    "demand_boost": {
-        "countries": {}
     }
 }`
