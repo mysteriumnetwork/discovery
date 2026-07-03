@@ -77,7 +77,7 @@ func main() {
 		mrkt,
 		countryDemandIndexes,
 		time.Minute*5,
-		pricingbyservice.Bound{Min: 0.1, Max: 3.0},
+		pricingbyservice.Bound{Min: 0.01, Max: 3.0},
 		rdb,
 	)
 	if err != nil {

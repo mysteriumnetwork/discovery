@@ -246,6 +246,18 @@ func TestPricer_isMystInSensibleLimit(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "accepts price below ten cents when inside configured bound",
+			fields: fields{
+				mystBound: Bound{
+					Min: 0.01,
+					Max: 3,
+				},
+			},
+			args: args{
+				price: 0.090547,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
