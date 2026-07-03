@@ -19,7 +19,6 @@ import (
 	"github.com/mysteriumnetwork/discovery/middleware"
 	"github.com/mysteriumnetwork/discovery/price"
 	"github.com/mysteriumnetwork/discovery/price/pricingbyservice"
-	"github.com/mysteriumnetwork/go-rest/apierror"
 	mlog "github.com/mysteriumnetwork/logger"
 )
 
@@ -41,8 +40,8 @@ func main() {
 
 	r := gin.New()
 	r.Use(gin.Recovery())
+	r.Use(middleware.ErrorHandler)
 	r.Use(middleware.Logger)
-	r.Use(apierror.ErrorHandler)
 
 	rdb := redis.NewUniversalClient(&redis.UniversalOptions{
 		Addrs:    cfg.RedisAddress,

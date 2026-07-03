@@ -2,6 +2,7 @@ package price
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 
 const (
 	errCodeParsingJson = "err_parsing_config"
+	errCodeMarshalJson = "err_marshal_prices"
 
 	errCodeNoConfig     = "err_no_config"
 	errCodeUpdateConfig = "err_update_config"
@@ -23,11 +25,15 @@ const (
 )
 
 type APIByService struct {
-	pricer *pricingbyservice.PriceGetter
+	pricer latestPricer
 	cfger  pricingbyservice.ConfigProvider
 	redis  redis.UniversalClient
 
 	ac authCheck
+}
+
+type latestPricer interface {
+	GetPrices() pricingbyservice.LatestPrices
 }
 
 type authCheck interface {
@@ -51,7 +57,14 @@ func NewAPIByService(redis redis.UniversalClient, pricer *pricingbyservice.Price
 // @Router /prices [get]
 // @Tags prices
 func (a *APIByService) LatestPrices(c *gin.Context) {
-	c.JSON(200, a.pricer.GetPrices())
+	blob, err := json.Marshal(a.pricer.GetPrices())
+	if err != nil {
+		log.Err(err).Msg("Failed to marshal latest prices")
+		c.Error(apierror.Internal(err.Error(), errCodeMarshalJson))
+		return
+	}
+
+	c.Data(http.StatusOK, gin.MIMEJSON, blob)
 }
 
 // GetConfig returns the base pricing config
