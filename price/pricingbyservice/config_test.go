@@ -30,6 +30,7 @@ func TestConfig_Validate(t *testing.T) {
 						DataTransfer: mprice,
 						DVPN:         mprice,
 						Monitoring:   mprice,
+						Runtime:      mprice,
 					},
 					Other: &PriceByServiceTypeUSD{
 						Wireguard:    mprice,
@@ -38,6 +39,7 @@ func TestConfig_Validate(t *testing.T) {
 						DataTransfer: mprice,
 						DVPN:         mprice,
 						Monitoring:   mprice,
+						Runtime:      mprice,
 					},
 				},
 				CountryModifiers: map[ISO3166CountryCode]Modifier{
@@ -60,6 +62,7 @@ func TestConfig_Validate(t *testing.T) {
 						DataTransfer: mprice,
 						DVPN:         mprice,
 						Monitoring:   mprice,
+						Runtime:      mprice,
 					},
 					Other: &PriceByServiceTypeUSD{
 						Wireguard:    mprice,
@@ -68,6 +71,7 @@ func TestConfig_Validate(t *testing.T) {
 						DataTransfer: mprice,
 						DVPN:         mprice,
 						Monitoring:   mprice,
+						Runtime:      mprice,
 					},
 				},
 				CountryModifiers: map[ISO3166CountryCode]Modifier{
@@ -90,6 +94,7 @@ func TestConfig_Validate(t *testing.T) {
 						DataTransfer: mprice,
 						DVPN:         mprice,
 						Monitoring:   mprice,
+						Runtime:      mprice,
 					},
 					Other: &PriceByServiceTypeUSD{
 						Wireguard:    mprice,
@@ -98,6 +103,7 @@ func TestConfig_Validate(t *testing.T) {
 						DataTransfer: mprice,
 						DVPN:         mprice,
 						Monitoring:   mprice,
+						Runtime:      mprice,
 					},
 				},
 				CountryModifiers: map[ISO3166CountryCode]Modifier{
@@ -119,6 +125,7 @@ func TestConfig_Validate(t *testing.T) {
 						DataTransfer: mprice,
 						DVPN:         mprice,
 						Monitoring:   mprice,
+						Runtime:      mprice,
 					},
 					Other: &PriceByServiceTypeUSD{
 						Wireguard:    mprice,
@@ -130,6 +137,7 @@ func TestConfig_Validate(t *testing.T) {
 						},
 						DVPN:       mprice,
 						Monitoring: mprice,
+						Runtime:    mprice,
 					},
 				},
 				CountryModifiers: map[ISO3166CountryCode]Modifier{
@@ -152,6 +160,7 @@ func TestConfig_Validate(t *testing.T) {
 						DataTransfer: mprice,
 						DVPN:         mprice,
 						Monitoring:   mprice,
+						Runtime:      mprice,
 					},
 					Other: &PriceByServiceTypeUSD{
 						Scraping:     mprice,
@@ -159,6 +168,7 @@ func TestConfig_Validate(t *testing.T) {
 						DataTransfer: mprice,
 						DVPN:         mprice,
 						Monitoring:   mprice,
+						Runtime:      mprice,
 					},
 				},
 				CountryModifiers: map[ISO3166CountryCode]Modifier{
@@ -181,6 +191,31 @@ func TestConfig_Validate(t *testing.T) {
 				t.Errorf("Config.Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
+	}
+}
+
+func TestServiceTypeValidate(t *testing.T) {
+	for _, serviceType := range []ServiceType{ServiceTypeRuntime, "runtime-cdp"} {
+		if err := serviceType.Validate(); err != nil {
+			t.Errorf("Validate() error = %v for service type %q", err, serviceType)
+		}
+	}
+}
+
+func TestRuntimePricesUseRuntimeConfiguration(t *testing.T) {
+	priceUpdater := &PriceUpdater{}
+	runtimePrice := PriceUSD{PricePerHour: 0.01, PricePerGiB: 0.02}
+	config := Config{BasePrices: PriceByTypeUSD{
+		Residential: &PriceByServiceTypeUSD{DataTransfer: PriceUSD{PricePerHour: 1, PricePerGiB: 1}, Runtime: runtimePrice},
+		Other:       &PriceByServiceTypeUSD{DataTransfer: PriceUSD{PricePerHour: 1, PricePerGiB: 1}, Runtime: runtimePrice},
+	}}
+
+	prices := priceUpdater.generateNewDefaults(1, config)
+	if prices.Current.Residential.Runtime.PricePerHourHumanReadable != runtimePrice.PricePerHour {
+		t.Fatalf("runtime price per hour = %v, want %v", prices.Current.Residential.Runtime.PricePerHourHumanReadable, runtimePrice.PricePerHour)
+	}
+	if prices.Current.Other.Runtime.PricePerGiBHumanReadable != runtimePrice.PricePerGiB {
+		t.Fatalf("runtime price per GiB = %v, want %v", prices.Current.Other.Runtime.PricePerGiBHumanReadable, runtimePrice.PricePerGiB)
 	}
 }
 
