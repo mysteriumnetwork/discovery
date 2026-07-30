@@ -160,6 +160,10 @@ var expectedPricingConfig = `
                 "price_per_hour_usd": 0.00005,
                 "price_per_gib_usd": 0.016
             },
+            "runtime": {
+                "price_per_hour_usd": 0.00005,
+                "price_per_gib_usd": 0.016
+            },
             "dvpn": {
                 "price_per_hour_usd": 0.00005,
                 "price_per_gib_usd": 0.05
@@ -183,6 +187,10 @@ var expectedPricingConfig = `
                 "price_per_gib_usd": 0.0101
             },
             "data_transfer": {
+                "price_per_hour_usd": 0.00005,
+                "price_per_gib_usd": 0.012
+            },
+            "runtime": {
                 "price_per_hour_usd": 0.00005,
                 "price_per_gib_usd": 0.012
             },

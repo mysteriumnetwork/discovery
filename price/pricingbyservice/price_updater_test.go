@@ -87,7 +87,7 @@ func TestDemandBoostServiceMultipliers(t *testing.T) {
 				"PL": {
 					TargetDemandIndex: 0.1,
 					MaxBonus:          0.5,
-					ServiceTypes:      []ServiceType{ServiceTypeDVPN, ServiceTypeWireguard},
+					ServiceTypes:      []ServiceType{ServiceTypeDVPN, ServiceTypeWireguard, "runtime-cdp"},
 				},
 				"GB": {TargetDemandIndex: 0.1, MaxBonus: 0.5},
 			},
@@ -101,6 +101,9 @@ func TestDemandBoostServiceMultipliers(t *testing.T) {
 
 	if got["PL"][ServiceTypeDVPN] != 1.5 || got["PL"][ServiceTypeWireguard] != 1.5 {
 		t.Fatalf("expected PL selected service multipliers to be boosted, got %#v", got["PL"])
+	}
+	if got["PL"][ServiceTypeRuntime] != 1.5 {
+		t.Fatalf("expected PL runtime multiplier to be boosted, got %#v", got["PL"])
 	}
 	if _, ok := got["PL"][ServiceTypeScraping]; ok {
 		t.Fatalf("expected PL scraping to be omitted, got %#v", got["PL"])
@@ -818,7 +821,9 @@ func TestPricer_generateNewDefaults(t *testing.T) {
 			p := &PriceUpdater{
 				lp: tt.fields.lp,
 			}
-			if got := p.generateNewDefaults(tt.args.mystInUSD, tt.fields.cfg); !reflect.DeepEqual(got, tt.want) {
+			got := p.generateNewDefaults(tt.args.mystInUSD, tt.fields.cfg)
+			clearRuntimePrices(got)
+			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Pricer.generateNewDefaults() = %v, want %v", got, tt.want)
 			}
 		})
@@ -1628,10 +1633,18 @@ func TestPricer_generateNewPerCountry(t *testing.T) {
 			generated := p.generateNewPerCountry(tt.args.mystInUSD, tt.fields.cfg)
 			got := generated["US"]
 			want := tt.want["US"]
+			clearRuntimePrices(got)
 
 			if !reflect.DeepEqual(got, want) {
 				t.Errorf("Pricer.generateNewPerCountry() = %v, want %v", got, want)
 			}
 		})
+	}
+}
+
+func clearRuntimePrices(priceHistory *PriceHistory) {
+	for _, prices := range []*PriceByType{priceHistory.Current, priceHistory.Previous} {
+		prices.Residential.Runtime = Price{}
+		prices.Other.Runtime = Price{}
 	}
 }

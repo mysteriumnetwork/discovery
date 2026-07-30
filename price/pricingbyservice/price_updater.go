@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"strings"
 	"sync"
 	"time"
 
@@ -164,11 +165,18 @@ func DemandBoostServiceMultipliers(cfg Config, demandIndexes map[ISO3166CountryC
 
 		multipliers[country] = make(map[ServiceType]float64, len(serviceTypes))
 		for _, serviceType := range serviceTypes {
-			multipliers[country][serviceType] = multiplier
+			multipliers[country][canonicalServiceType(serviceType)] = multiplier
 		}
 	}
 
 	return multipliers
+}
+
+func canonicalServiceType(serviceType ServiceType) ServiceType {
+	if strings.HasPrefix(string(serviceType), string(ServiceTypeRuntime)+"-") {
+		return ServiceTypeRuntime
+	}
+	return serviceType
 }
 
 func demandBoostMultiplier(boostCfg DemandBoostCountryCfg, currentDemandIndex float64) float64 {
@@ -237,6 +245,11 @@ func (p *PriceUpdater) submitPriceMetric(country string, price *PriceByType) {
 	metrics.CurrentPriceByCountry.WithLabelValues(country, "residential", "data_transfer", "per_gib").Set(price.Residential.DataTransfer.PricePerGiBHumanReadable)
 	metrics.CurrentPriceByCountry.WithLabelValues(country, "residential", "data_transfer", "per_hour").Set(price.Residential.DataTransfer.PricePerHourHumanReadable)
 
+	metrics.CurrentPriceByCountry.WithLabelValues(country, "other", "runtime", "per_gib").Set(price.Other.Runtime.PricePerGiBHumanReadable)
+	metrics.CurrentPriceByCountry.WithLabelValues(country, "other", "runtime", "per_hour").Set(price.Other.Runtime.PricePerHourHumanReadable)
+	metrics.CurrentPriceByCountry.WithLabelValues(country, "residential", "runtime", "per_gib").Set(price.Residential.Runtime.PricePerGiBHumanReadable)
+	metrics.CurrentPriceByCountry.WithLabelValues(country, "residential", "runtime", "per_hour").Set(price.Residential.Runtime.PricePerHourHumanReadable)
+
 	metrics.CurrentPriceByCountry.WithLabelValues(country, "other", "dvpn", "per_gib").Set(price.Other.DVPN.PricePerGiBHumanReadable)
 	metrics.CurrentPriceByCountry.WithLabelValues(country, "other", "dvpn", "per_hour").Set(price.Other.DVPN.PricePerHourHumanReadable)
 	metrics.CurrentPriceByCountry.WithLabelValues(country, "residential", "dvpn", "per_gib").Set(price.Residential.DVPN.PricePerGiBHumanReadable)
@@ -300,6 +313,12 @@ func (p *PriceUpdater) generateNewDefaults(mystUSD float64, cfg Config) *PriceHi
 					PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.DataTransfer.PricePerGiB, 1),
 					PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.DataTransfer.PricePerGiB, 1),
 				},
+				Runtime: Price{
+					PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.Runtime.PricePerHour, 1),
+					PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.Runtime.PricePerHour, 1),
+					PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.Runtime.PricePerGiB, 1),
+					PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.Runtime.PricePerGiB, 1),
+				},
 				DVPN: Price{
 					PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.DVPN.PricePerHour, 1),
 					PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.DVPN.PricePerHour, 1),
@@ -337,6 +356,12 @@ func (p *PriceUpdater) generateNewDefaults(mystUSD float64, cfg Config) *PriceHi
 					PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerHour, 1),
 					PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerGiB, 1),
 					PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerGiB, 1),
+				},
+				Runtime: Price{
+					PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.Runtime.PricePerHour, 1),
+					PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.Runtime.PricePerHour, 1),
+					PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.Runtime.PricePerGiB, 1),
+					PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.Runtime.PricePerGiB, 1),
 				},
 				DVPN: Price{
 					PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.DVPN.PricePerHour, 1),
@@ -407,6 +432,7 @@ func (p *PriceUpdater) generateNewPerCountryWithModifier(mystUSD float64, cfg Co
 		scrapingMod := modifierFor(countryCode, ServiceTypeScraping)
 		quicScrapingMod := modifierFor(countryCode, ServiceTypeQUICScraping)
 		dataTransferMod := modifierFor(countryCode, ServiceTypeDataTransfer)
+		runtimeMod := modifierFor(countryCode, ServiceTypeRuntime)
 		dvpnMod := modifierFor(countryCode, ServiceTypeDVPN)
 		monitoringMod := modifierFor(countryCode, ServiceTypeMonitoring)
 
@@ -436,6 +462,12 @@ func (p *PriceUpdater) generateNewPerCountryWithModifier(mystUSD float64, cfg Co
 						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.DataTransfer.PricePerHour, dataTransferMod.Residential),
 						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.DataTransfer.PricePerGiB, dataTransferMod.Residential),
 						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.DataTransfer.PricePerGiB, dataTransferMod.Residential),
+					},
+					Runtime: Price{
+						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.Runtime.PricePerHour, runtimeMod.Residential),
+						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.Runtime.PricePerHour, runtimeMod.Residential),
+						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.Runtime.PricePerGiB, runtimeMod.Residential),
+						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Residential.Runtime.PricePerGiB, runtimeMod.Residential),
 					},
 					DVPN: Price{
 						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Residential.DVPN.PricePerHour, dvpnMod.Residential),
@@ -474,6 +506,12 @@ func (p *PriceUpdater) generateNewPerCountryWithModifier(mystUSD float64, cfg Co
 						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerHour, dataTransferMod.Other),
 						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerGiB, dataTransferMod.Other),
 						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.DataTransfer.PricePerGiB, dataTransferMod.Other),
+					},
+					Runtime: Price{
+						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.Runtime.PricePerHour, runtimeMod.Other),
+						PricePerHourHumanReadable: calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.Runtime.PricePerHour, runtimeMod.Other),
+						PricePerGiB:               calculatePriceMYST(mystUSD, cfg.BasePrices.Other.Runtime.PricePerGiB, runtimeMod.Other),
+						PricePerGiBHumanReadable:  calculatePriceMystFloat(mystUSD, cfg.BasePrices.Other.Runtime.PricePerGiB, runtimeMod.Other),
 					},
 					DVPN: Price{
 						PricePerHour:              calculatePriceMYST(mystUSD, cfg.BasePrices.Other.DVPN.PricePerHour, dvpnMod.Other),
@@ -574,6 +612,7 @@ type PriceByServiceType struct {
 	Scraping     Price `json:"scraping"`
 	QUICScraping Price `json:"quic_scraping"`
 	DataTransfer Price `json:"data_transfer"`
+	Runtime      Price `json:"runtime"`
 	DVPN         Price `json:"dvpn"`
 	Monitoring   Price `json:"monitoring"`
 }

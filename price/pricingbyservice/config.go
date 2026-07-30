@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -164,6 +165,7 @@ const (
 	ServiceTypeDataTransfer ServiceType = "data_transfer"
 	ServiceTypeDVPN         ServiceType = "dvpn"
 	ServiceTypeMonitoring   ServiceType = "monitoring"
+	ServiceTypeRuntime      ServiceType = "runtime"
 )
 
 var validServiceTypes = map[ServiceType]struct{}{
@@ -173,6 +175,7 @@ var validServiceTypes = map[ServiceType]struct{}{
 	ServiceTypeDataTransfer: {},
 	ServiceTypeDVPN:         {},
 	ServiceTypeMonitoring:   {},
+	ServiceTypeRuntime:      {},
 }
 
 var allServiceTypes = []ServiceType{
@@ -182,9 +185,13 @@ var allServiceTypes = []ServiceType{
 	ServiceTypeDataTransfer,
 	ServiceTypeDVPN,
 	ServiceTypeMonitoring,
+	ServiceTypeRuntime,
 }
 
 func (s ServiceType) Validate() error {
+	if strings.HasPrefix(string(s), string(ServiceTypeRuntime)+"-") {
+		return nil
+	}
 	if _, ok := validServiceTypes[s]; !ok {
 		return fmt.Errorf("%v is an invalid service type", s)
 	}
@@ -216,6 +223,7 @@ type PriceByServiceTypeUSD struct {
 	DataTransfer PriceUSD `json:"data_transfer"`
 	DVPN         PriceUSD `json:"dvpn"`
 	Monitoring   PriceUSD `json:"monitoring"`
+	Runtime      PriceUSD `json:"runtime"`
 }
 
 func (p PriceByServiceTypeUSD) Validate() error {
@@ -232,6 +240,9 @@ func (p PriceByServiceTypeUSD) Validate() error {
 		return err
 	}
 	if err := p.Monitoring.Validate(); err != nil {
+		return err
+	}
+	if err := p.Runtime.Validate(); err != nil {
 		return err
 	}
 	return p.DataTransfer.Validate()
@@ -281,6 +292,10 @@ var defaultPriceConfig = `{
                 "price_per_hour_usd": 0.00005,
                 "price_per_gib_usd": 0.016
             },
+			"runtime": {
+				"price_per_hour_usd": 0.00005,
+				"price_per_gib_usd": 0.016
+			},
             "dvpn": {
                 "price_per_hour_usd": 0.00005,
                 "price_per_gib_usd": 0.05
@@ -307,6 +322,10 @@ var defaultPriceConfig = `{
                 "price_per_hour_usd": 0.00005,
                 "price_per_gib_usd": 0.012
             },
+			"runtime": {
+				"price_per_hour_usd": 0.00005,
+				"price_per_gib_usd": 0.012
+			},
             "dvpn": {
                 "price_per_hour_usd": 0.00005,
                 "price_per_gib_usd": 0.03
