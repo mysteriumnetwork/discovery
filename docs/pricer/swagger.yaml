@@ -1,0 +1,293 @@
+basePath: /api/v4
+definitions:
+  price.CountryServiceTrend:
+    properties:
+      country:
+        type: string
+      country_code:
+        type: string
+      service:
+        type: string
+      trend:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  price.CountryTrend:
+    properties:
+      country:
+        type: string
+      country_code:
+        type: string
+      intensity:
+        type: string
+      trend:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  price.EarningTrendSummary:
+    properties:
+      decreasing:
+        $ref: '#/definitions/price.TrendSummaryItem'
+      increasing:
+        $ref: '#/definitions/price.TrendSummaryItem'
+      stable:
+        $ref: '#/definitions/price.TrendSummaryItem'
+    type: object
+  price.EarningTrendsResponse:
+    properties:
+      countries:
+        items:
+          $ref: '#/definitions/price.CountryTrend'
+        type: array
+      latest_updates:
+        items:
+          $ref: '#/definitions/price.CountryServiceTrend'
+        type: array
+      summary:
+        $ref: '#/definitions/price.EarningTrendSummary'
+      trends:
+        items:
+          $ref: '#/definitions/price.CountryServiceTrend'
+        type: array
+    type: object
+  price.PingResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  price.StatusResponse:
+    properties:
+      cache_ok:
+        type: boolean
+    type: object
+  price.TrendSummaryItem:
+    properties:
+      count:
+        type: integer
+      share_percentage:
+        type: number
+    type: object
+  pricingbyservice.Config:
+    properties:
+      base_prices:
+        $ref: '#/definitions/pricingbyservice.PriceByTypeUSD'
+      country_modifiers:
+        additionalProperties:
+          $ref: '#/definitions/pricingbyservice.Modifier'
+        type: object
+      demand_boost:
+        $ref: '#/definitions/pricingbyservice.DemandBoostConfig'
+    type: object
+  pricingbyservice.DemandBoostConfig:
+    properties:
+      countries:
+        additionalProperties:
+          $ref: '#/definitions/pricingbyservice.DemandBoostCountryCfg'
+        type: object
+    type: object
+  pricingbyservice.DemandBoostCountryCfg:
+    properties:
+      max_bonus:
+        type: number
+      service_types:
+        items:
+          type: string
+        type: array
+      target_demand_index:
+        type: number
+    type: object
+  pricingbyservice.LatestPrices:
+    properties:
+      current_server_time:
+        type: string
+      current_valid_until:
+        type: string
+      defaults:
+        $ref: '#/definitions/pricingbyservice.PriceHistory'
+      per_country:
+        additionalProperties:
+          $ref: '#/definitions/pricingbyservice.PriceHistory'
+        type: object
+      previous_valid_until:
+        type: string
+    type: object
+  pricingbyservice.Modifier:
+    properties:
+      other:
+        type: number
+      residential:
+        type: number
+    type: object
+  pricingbyservice.Price:
+    properties:
+      price_per_gib:
+        type: integer
+      price_per_gib_human_readable:
+        type: number
+      price_per_hour:
+        type: integer
+      price_per_hour_human_readable:
+        type: number
+    type: object
+  pricingbyservice.PriceByServiceType:
+    properties:
+      data_transfer:
+        $ref: '#/definitions/pricingbyservice.Price'
+      dvpn:
+        $ref: '#/definitions/pricingbyservice.Price'
+      monitoring:
+        $ref: '#/definitions/pricingbyservice.Price'
+      quic_scraping:
+        $ref: '#/definitions/pricingbyservice.Price'
+      runtime:
+        $ref: '#/definitions/pricingbyservice.Price'
+      scraping:
+        $ref: '#/definitions/pricingbyservice.Price'
+      wireguard:
+        $ref: '#/definitions/pricingbyservice.Price'
+    type: object
+  pricingbyservice.PriceByServiceTypeUSD:
+    properties:
+      data_transfer:
+        $ref: '#/definitions/pricingbyservice.PriceUSD'
+      dvpn:
+        $ref: '#/definitions/pricingbyservice.PriceUSD'
+      monitoring:
+        $ref: '#/definitions/pricingbyservice.PriceUSD'
+      quic_scraping:
+        $ref: '#/definitions/pricingbyservice.PriceUSD'
+      runtime:
+        $ref: '#/definitions/pricingbyservice.PriceUSD'
+      scraping:
+        $ref: '#/definitions/pricingbyservice.PriceUSD'
+      wireguard:
+        $ref: '#/definitions/pricingbyservice.PriceUSD'
+    type: object
+  pricingbyservice.PriceByType:
+    properties:
+      other:
+        $ref: '#/definitions/pricingbyservice.PriceByServiceType'
+      residential:
+        $ref: '#/definitions/pricingbyservice.PriceByServiceType'
+    type: object
+  pricingbyservice.PriceByTypeUSD:
+    properties:
+      other:
+        $ref: '#/definitions/pricingbyservice.PriceByServiceTypeUSD'
+      residential:
+        $ref: '#/definitions/pricingbyservice.PriceByServiceTypeUSD'
+    type: object
+  pricingbyservice.PriceHistory:
+    properties:
+      current:
+        $ref: '#/definitions/pricingbyservice.PriceByType'
+      previous:
+        $ref: '#/definitions/pricingbyservice.PriceByType'
+    type: object
+  pricingbyservice.PriceUSD:
+    properties:
+      price_per_gib_usd:
+        type: number
+      price_per_hour_usd:
+        type: number
+    type: object
+info:
+  contact: {}
+  description: Pricing and earning-trend API for Mysterium Network
+  title: Discovery Pricer API
+  version: "4.0"
+paths:
+  /earning-trends:
+    get:
+      description: Country and service demand classifications without pricing values
+      parameters:
+      - description: Use countries to omit service-level details
+        in: query
+        name: scope
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/price.EarningTrendsResponse'
+      summary: Earning trends
+      tags:
+      - prices
+  /ping:
+    get:
+      consumes:
+      - application/json
+      description: Ping
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/price.PingResponse'
+      summary: Ping
+      tags:
+      - system
+  /prices:
+    get:
+      description: Latest Prices
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pricingbyservice.LatestPrices'
+      summary: Latest Prices
+      tags:
+      - prices
+  /prices/config:
+    get:
+      description: price config
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pricingbyservice.Config'
+      summary: Price config
+      tags:
+      - prices
+    post:
+      description: update price config
+      parameters:
+      - description: config object
+        in: body
+        name: config
+        required: true
+        schema:
+          $ref: '#/definitions/pricingbyservice.Config'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: ""
+      summary: update price config
+      tags:
+      - prices
+  /status:
+    get:
+      consumes:
+      - application/json
+      description: Status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/price.StatusResponse'
+      summary: Status
+      tags:
+      - system
+swagger: "2.0"

@@ -52,8 +52,8 @@ func NewAPIByService(redis redis.UniversalClient, pricer *pricingbyservice.Price
 // LatestPrices returns latest prices
 // @Summary Latest Prices
 // @Description Latest Prices
-// @Product json
-// @Success 200 {array} pricing.LatestPrices
+// @Produce json
+// @Success 200 {object} pricingbyservice.LatestPrices
 // @Router /prices [get]
 // @Tags prices
 func (a *APIByService) LatestPrices(c *gin.Context) {
@@ -67,11 +67,31 @@ func (a *APIByService) LatestPrices(c *gin.Context) {
 	c.Data(http.StatusOK, gin.MIMEJSON, blob)
 }
 
+// EarningTrends returns country-by-service earning classifications without
+// exposing any underlying pricing values.
+// @Summary Earning trends
+// @Description Country and service demand classifications without pricing values
+// @Produce json
+// @Param scope query string false "Use countries to omit service-level details"
+// @Success 200 {object} EarningTrendsResponse
+// @Router /earning-trends [get]
+// @Tags prices
+func (a *APIByService) EarningTrends(c *gin.Context) {
+	response := earningTrends(a.pricer.GetPrices())
+	c.Header("Cache-Control", "no-store")
+	c.Header("X-Content-Type-Options", "nosniff")
+	if c.Query("scope") == "countries" {
+		c.JSON(http.StatusOK, countryEarningTrendsResponse(response))
+		return
+	}
+	c.JSON(http.StatusOK, response)
+}
+
 // GetConfig returns the base pricing config
 // @Summary Price config
 // @Description price config
-// @Product json
-// @Success 200 {array} pricing.Config
+// @Produce json
+// @Success 200 {object} pricingbyservice.Config
 // @Router /prices/config [get]
 // @Tags prices
 func (a *APIByService) GetConfig(c *gin.Context) {
@@ -87,9 +107,9 @@ func (a *APIByService) GetConfig(c *gin.Context) {
 // UpdateConfig updates the pricing config
 // @Summary update price config
 // @Description update price config
-// @Product json
+// @Produce json
 // @Success 202
-// @Param config body pricing.Config true "config object"
+// @Param config body pricingbyservice.Config true "config object"
 // @Router /prices/config [post]
 // @Tags prices
 func (a *APIByService) UpdateConfig(c *gin.Context) {
@@ -160,6 +180,11 @@ func (a *APIByService) RegisterRoutes(r gin.IRoutes) {
 	r.GET("/prices/config", a.ac.JWTAuthorized(), a.GetConfig)
 	r.POST("/prices/config", a.ac.JWTAuthorized(), a.UpdateConfig)
 	r.GET("/prices", a.LatestPrices)
+	r.GET("/earning-trends", a.EarningTrends)
+	r.GET("/earning-trends/view", a.EarningTrendsUI)
+	r.GET("/earning-trends/assets/view.css", a.EarningTrendsCSS)
+	r.GET("/earning-trends/assets/view.js", a.EarningTrendsJS)
+	r.GET("/earning-trends/world.geojson", a.EarningTrendsMap)
 	r.GET("/ping", a.Ping)
 	r.GET("/status", a.Status)
 }

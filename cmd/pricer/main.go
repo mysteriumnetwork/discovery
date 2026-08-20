@@ -4,6 +4,8 @@
 
 package main
 
+//go:generate go run github.com/swaggo/swag/cmd/swag@v1.7.8 init --generalInfo main.go --dir .,../../price --parseDependency --output ../../docs/pricer
+
 import (
 	"context"
 	"strings"
@@ -15,7 +17,7 @@ import (
 	_ "go.uber.org/automaxprocs"
 
 	"github.com/mysteriumnetwork/discovery/config"
-	_ "github.com/mysteriumnetwork/discovery/docs"
+	_ "github.com/mysteriumnetwork/discovery/docs/pricer"
 	"github.com/mysteriumnetwork/discovery/middleware"
 	"github.com/mysteriumnetwork/discovery/price"
 	"github.com/mysteriumnetwork/discovery/price/pricingbyservice"
@@ -24,10 +26,10 @@ import (
 
 var Version = "<dev>"
 
-// @title Discovery API
-// @version 3.0
-// @BasePath /api/v3
-// @description Discovery API for Mysterium Network
+// @title Discovery Pricer API
+// @version 4.0
+// @BasePath /api/v4
+// @description Pricing and earning-trend API for Mysterium Network
 func main() {
 	logger := mlog.BootstrapDefaultLogger()
 	printBanner()

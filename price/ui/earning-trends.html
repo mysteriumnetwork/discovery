@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Network demand · Mysterium</title>
+  <link rel="stylesheet" href="/api/v4/earning-trends/assets/view.css">
+  <script src="/api/v4/earning-trends/assets/view.js" defer></script>
+</head>
+<body>
+  <main class="app-shell" aria-label="Network demand dashboard">
+    <div class="dashboard">
+      <header class="masthead">
+        <div class="brand-lockup">
+          <div class="brand-mark" aria-hidden="true">↗</div>
+          <div>
+            <h1>Network demand</h1>
+            <p>See where earning potential is changing across the network.</p>
+          </div>
+        </div>
+      </header>
+
+      <section class="summary-grid" aria-label="Network demand summary">
+        <article class="trend-card up" aria-labelledby="up-card-title">
+          <span class="trend-card-icon" aria-hidden="true">↑</span>
+          <div class="trend-card-copy">
+            <strong id="up-count">—</strong>
+            <h2 id="up-card-title">Increasing</h2>
+            <p id="up-share">Loading</p>
+          </div>
+        </article>
+        <article class="trend-card stable" aria-labelledby="stable-card-title">
+          <span class="trend-card-icon" aria-hidden="true">—</span>
+          <div class="trend-card-copy">
+            <strong id="stable-count">—</strong>
+            <h2 id="stable-card-title">Stable</h2>
+            <p id="stable-share">Loading</p>
+          </div>
+        </article>
+        <article class="trend-card down" aria-labelledby="down-card-title">
+          <span class="trend-card-icon" aria-hidden="true">↓</span>
+          <div class="trend-card-copy">
+            <strong id="down-count">—</strong>
+            <h2 id="down-card-title">Decreasing</h2>
+            <p id="down-share">Loading</p>
+          </div>
+        </article>
+      </section>
+
+      <section class="workspace" aria-label="Explore earning potential by country">
+        <section class="map-panel" aria-labelledby="map-title">
+          <header class="map-head">
+            <div><h2 id="map-title">Demand map</h2><p>Select a country to inspect its directional signal</p></div>
+            <span id="map-scope" class="map-scope">Showing all countries</span>
+          </header>
+          <div class="map-wrap">
+            <canvas id="world" tabindex="0" aria-label="Interactive world demand map" aria-describedby="map-help"></canvas>
+            <span id="map-help" class="sr-only">Use arrow keys to pan, plus and minus to zoom, Home to reset, Enter to inspect the highest-ranked visible country, and Escape to clear. The complete country list is beside the map.</span>
+            <aside id="country-inspector" class="country-inspector" aria-live="polite" hidden>
+              <div class="inspector-top"><span id="inspector-code" class="inspector-code"></span><button id="inspector-close" class="inspector-close" type="button" aria-label="Clear selected country">×</button></div>
+              <h3 id="inspector-country"></h3>
+              <div id="inspector-signal" class="inspector-signal"></div>
+              <p id="inspector-copy" class="inspector-copy"></p>
+            </aside>
+            <div id="map-tooltip" class="map-tooltip" role="tooltip"></div>
+            <div class="map-controls" aria-label="Map controls">
+              <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+              <button id="zoom-out" type="button" aria-label="Zoom out">−</button>
+              <button id="reset-map" type="button" aria-label="Reset map">⌂</button>
+            </div>
+            <div id="map-status" class="map-status" role="status" aria-live="polite"><span>Loading map…</span></div>
+          </div>
+          <div class="intensity-legend" aria-label="Qualitative demand strength scale">
+            <div class="intensity-bar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="intensity-labels"><span>Strong decrease</span><span>Moderate decrease</span><span>Slight decrease</span><span>Stable</span><span>Slight increase</span><span>Moderate increase</span><span>Strong increase</span></div>
+          </div>
+          <div class="map-foot">Small territories remain available in the complete country list.</div>
+        </section>
+
+        <section class="country-panel" aria-labelledby="country-panel-title">
+          <div class="panel-head">
+            <div class="panel-head-row">
+              <div><h2 id="country-panel-title">Biggest demand</h2><p>Countries ordered by strongest signal</p></div>
+              <span id="result-count" class="result-count" role="status" aria-live="polite">Loading…</span>
+            </div>
+            <div class="search-wrap">
+              <label class="sr-only" for="country-search">Find a country by name or country code</label>
+              <i class="search-icon" aria-hidden="true"></i>
+              <input id="country-search" class="country-search" type="search" inputmode="search" autocomplete="off" placeholder="Find a country or code" disabled>
+              <button id="clear-search" class="clear-search" type="button" aria-label="Clear country search" hidden>×</button>
+            </div>
+          </div>
+          <div class="filters" role="group" aria-label="Filter countries by demand trend">
+            <button class="filter-button" type="button" data-filter="all" aria-pressed="false" aria-controls="country-list" disabled>All <span id="filter-all-count" class="filter-count">—</span></button>
+            <button class="filter-button" type="button" data-filter="increasing" aria-pressed="true" aria-controls="country-list" disabled>Increasing <span id="filter-up-count" class="filter-count">—</span></button>
+            <button class="filter-button" type="button" data-filter="stable" aria-pressed="false" aria-controls="country-list" disabled>Stable <span id="filter-stable-count" class="filter-count">—</span></button>
+            <button class="filter-button" type="button" data-filter="decreasing" aria-pressed="false" aria-controls="country-list" disabled>Decreasing <span id="filter-down-count" class="filter-count">—</span></button>
+          </div>
+          <div id="country-list" class="country-list" aria-label="Earning potential by country" aria-busy="true">
+            <div class="list-state">Loading country signals…</div>
+          </div>
+          <div id="country-panel-foot" class="country-panel-foot">Ranking is qualitative and never exposes price or numeric change.</div>
+        </section>
+      </section>
+
+      <footer class="page-foot">Demand compares the latest pricing period with the previous period.<span>Use country search to check a node location.</span></footer>
+      <noscript><p class="list-state">JavaScript is required to display country demand signals.</p></noscript>
+    </div>
+  </main>
+</body>
+</html>
