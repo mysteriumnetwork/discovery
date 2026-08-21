@@ -60,11 +60,11 @@ func TestEarningTrendsClassifiesCountryAndServiceWithoutExposingPrices(t *testin
 	}
 }
 
-func TestEarningTrendsIgnoresNetworkWidePriceMovement(t *testing.T) {
+func TestEarningTrendsUsesCurrentNetworkBaseline(t *testing.T) {
 	prices := pricingbyservice.LatestPrices{
 		Defaults: history(servicePrices(100, 100, 100), servicePrices(200, 200, 200)),
 		PerCountry: map[string]*pricingbyservice.PriceHistory{
-			"US": history(servicePrices(150, 150, 150), servicePrices(300, 300, 300)),
+			"US": history(servicePrices(100, 100, 100), servicePrices(300, 300, 300)),
 		},
 	}
 
@@ -73,6 +73,26 @@ func TestEarningTrendsIgnoresNetworkWidePriceMovement(t *testing.T) {
 			t.Fatalf("%s trend = %q, want stable", trend.Service, trend.Trend)
 		}
 	}
+}
+
+func TestEarningTrendsKeepsActiveBoostVisibleWhenPreviousMatchesCurrent(t *testing.T) {
+	prices := pricingbyservice.LatestPrices{
+		Defaults: history(uniformPrices(1), uniformPrices(1)),
+		PerCountry: map[string]*pricingbyservice.PriceHistory{
+			"BG": history(uniformPrices(1.2), uniformPrices(1.2)),
+		},
+	}
+
+	result := earningTrends(prices)
+	for _, country := range result.Countries {
+		if country.CountryCode == "BG" {
+			if country.Trend != EarningTrendIncreasing || country.Intensity != DemandIntensityHigh {
+				t.Fatalf("BG classification = (%q, %q), want increasing/high", country.Trend, country.Intensity)
+			}
+			return
+		}
+	}
+	t.Fatal("BG is missing from country trends")
 }
 
 func TestCountryTrendUsesAverageAcrossServices(t *testing.T) {
@@ -376,6 +396,9 @@ func TestEarningTrendsUI(t *testing.T) {
 	}
 	if !strings.Contains(response.Body.String(), "Biggest demand") {
 		t.Fatal("restored Biggest demand panel is missing")
+	}
+	if !strings.Contains(response.Body.String(), "network baseline") || strings.Contains(response.Body.String(), "previous period") {
+		t.Fatal("UI does not explain the current network-baseline comparison")
 	}
 	mapPosition := strings.Index(response.Body.String(), `class="map-panel"`)
 	listPosition := strings.Index(response.Body.String(), `class="country-panel"`)
