@@ -4,8 +4,6 @@
 
 package main
 
-//go:generate go run github.com/swaggo/swag/cmd/swag@v1.7.8 init --generalInfo main.go --dir .,../../price --parseDependency --output ../../docs/pricer
-
 import (
 	"context"
 	"strings"
