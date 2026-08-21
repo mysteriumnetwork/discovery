@@ -177,7 +177,7 @@ func earningTrends(prices pricingbyservice.LatestPrices) EarningTrendsResponse {
 }
 
 func classifyCountryTrend(history *pricingbyservice.PriceHistory, defaults *pricingbyservice.PriceHistory) (EarningTrend, DemandIntensity, float64) {
-	if history == nil || history.Current == nil || history.Previous == nil || defaults == nil || defaults.Current == nil || defaults.Previous == nil {
+	if history == nil || history.Current == nil || defaults == nil || defaults.Current == nil {
 		return EarningTrendStable, DemandIntensityLow, 0
 	}
 	// Each service contributes one vote to the country trend, regardless of
@@ -218,11 +218,6 @@ func demandIntensity(change float64) DemandIntensity {
 	return DemandIntensityLow
 }
 
-func classifyTrend(current, previous, currentDefault, previousDefault float64) EarningTrend {
-	change, ok := normalizedDimensionChange(current, previous, currentDefault, previousDefault)
-	return classifyChange(change, ok)
-}
-
 func classifyChange(change float64, valid bool) EarningTrend {
 	if !valid {
 		return EarningTrendStable
@@ -237,36 +232,31 @@ func classifyChange(change float64, valid bool) EarningTrend {
 }
 
 func normalizedServiceChange(history *pricingbyservice.PriceHistory, defaults *pricingbyservice.PriceHistory, service pricingbyservice.ServiceType) (float64, bool) {
-	if history == nil || history.Current == nil || history.Previous == nil || defaults == nil || defaults.Current == nil || defaults.Previous == nil {
+	if history == nil || history.Current == nil || defaults == nil || defaults.Current == nil {
 		return 0, false
 	}
 
-	// A service change is the mean of its valid Residential/Other and
-	// per-GiB/per-hour dimensions. Each dimension is normalized to the same
-	// dimension in the network default to remove network-wide price movement.
-	// A service trend is the unweighted mean of every valid earning dimension:
-	// Residential and Other, each for per-GiB and per-hour earnings. Dividing by
-	// the matching network default isolates country demand from market-wide
-	// price movement.
-	priceTypes := [][4]*pricingbyservice.PriceByServiceType{
-		{history.Current.Residential, history.Previous.Residential, defaults.Current.Residential, defaults.Previous.Residential},
-		{history.Current.Other, history.Previous.Other, defaults.Current.Other, defaults.Previous.Other},
+	// A service signal is the mean of its valid Residential/Other and
+	// per-GiB/per-hour dimensions. Comparing each current country value with the
+	// matching current network default keeps active demand boosts visible while
+	// removing network-wide currency and base-price movement.
+	priceTypes := [][2]*pricingbyservice.PriceByServiceType{
+		{history.Current.Residential, defaults.Current.Residential},
+		{history.Current.Other, defaults.Current.Other},
 	}
 	var total float64
 	var count int
 	for _, priceType := range priceTypes {
 		current := servicePrice(priceType[0], service)
-		previous := servicePrice(priceType[1], service)
-		currentDefault := servicePrice(priceType[2], service)
-		previousDefault := servicePrice(priceType[3], service)
-		if current == nil || previous == nil || currentDefault == nil || previousDefault == nil {
+		currentDefault := servicePrice(priceType[1], service)
+		if current == nil || currentDefault == nil {
 			continue
 		}
-		for _, dimension := range [][4]float64{
-			{current.PricePerGiBHumanReadable, previous.PricePerGiBHumanReadable, currentDefault.PricePerGiBHumanReadable, previousDefault.PricePerGiBHumanReadable},
-			{current.PricePerHourHumanReadable, previous.PricePerHourHumanReadable, currentDefault.PricePerHourHumanReadable, previousDefault.PricePerHourHumanReadable},
+		for _, dimension := range [][2]float64{
+			{current.PricePerGiBHumanReadable, currentDefault.PricePerGiBHumanReadable},
+			{current.PricePerHourHumanReadable, currentDefault.PricePerHourHumanReadable},
 		} {
-			change, ok := normalizedDimensionChange(dimension[0], dimension[1], dimension[2], dimension[3])
+			change, ok := normalizedDimensionChange(dimension[0], dimension[1])
 			if !ok {
 				continue
 			}
@@ -280,13 +270,13 @@ func normalizedServiceChange(history *pricingbyservice.PriceHistory, defaults *p
 	return total / float64(count), true
 }
 
-func normalizedDimensionChange(current, previous, currentDefault, previousDefault float64) (float64, bool) {
-	// A current value of zero is a valid complete decrease. The previous and
-	// default values must remain positive so the relative comparison is defined.
-	if !isNonNegativeFinite(current) || !isPositiveFinite(previous) || !isPositiveFinite(currentDefault) || !isPositiveFinite(previousDefault) {
+func normalizedDimensionChange(current, currentDefault float64) (float64, bool) {
+	// A current value of zero is a valid complete decrease. The network default
+	// must remain positive so the relative comparison is defined.
+	if !isNonNegativeFinite(current) || !isPositiveFinite(currentDefault) {
 		return 0, false
 	}
-	change := (current/currentDefault)/(previous/previousDefault) - 1
+	change := current/currentDefault - 1
 	if math.IsNaN(change) || math.IsInf(change, 0) {
 		return 0, false
 	}

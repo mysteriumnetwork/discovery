@@ -97,8 +97,8 @@ function strengthWord(country) {
 }
 
 function signalSentence(country) {
-  if (country.trend === 'stable') return 'Earning potential is stable.';
-  return `${strengthWord(country)} in earning potential.`;
+  if (country.trend === 'stable') return 'Earning potential is near the network baseline.';
+  return `${strengthWord(country)} relative to the network baseline.`;
 }
 
 function dominantTrend(increasing, stable, decreasing) {
@@ -115,7 +115,7 @@ function dominantTrend(increasing, stable, decreasing) {
 function renderSummary() {
   if (state.dataLoading) {
     setText('#pulse-title', 'Reading the latest demand signals…');
-    setText('#pulse-copy', 'Comparing country earning potential with the previous period.');
+    setText('#pulse-copy', 'Comparing current country earning potential with the network baseline.');
     ['up', 'stable', 'down'].forEach(id => {
       setText(`#${id}-count`, '—');
       setText(`#${id}-share`, 'Loading');
@@ -147,29 +147,29 @@ function renderSummary() {
   const dominant = dominantTrend(increasing, stable, decreasing);
 
   if (dominant === 'increasing') {
-    setText('#pulse-title', `${increasing.count} ${increasing.count === 1 ? 'country is' : 'countries are'} gaining momentum`);
+    setText('#pulse-title', `${increasing.count} ${increasing.count === 1 ? 'country is' : 'countries are'} above the network baseline`);
     setText('#pulse-copy', firstIncreasing
-      ? `${firstIncreasing.country} currently has the strongest upward signal. Upward signals form the largest group.`
-      : 'Upward signals form the largest group.');
+      ? `${firstIncreasing.country} currently has the strongest above-baseline signal.`
+      : 'Above-baseline signals form the largest group.');
   } else if (dominant === 'decreasing') {
-    setText('#pulse-title', `Demand softened in ${decreasing.count} ${decreasing.count === 1 ? 'country' : 'countries'}`);
+    setText('#pulse-title', `${decreasing.count} ${decreasing.count === 1 ? 'country is' : 'countries are'} below the network baseline`);
     setText('#pulse-copy', firstIncreasing
-      ? `${firstIncreasing.country} still has the strongest upward signal. Downward signals form the largest group.`
+      ? `${firstIncreasing.country} still has the strongest above-baseline signal.`
       : firstDecreasing
-        ? `${firstDecreasing.country} is showing a downward signal. Downward signals form the largest group.`
-        : 'Downward signals form the largest group.');
+        ? `${firstDecreasing.country} has the strongest below-baseline signal.`
+        : 'Below-baseline signals form the largest group.');
   } else if (dominant === 'stable') {
-    setText('#pulse-title', 'Earning potential is steady across the network');
+    setText('#pulse-title', 'Most countries are near the network baseline');
     setText('#pulse-copy', firstIncreasing
-      ? `${firstIncreasing.country} has the strongest upward signal, while stable countries form the largest group.`
+      ? `${firstIncreasing.country} has the strongest above-baseline signal.`
       : firstDecreasing
-        ? `${firstDecreasing.country} is showing a downward signal, while stable countries form the largest group.`
-        : 'No country has a meaningful directional movement in this period.');
+        ? `${firstDecreasing.country} has the strongest below-baseline signal.`
+        : 'No country differs meaningfully from the network baseline.');
   } else {
     setText('#pulse-title', 'Demand signals are mixed across the network');
     setText('#pulse-copy', firstIncreasing
-      ? `${firstIncreasing.country} currently has the strongest upward signal. No single trend is dominant.`
-      : 'No single directional trend is dominant.');
+      ? `${firstIncreasing.country} currently has the strongest above-baseline signal.`
+      : 'No single baseline-relative signal is dominant.');
   }
 
   const values = [['up', increasing], ['stable', stable], ['down', decreasing]];
