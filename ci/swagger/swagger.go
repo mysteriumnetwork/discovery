@@ -32,12 +32,19 @@ func Swag() error {
 		return err
 	}
 
-	color.Cyan("Removing old docs")
-	err = os.RemoveAll("./docs")
-	if err != nil {
-		return err
+	color.Cyan("Removing old generated docs")
+	for _, generatedPath := range []string{
+		"./docs/docs.go",
+		"./docs/swagger.json",
+		"./docs/swagger.yaml",
+		"./docs/pricer",
+	} {
+		err = os.RemoveAll(generatedPath)
+		if err != nil {
+			return err
+		}
 	}
-	color.Cyan("Old docs removed")
+	color.Cyan("Old generated docs removed")
 
 	color.Cyan("Generating swagger docs with %s", swag)
 	err = sh.RunV(
@@ -45,6 +52,18 @@ func Swag() error {
 		"--generalInfo", "main.go",
 		"--dir", "cmd",
 		"--parseDependency",
+	)
+	if err != nil {
+		return err
+	}
+
+	color.Cyan("Generating pricer swagger docs with %s", swag)
+	err = sh.RunV(
+		swag, "init",
+		"--generalInfo", "main.go",
+		"--dir", "cmd/pricer,price",
+		"--parseDependency",
+		"--output", "docs/pricer",
 	)
 	if err != nil {
 		return err
